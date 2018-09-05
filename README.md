@@ -6,7 +6,7 @@ Nodebook - Minimalist Node REPL with web UI
 
 It's an in-browser REPL for Node.
 
-Code's on the left, Console on the right. Click "Run" or press "Ctrl+Enter" or "Cmd+Enter" to run your code.
+Code's on the left, Console on the right. Click "Run" or press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> or <kbd>Cmd</kbd>+<kbd>Enter</kbd> to run your code.
 The code is automatically persisted on the file system.
 
 ![nodebook](https://user-images.githubusercontent.com/4974818/45084039-8f2b6380-b0fd-11e8-94d4-dadcab34c7f6.png)
