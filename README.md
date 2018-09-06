@@ -20,7 +20,7 @@ The home lists the available Nodebooks. A Nodebook is a folder containing an `in
 ```bash
 $ git clone https://github.com/netgusto/nodebook
 $ cd nodebook
-$ npm install
+$ npm install --production
 ```
 
 ## Usage

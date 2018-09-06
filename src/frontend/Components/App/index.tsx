@@ -1,0 +1,23 @@
+import * as React from 'react';
+
+import { Route as RouteType, NotebookHandle as NotebookHandleType, Notebook as NotebookType } from "../../types";
+
+import Home, { Props as HomeProps } from "../Home";
+import Notebook, { Props as NotebookProps } from "../Notebook";
+
+
+interface Props {
+    route: RouteType;
+    notebooks?: NotebookHandleType[];
+    notebook?: NotebookType;
+    homeurl?: string;
+}
+
+export default function(props: Props) {
+    const { route } = props;
+    switch(route) {
+        case "home": return <Home {...(props as HomeProps)} />; break;
+        case "notebook": return <Notebook {...(props as NotebookProps)} />; break;
+        default: throw new Error("Unknown route:" + route);
+    }
+}

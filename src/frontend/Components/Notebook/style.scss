@@ -1,0 +1,115 @@
+body { margin: 0; padding: 0; }
+
+.home-app {
+    padding: 10px;
+}
+
+.notebook-app {
+
+    background: #272822; font-size: 14px; 
+
+    pre, code {
+        font-family: 'Roboto Mono', Menlo, 'Ubuntu Mono', Monaco, Consolas, 'source-code-pro', monospace;
+    }
+
+    .CodeMirror {
+        width: 100%;
+        height: calc(100vh - 50px);
+        
+        font-family: 'Roboto Mono', Menlo, 'Ubuntu Mono', Monaco, Consolas, 'source-code-pro', monospace;
+        line-height: 1.414;
+    }
+
+    .CodeMirror-linenumber {
+        padding-right: 20px;
+    }
+
+    .cm-s-monokai .CodeMirror-linenumber {
+        color: #777;
+    } 
+
+    #layout {
+        display: grid;
+        grid-template-rows: 50px auto;
+        grid-template-columns: auto 5px 40%;
+        grid-template-areas: "top top top"
+                                "code gutter console";
+    }
+
+    #top {
+        grid-area: top;
+        background-color: #333;
+        padding: 10px;
+        vertical-align: middle;
+
+        display: grid;
+        grid-template-columns: 100px auto 100px;
+        grid-template-areas: "btn-run notebook-name btn-home";
+    }
+
+    #top button {
+        height: 30px;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    #top #btn-run {
+        grid-area: btn-run;
+    }
+
+    #top #notebook-name {
+        grid-area: notebook-name;
+
+        color: white;
+        font-weight: bold;
+        font-size: 20px;
+        line-height: 30px;
+        font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+    }
+
+    #top #btn-home {
+        grid-area: btn-home;
+        text-align: right;
+    }
+
+    #top #btn-run button {
+        width: 90px;
+        background-color: rgb(107, 183, 175);
+    }
+
+    #top #btn-home button {
+        background-color: #9b59b6;
+    }
+
+    #left {
+        grid-area: code;
+    }
+
+    #gutter {
+        grid-area: gutter;
+        background-color: #333;
+    }
+
+    #right {
+        grid-area: console;
+    }
+
+    #console {
+        color: #f8f8f2;
+        width: 100%;
+        height: calc(100vh - 50px);
+        overflow: scroll;
+        unicode-bidi: embed;
+        font-family: 'Roboto Mono', Menlo, 'Ubuntu Mono', Monaco, Consolas, 'source-code-pro', monospace;
+        white-space: pre;
+        margin-bottom: 20px;
+        padding-left: 10px;
+    }
+
+    #console .stderr { color: red; }
+    #console .info { color: #888; }
+}
