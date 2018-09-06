@@ -2,16 +2,37 @@
   "name": "nodebook",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/backend/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently --kill-others \"npm run dev-frontend\" \"npm run dev-backend -- --notebooks $NOTEBOOKS\"",
+    "dev-frontend": "parcel watch src/frontend/*.html",
+    "dev-backend": "nodemon --watch src/backend src/backend",
+    "build": "parcel build src/frontend/*.html"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.18.3",
+    "codemirror": "^5.40.0",
     "express": "^4.16.3",
     "glob": "^7.1.3",
-    "minimist": "^1.2.0"
+    "minimist": "^1.2.0",
+    "preact": "^8.3.1",
+    "preact-compat": "^3.18.4",
+    "react": "^16.4.2",
+    "react-codemirror2": "^5.1.0",
+    "react-dom": "^16.4.2"
+  },
+  "devDependencies": {
+    "concurrently": "^4.0.1",
+    "node-sass": "^4.9.3",
+    "nodemon": "^1.18.4",
+    "parcel-bundler": "^1.9.7",
+    "typescript": "^3.0.3"
+  },
+  "alias": {
+    "react": "preact-compat",
+    "react-dom": "preact-compat"
   }
 }

@@ -4,7 +4,7 @@ const minimist = require('minimist');
 const fs = require('fs');
 const { resolve: resolvePath } = require('path');
 
-const { handleHomePage, handleNoteBook, handleNoteBookSetContent, handleNoteBookExec } = require('./handlers');
+const { handleHomePage, handleNoteBook, handleAPINoteBookSetContent, handleAPINoteBookExec } = require('./handlers');
 
 module.exports = {
     app,
@@ -18,8 +18,10 @@ function app({ port, bindaddress, notebookspath, execCommand }) {
 
     app.get('/', handleHomePage({ notebookspath }));
     app.get('/notebook/:name', handleNoteBook({ notebookspath }));
-    app.post('/notebook/:name/setcontent', handleNoteBookSetContent({ notebookspath }));
-    app.post('/notebook/:name/exec', handleNoteBookExec({ notebookspath, execCommand }));
+    app.post('/api/notebook/:name/setcontent', handleAPINoteBookSetContent({ notebookspath }));
+    app.post('/api/notebook/:name/exec', handleAPINoteBookExec({ notebookspath, execCommand }));
+
+    app.use(express.static(__dirname + '/../../dist'));
 
     app.listen(port, bindaddress, () => console.log('Listening on port ' + port));
 }

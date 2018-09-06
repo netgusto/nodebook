@@ -1,4 +1,4 @@
-const { app, sanitizeParameters } = require('./src/app');
+const { app, sanitizeParameters } = require('./app');
 
 let parameters;
 try {
