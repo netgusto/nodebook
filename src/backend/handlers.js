@@ -1,5 +1,4 @@
 const { listNotebooks, getFileContent, setFileContent, execNotebook } = require('./notebook');
-const { renderNotebook } = require('./render');
 const { buildUrl } = require('./buildurl');
 const path = require('path');
 

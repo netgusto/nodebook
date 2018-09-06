@@ -1,16 +1,17 @@
 {
   "name": "nodebook",
   "version": "1.0.0",
-  "description": "",
+  "description": "Nodebook - Minimalist Node REPL with web UI",
   "main": "src/backend/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "concurrently --kill-others \"npm run dev-frontend\" \"npm run dev-backend -- --notebooks $NOTEBOOKS\"",
     "dev-frontend": "parcel watch src/frontend/*.html",
     "dev-backend": "nodemon --watch src/backend src/backend",
-    "build": "parcel build src/frontend/*.html"
+    "prebuild": "rm -Rf dist",
+    "build": "npm run prebuild; parcel build src/frontend/*.html"
   },
-  "author": "",
+  "author": "@netgusto",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.18.3",
