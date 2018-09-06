@@ -132,30 +132,45 @@ function execNotebook(notebook: Notebook) {
         },
     })
     .then(res => {
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder("utf-8");
-        function pump() {
-            reader.read().then(({ done, value }) => {
-                if (done) {
-                    consoleLog('--- Done.\n', 'info');
-                    return;
-                }
-    
-                decoder.decode(value).split('\n').map(jsonline => {
-    
+        if (!res.body) {
+            // response not streamable; use it in one piece
+            return res.text()
+                .then(text => text.split('\n').map(jsonline => {
+        
                     if (jsonline.trim().length === 0) return;
 
                     const data = JSON.parse(jsonline);
                     consoleLog(JSON.parse(data.data), data.chan);
-                });
-                
-                // Get the data and send it to the browser via the controller
+                }));
+        } else {
+            return new Promise((resolve, reject) => {
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder("utf-8");
+                function pump() {
+                    reader.read().then(({ done, value }) => {
+                        if (done) {
+                            resolve();
+                            return;
+                        }
+            
+                        decoder.decode(value).split('\n').map(jsonline => {
+            
+                            if (jsonline.trim().length === 0) return;
+
+                            const data = JSON.parse(jsonline);
+                            consoleLog(JSON.parse(data.data), data.chan);
+                        });
+                        
+                        // Get the data and send it to the browser via the controller
+                        pump();
+                    });
+                }
+
                 pump();
             });
         }
-
-        pump();
-    });
+    })
+    .then(() => consoleLog('--- Done.\n', 'info'));
 }
 
 function consoleLog(msg: string, cls: string) {

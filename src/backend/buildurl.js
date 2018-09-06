@@ -8,19 +8,14 @@ function buildUrl(name, params) {
         });
     }
 
-    function forgeUrl() {
-        switch (name) {
-            case 'home': return '/';
-            case 'notebook': return replaceParamsInUrl('/notebook/:name', params);
-            case 'notebooksetcontent': return replaceParamsInUrl('/api/notebook/:name/setcontent', params);
-            case 'notebookexec': return replaceParamsInUrl('/api/notebook/:name/exec', params);
-        }
-
-        return undefined;
+    switch (name) {
+        case 'home': return '/';
+        case 'notebook': return replaceParamsInUrl('/notebook/:name', params);
+        case 'notebooksetcontent': return replaceParamsInUrl('/api/notebook/:name/setcontent', params);
+        case 'notebookexec': return replaceParamsInUrl('/api/notebook/:name/exec', params);
     }
 
-    return forgeUrl();
-
+    return undefined;
 }
 
 

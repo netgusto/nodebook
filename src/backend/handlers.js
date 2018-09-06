@@ -67,6 +67,7 @@ function handleAPINoteBookSetContent({ notebookspath }) {
         const notebook = notebooks.get(name);
 
         await setFileContent(notebook.abspath, content);
+        res.set('Content-Type', 'application/json');
         res.send('"OK"');
     };
 }
@@ -80,6 +81,7 @@ function handleAPINoteBookExec({ notebookspath, execCommand }) {
         if (!notebooks.has(name)) return res.send('Notebook not found');
         const notebook = notebooks.get(name);
 
+        res.set('Content-Type', 'text/plain');
         await execNotebook(notebook, execCommand, res);
         res.end();
     };
