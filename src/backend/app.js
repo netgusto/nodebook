@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const minimist = require('minimist');
 const fs = require('fs');
+const http = require('http');
 const { resolve: resolvePath } = require('path');
 
 const { handleHomePage, handleNoteBook, handleAPINoteBookSetContent, handleAPINoteBookExec } = require('./handlers');
@@ -11,7 +12,8 @@ module.exports = {
     sanitizeParameters,
 };
 
-function app({ port, bindaddress, notebookspath, execCommand }) {
+function app({ port, bindaddress, notebookspath, execCommand, logger }) {
+
     const app = express();
 
     app.use(bodyParser.json());
@@ -23,7 +25,10 @@ function app({ port, bindaddress, notebookspath, execCommand }) {
 
     app.use(express.static(__dirname + '/../../dist'));
 
-    app.listen(port, bindaddress, () => console.log('Listening on port ' + port));
+    const httpServer = http.createServer(app);
+    httpServer.listen(port, bindaddress, () => logger('Listening on port ' + port));
+
+    return httpServer;
 }
 
 function sanitizeParameters(rawargv) {

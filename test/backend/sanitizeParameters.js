@@ -1,6 +1,6 @@
 const expect = require('chai').expect;
 const { sanitizeParameters } = require('../../src/backend/app');
-const { dirname } = require('path');
+const { dirname, resolve } = require('path');
 
 describe('sanitizeParameters()', function () {
 
@@ -11,8 +11,8 @@ describe('sanitizeParameters()', function () {
     const outOfRangePortError = 'Port is out of range';
     const invalidBindAddressError = '--bindaddress is invalid';
 
-    const validFilepath = __filename;
-    const validDirpath = dirname(validFilepath);
+    const someFilepath = __filename;
+    const validDirpath = resolve(dirname(__filename) + '/../fixtures/notebooks');
     const validBindAddress = '0.0.0.0';
 
     const validRequiredParams = ['--notebooks', validDirpath];
@@ -58,7 +58,7 @@ describe('sanitizeParameters()', function () {
     });
 
     it('should throw if --notebooks is not a directory', function () {
-        const rawargv = ['--notebooks', validFilepath];
+        const rawargv = ['--notebooks', someFilepath];
         expect(() => sanitizeParameters(rawargv)).to.throw(notDirectoryNotebookError);
     });
 
