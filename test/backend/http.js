@@ -61,7 +61,7 @@ portfinder.getPort(function (err, port) {
                     expect(err).eq(null);
                     expect(res).has.status(200);
 
-                    expect(res.text).contains('route="notebook"');
+                    expect(res.text).matches(/route\s?=\s?"notebook"/g);
                     expect(res.text).contains('"content":"console.log(\'OK\');"');
 
                     expect(res.text).contains(validNotebook);

@@ -11,7 +11,7 @@ The code is automatically persisted on the file system.
 
 ![nodebook](https://user-images.githubusercontent.com/4974818/45084039-8f2b6380-b0fd-11e8-94d4-dadcab34c7f6.png)
 
-The home lists the available Nodebooks. A Nodebook is a folder containing an `index.js` file.
+The home lists the available notebooks. A notebook is a folder containing an `index.js` file.
 
 ![home](https://user-images.githubusercontent.com/4974818/45084276-3c9e7700-b0fe-11e8-9ed0-d2b7cb5b7bb3.png)
 
@@ -25,10 +25,10 @@ $ npm install --production
 
 ## Usage
 
-### Create a Nodebook
+### Create a Notebook
 
-In a directory where your Nodebooks will be stored, simply create a folder containing a file named `index.js`.
-The dir name will be the nodebook name.
+In a directory where your notebooks will be stored, simply create a folder containing a file named `index.js`.
+The dir name will be the notebook name.
 
 ### Run the REPL
 
@@ -60,3 +60,24 @@ $ node . --notebooks path/to/notebooks --docker
 Do not run this on a port open to public traffic! Doing so would allow remote code execution on your machine.
 
 By default, the server binds to `127.0.0.1`, which allows connexion from the localhost only. You can override the bind address using `--bindaddress`, but do it only if you know what you're doing.
+
+## Develop
+
+To iterate on the code:
+
+```bash
+$ npm install
+$ NOTEBOOKS=path/to/notebooks npm run dev
+```
+
+To build:
+
+```bash
+$ npm run build
+```
+
+To test:
+
+```bash
+$ npm test
+```

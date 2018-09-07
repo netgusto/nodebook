@@ -52,6 +52,11 @@ describe('sanitizeParameters()', function () {
         expect(() => sanitizeParameters(rawargv)).to.throw(missingNotebookError);
     });
 
+    it('should throw for boolean --notebooks', function () {
+        const rawargv = ['--notebooks'];
+        expect(() => sanitizeParameters(rawargv)).to.throw(missingNotebookError);
+    });
+
     it('should throw for non existing --notebooks', function () {
         const rawargv = ['--notebooks', '/' + Math.random()];
         expect(() => sanitizeParameters(rawargv)).to.throw(nonexistingNotebookError);

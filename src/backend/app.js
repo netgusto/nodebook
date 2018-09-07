@@ -65,7 +65,7 @@ function sanitizeParameters(rawargv) {
 
     // --notebooks
 
-    if (!("notebooks" in argv) || argv.notebooks.trim() === '') throw new Error("--notebooks path/to/notebooks is required.");
+    if (!("notebooks" in argv) || typeof argv.notebooks !== "string" || argv.notebooks.trim() === '') throw new Error("--notebooks path/to/notebooks is required.");
     const notebooks = resolvePath(argv.notebooks);
 
     if (!fs.existsSync(notebooks)) {
