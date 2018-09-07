@@ -1,7 +1,7 @@
 const fs = require('fs');
 const { resolve: resolvePath, basename, dirname, join: pathJoin } = require('path');
 const { spawn } = require('child_process');
-const glob = require('glob');
+const globby = require('globby');
 
 module.exports = {
     listNotebooks,
@@ -11,13 +11,10 @@ module.exports = {
 };
 
 function listNotebooks(basepath) {
-    return new Promise((resolve, reject) => {
+    const resolvedbasepath = resolvePath(basepath);
 
-        const resolvedbasepath = resolvePath(basepath);
-
-        glob(resolvedbasepath + '/**/index.js', (err, items) => {
-            if (err) return reject(err);
-
+    return globby(resolvedbasepath + '/**/index.js', { gitignore: true })
+        .then(items => {
             const res = new Map();
 
             items
@@ -34,9 +31,8 @@ function listNotebooks(basepath) {
                     });
                 });
 
-            resolve(res);
+            return res;
         });
-    });
 }
 
 function getFileContent(abspath) {
