@@ -4,7 +4,7 @@
   "description": "Nodebook - Minimalist Node REPL with web UI",
   "main": "src/backend/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha test/backend",
     "dev": "concurrently --kill-others \"npm run dev-frontend\" \"npm run dev-backend -- --notebooks $NOTEBOOKS\"",
     "dev-frontend": "parcel watch src/frontend/*.html",
     "dev-backend": "nodemon --watch src/backend src/backend",
@@ -21,16 +21,21 @@
     "minimist": "^1.2.0"
   },
   "devDependencies": {
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
+    "chai-http": "^4.2.0",
     "concurrently": "^4.0.1",
+    "mocha": "^5.2.0",
     "node-sass": "^4.9.3",
     "nodemon": "^1.18.4",
     "parcel-bundler": "^1.9.7",
-    "typescript": "^3.0.3",
+    "portfinder": "^1.0.17",
     "preact": "^8.3.1",
     "preact-compat": "^3.18.4",
     "react": "^16.4.2",
     "react-codemirror2": "^5.1.0",
-    "react-dom": "^16.4.2"
+    "react-dom": "^16.4.2",
+    "typescript": "^3.0.3"
   },
   "alias": {
     "react": "preact-compat",

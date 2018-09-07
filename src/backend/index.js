@@ -26,4 +26,5 @@ app({
     bindaddress: parameters.bindaddress,
     notebookspath: parameters.notebooks,
     execCommand,
+    logger: (msg) => console.log(msg),
 });
