@@ -1,4 +1,4 @@
-# nodebook
+# nodebook ![](https://travis-ci.com/netgusto/nodebook.svg?branch=master)
 
 Nodebook - Minimalist Node REPL with web UI
 
