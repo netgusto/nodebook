@@ -8,8 +8,8 @@
     "dev": "concurrently --kill-others \"npm run dev-frontend\" \"npm run dev-backend -- --notebooks $NOTEBOOKS\"",
     "dev-frontend": "parcel watch src/frontend/*.html",
     "dev-backend": "nodemon --watch src/backend src/backend",
-    "prebuild": "rm -Rf dist",
-    "build": "npm run prebuild; parcel build src/frontend/*.html"
+    "prebuild": "rm -Rf dist/*.js dist/*.css dist/*.map",
+    "build": "npm test && npm run prebuild && parcel build src/frontend/*.html"
   },
   "author": "@netgusto",
   "license": "ISC",
