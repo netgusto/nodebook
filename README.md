@@ -59,7 +59,7 @@ $ node . --notebooks path/to/notebooks --docker
 
 Do not run this on a port open to public traffic! Doing so would allow remote code execution on your machine.
 
-By default, the server binds to `127.0.0.1`, which allows connexion from the localhost only. You can override the bind address using `--bindaddress`, but do it only if you know what you're doing.
+By default, the server binds to `127.0.0.1`, which allows connection from the localhost only. You can override the bind address using `--bindaddress`, but do it only if you know what you're doing.
 
 ## Develop
 
