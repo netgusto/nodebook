@@ -1,17 +1,15 @@
-# nodebook ![](https://travis-ci.com/netgusto/nodebook.svg?branch=master)
+# nodebook [![Build Status](https://travis-ci.com/netgusto/nodebook.svg?branch=master)](https://travis-ci.com/netgusto/nodebook)
 
 Nodebook - Minimalist Node REPL with web UI
 
 ## What is it?
 
-It's an in-browser REPL for Node.
-
-Code's on the left, Console on the right. Click "Run" or press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> or <kbd>Cmd</kbd>+<kbd>Enter</kbd> to run your code.
-The code is automatically persisted on the file system.
+Nodebook is an in-browser REPL for Node. Code's on the left, Console's on the right. Click "Run" or press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> or <kbd>Cmd</kbd>+<kbd>Enter</kbd> to run your code.
+Code is automatically persisted on the file system.
 
 ![nodebook](https://user-images.githubusercontent.com/4974818/45084039-8f2b6380-b0fd-11e8-94d4-dadcab34c7f6.png)
 
-The home lists the available notebooks. A notebook is a folder containing an `index.js` file.
+A notebook is a folder containing an `index.js` file. The homepage lists all of the available notebooks.
 
 ![home](https://user-images.githubusercontent.com/4974818/45084276-3c9e7700-b0fe-11e8-9ed0-d2b7cb5b7bb3.png)
 
@@ -27,8 +25,8 @@ $ npm install --production
 
 ### Create a Notebook
 
-In a directory where your notebooks will be stored, simply create a folder containing a file named `index.js`.
-The dir name will be the notebook name.
+In the directory where you want your notebooks to be stored, simply create a folder containing a file named `index.js`.
+The notebook's name will be the name of the folder.
 
 ### Run the REPL
 
@@ -40,7 +38,7 @@ $ node . --notebooks path/to/notebooks
 
 ```bash
 # Set bindaddress and port
-$ node . --notebooks path/to/notebooks --bindaddress 0.0.0.0 -port 12000
+$ node . --notebooks path/to/notebooks --bindaddress 0.0.0.0 --port 12000
 ```
 
 ```bash
