@@ -1,6 +1,7 @@
+const path = require('path');
+
 const { listNotebooks, getFileContent, setFileContent, execNotebook } = require('./notebook');
 const { buildUrl } = require('./buildurl');
-const path = require('path');
 
 module.exports = {
     handleHomePage,
@@ -8,6 +9,19 @@ module.exports = {
     handleAPINoteBookSetContent,
     handleAPINoteBookExec,
 };
+
+function extractFrontendNotebookSummary(notebook) {
+    return {
+        name: notebook.name,
+        url: buildUrl("notebook", { name: notebook.name }),
+        recipe: {
+            key: notebook.recipe.key,
+            name: notebook.recipe.name,
+            language: notebook.recipe.language,
+            cmmode: notebook.recipe.cmmode,
+        }
+    };
+}
 
 function generatePageHtml(route, params = {}) {
     return getFileContent(path.resolve(__dirname + '/../../dist/index.html'))
@@ -22,10 +36,7 @@ function handleHomePage({ notebookspath }) {
     return async function (req, res) {
         const notebooks = await listNotebooks(notebookspath);
         const data = [];
-        notebooks.forEach((notebook) => data.push({
-            name: notebook.name,
-            url: buildUrl("notebook", { name: notebook.name })
-        }));
+        notebooks.forEach((notebook) => data.push(extractFrontendNotebookSummary(notebook)));
 
         res.send(await generatePageHtml("home", { notebooks: data }));
     };
@@ -46,7 +57,7 @@ function handleNoteBook({ notebookspath }) {
         res.send(await generatePageHtml("notebook", {
             homeurl,
             notebook: {
-                ...notebook,
+                ...extractFrontendNotebookSummary(notebook),
                 execurl,
                 persisturl,
                 content: await getFileContent(notebook.abspath),
@@ -72,7 +83,7 @@ function handleAPINoteBookSetContent({ notebookspath }) {
     };
 }
 
-function handleAPINoteBookExec({ notebookspath, execCommand }) {
+function handleAPINoteBookExec({ notebookspath, docker }) {
     return async function (req, res) {
         const { name } = req.params;
 
@@ -80,6 +91,7 @@ function handleAPINoteBookExec({ notebookspath, execCommand }) {
 
         if (!notebooks.has(name)) return res.send('Notebook not found');
         const notebook = notebooks.get(name);
+        const execCommand = notebook.recipe[docker ? 'execDocker' : 'execLocal'];
 
         res.set('Content-Type', 'text/plain');
         await execNotebook(notebook, execCommand, res);

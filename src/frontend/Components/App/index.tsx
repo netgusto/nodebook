@@ -15,9 +15,10 @@ interface Props {
 
 export default function(props: Props) {
     const { route } = props;
+    const NB = Notebook as any;
     switch(route) {
         case "home": return <Home {...(props as HomeProps)} />; break;
-        case "notebook": return <Notebook {...(props as NotebookProps)} />; break;
+        case "notebook": return <NB {...(props as NotebookProps)} />; break;
         default: throw new Error("Unknown route:" + route);
     }
 }

@@ -12,7 +12,10 @@ export default function(props: Props) {
         <div className="home-app">
             <ul>
                 {notebooks.map(notebook => (
-                    <li key={notebook.name}><a href={notebook.url}>{notebook.name}</a></li>
+                    <li key={notebook.name}>
+                        <a href={notebook.url}>{notebook.name}</a>
+                        <span className="notebook-recipe">{notebook.recipe.name}</span>
+                    </li>
                 ))}
             </ul>
         </div>

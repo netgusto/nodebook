@@ -6,9 +6,19 @@ const CM = CodeMirror as any;
 
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/monokai.css';
-import 'codemirror/addon/hint/show-hint.css';
 
 import 'codemirror/mode/javascript/javascript';
+import 'codemirror/mode/clike/clike';
+import 'codemirror/mode/go/go';
+import 'codemirror/mode/haskell/haskell';
+import 'codemirror/mode/lua/lua';
+import 'codemirror/mode/php/php';
+import 'codemirror/mode/python/python';
+import 'codemirror/mode/r/r';
+import 'codemirror/mode/ruby/ruby';
+import 'codemirror/mode/rust/rust';
+import 'codemirror/mode/swift/swift';
+
 import 'codemirror/keymap/sublime';
 
 import 'codemirror/addon/selection/active-line';
@@ -19,21 +29,20 @@ import 'codemirror/addon/search/matchesonscrollbar';
 import 'codemirror/addon/search/searchcursor';
 import 'codemirror/addon/search/match-highlighter';
 import 'codemirror/addon/fold/indent-fold';
-import 'codemirror/addon/hint/show-hint';
-import 'codemirror/addon/hint/javascript-hint';
 import 'codemirror/addon/scroll/scrollpastend';
 
 import "./style.scss";
 
 export interface Props {
-    homeurl: string;
     notebook: Notebook;
+    homeurl: string;
 }
 
 export default class NotebookComponent extends React.Component<Props> {
 
     boundHandleKeyDown: EventListener;
     editorvalue: string;
+    props: Props;
 
     constructor(props: Props) {
         super(props);
@@ -43,6 +52,10 @@ export default class NotebookComponent extends React.Component<Props> {
 
     componentWillMount(props: Props) {
         document.addEventListener('keydown', this.boundHandleKeyDown);
+    }
+
+    componentDidMount() {
+        consoleLog('Ready.\n', 'info');
     }
 
     componentWillUnmount() {
@@ -75,7 +88,10 @@ export default class NotebookComponent extends React.Component<Props> {
                             <button onClick={() => execNotebook(notebook)}>Run&nbsp;&nbsp;▶</button>
                         </div>
 
-                        <div id="notebook-name">{notebook.name}</div>
+                        <div id="notebook-header">
+                            <span className="notebook-name">{notebook.name}</span>
+                            <span className="notebook-recipe">{notebook.recipe.name}</span>
+                        </div>
 
                         <div id="btn-home">
                             <button onClick={() => document.location.href = homeurl}>Home&nbsp;&nbsp;🏠</button>
@@ -84,10 +100,9 @@ export default class NotebookComponent extends React.Component<Props> {
                     <div id="left">
                         <div id="code">
                             <CM
-                                ref={(el) => this.editor = el}
                                 value={notebook.content}
                                 options={{
-                                    mode: 'javascript',
+                                    mode: notebook.recipe.cmmode,
                                     theme: 'monokai',
                                     lineNumbers: true,
                                     lineWrapping: true,
@@ -146,10 +161,11 @@ function execNotebook(notebook: Notebook) {
             return new Promise((resolve, reject) => {
                 const reader = res.body.getReader();
                 const decoder = new TextDecoder("utf-8");
+                let hasLastNewLine = true;
                 function pump() {
                     reader.read().then(({ done, value }) => {
                         if (done) {
-                            resolve();
+                            resolve({ hasLastNewLine });
                             return;
                         }
             
@@ -158,6 +174,9 @@ function execNotebook(notebook: Notebook) {
                             if (jsonline.trim().length === 0) return;
 
                             const data = JSON.parse(jsonline);
+                            const txt = JSON.parse(data.data);
+                            const lastnl = txt.lastIndexOf('\n');
+                            hasLastNewLine = (lastnl === txt.length - 1);
                             consoleLog(JSON.parse(data.data), data.chan);
                         });
                         
@@ -170,7 +189,13 @@ function execNotebook(notebook: Notebook) {
             });
         }
     })
-    .then(() => consoleLog('--- Done.\n', 'info'));
+    .then(({ hasLastNewLine }) => {
+        if (!hasLastNewLine) {
+            consoleLog('%\n', 'forcednl');
+        }
+
+        consoleLog('--- Done.\n\n', 'info');
+    });
 }
 
 function consoleLog(msg: string, cls: string) {
@@ -178,6 +203,13 @@ function consoleLog(msg: string, cls: string) {
     consoleObj.innerHTML += '<span class="' + cls + '">' + msg + '</span>';
     consoleObj.scrollTop = consoleObj.scrollHeight;
 }
+
+// function lastConsoleLine() {
+//     const consoleObj = document.getElementById('console');
+//     const lastnl = consoleObj.innerHTML.lastIndexOf('\n');
+//     if (lastnl === consoleObj.innerHTML.length - 1) return '';
+//     return consoleObj.innerHTML.substr(lastnl);
+// }
 
 function persist(notebook: Notebook, value: string) {
     return window.fetch(notebook.persisturl, {

@@ -5,7 +5,7 @@
   "main": "src/backend/index.js",
   "scripts": {
     "test": "mocha test/backend",
-    "dev": "concurrently --kill-others \"npm run dev-frontend\" \"npm run dev-backend -- --notebooks $NOTEBOOKS\"",
+    "dev": "concurrently --kill-others \"npm run dev-frontend\" \"npm run dev-backend -- $PARAMS\"",
     "dev-frontend": "parcel watch src/frontend/*.html",
     "dev-backend": "nodemon --watch src/backend src/backend",
     "prebuild": "rm -Rf dist/*.js dist/*.css dist/*.map",
