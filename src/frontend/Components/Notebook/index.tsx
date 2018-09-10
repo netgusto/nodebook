@@ -26,8 +26,8 @@ import 'codemirror/addon/scroll/scrollpastend';
 import "./style.scss";
 
 export interface Props {
-    homeurl: string;
     notebook: Notebook;
+    homeurl: string;
 }
 
 export default class NotebookComponent extends React.Component<Props> {
@@ -43,6 +43,10 @@ export default class NotebookComponent extends React.Component<Props> {
 
     componentWillMount(props: Props) {
         document.addEventListener('keydown', this.boundHandleKeyDown);
+    }
+
+    componentDidMount() {
+        consoleLog('Ready.\n', 'info');
     }
 
     componentWillUnmount() {
@@ -75,7 +79,10 @@ export default class NotebookComponent extends React.Component<Props> {
                             <button onClick={() => execNotebook(notebook)}>Run&nbsp;&nbsp;▶</button>
                         </div>
 
-                        <div id="notebook-name">{notebook.name}</div>
+                        <div id="notebook-header">
+                            <span class="notebook-name">{notebook.name}</span>
+                            <span class="notebook-recipe">{notebook.recipe.name}</span>
+                        </div>
 
                         <div id="btn-home">
                             <button onClick={() => document.location.href = homeurl}>Home&nbsp;&nbsp;🏠</button>
@@ -146,10 +153,11 @@ function execNotebook(notebook: Notebook) {
             return new Promise((resolve, reject) => {
                 const reader = res.body.getReader();
                 const decoder = new TextDecoder("utf-8");
+                let hasLastNewLine = true;
                 function pump() {
                     reader.read().then(({ done, value }) => {
                         if (done) {
-                            resolve();
+                            resolve({ hasLastNewLine });
                             return;
                         }
             
@@ -158,6 +166,9 @@ function execNotebook(notebook: Notebook) {
                             if (jsonline.trim().length === 0) return;
 
                             const data = JSON.parse(jsonline);
+                            const txt = JSON.parse(data.data);
+                            const lastnl = txt.lastIndexOf('\n');
+                            hasLastNewLine = (lastnl === txt.length - 1);
                             consoleLog(JSON.parse(data.data), data.chan);
                         });
                         
@@ -170,7 +181,13 @@ function execNotebook(notebook: Notebook) {
             });
         }
     })
-    .then(() => consoleLog('--- Done.\n', 'info'));
+    .then(({ hasLastNewLine }) => {
+        if (!hasLastNewLine) {
+            consoleLog('%\n', 'forcednl');
+        }
+
+        consoleLog('--- Done.\n\n', 'info');
+    });
 }
 
 function consoleLog(msg: string, cls: string) {
@@ -178,6 +195,13 @@ function consoleLog(msg: string, cls: string) {
     consoleObj.innerHTML += '<span class="' + cls + '">' + msg + '</span>';
     consoleObj.scrollTop = consoleObj.scrollHeight;
 }
+
+// function lastConsoleLine() {
+//     const consoleObj = document.getElementById('console');
+//     const lastnl = consoleObj.innerHTML.lastIndexOf('\n');
+//     if (lastnl === consoleObj.innerHTML.length - 1) return '';
+//     return consoleObj.innerHTML.substr(lastnl);
+// }
 
 function persist(notebook: Notebook, value: string) {
     return window.fetch(notebook.persisturl, {

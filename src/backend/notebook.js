@@ -3,6 +3,8 @@ const { resolve: resolvePath, basename, dirname, join: pathJoin } = require('pat
 const { spawn } = require('child_process');
 const globby = require('globby');
 
+const { getGlobFileMatchingPatterns, getRecipeForMainFilename } = require('./recipes');
+
 module.exports = {
     listNotebooks,
     getFileContent,
@@ -13,7 +15,7 @@ module.exports = {
 function listNotebooks(basepath) {
     const resolvedbasepath = resolvePath(basepath);
 
-    return globby(resolvedbasepath + '/**/index.js', { gitignore: true })
+    return globby(getGlobFileMatchingPatterns(basepath), { gitignore: true })
         .then(items => {
             const res = new Map();
 
@@ -23,11 +25,16 @@ function listNotebooks(basepath) {
                 .sort((a, b) => a.toLowerCase() < b.toLowerCase() ? -1 : 1)
                 .map(abspath => {
                     const absdir = dirname(abspath);
+                    const mainfilename = basename(abspath);
                     const name = absdir.substr(resolvedbasepath.length + 1);
+                    const recipe = getRecipeForMainFilename(mainfilename);
+
                     res.set(name, {
                         name,
+                        mainfilename,
                         absdir,
                         abspath,
+                        recipe,
                     });
                 });
 
