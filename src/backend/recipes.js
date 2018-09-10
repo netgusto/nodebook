@@ -29,7 +29,7 @@ function getRecipes() {
         key: 'nodejs',
         name: 'NodeJS',
         language: 'JavaScript',
-        mainfile: ['index.js'],
+        mainfile: ['index.js', 'main.js'],
         cmmode: 'javascript',
         execLocal: ({ notebook }) => ([
             'node', '--harmony', notebook.absdir + '/' + notebook.mainfilename,
@@ -46,7 +46,7 @@ function getRecipes() {
         key: 'haskell',
         name: 'Haskell',
         language: 'Haskell',
-        mainfile: ['main.hs'],
+        mainfile: ['index.hs', 'main.hs'],
         cmmode: 'haskell',
         execLocal: ({ notebook }) => ([
             'bash', '-c', 'ghc -v0 -H14m -outputdir /tmp -o /tmp/code ' + notebook.absdir + '/' + notebook.mainfilename + ' && /tmp/code',
@@ -63,7 +63,7 @@ function getRecipes() {
         key: 'lua',
         name: 'Lua',
         language: 'Lua',
-        mainfile: ['main.lua'],
+        mainfile: ['index.lua', 'main.lua'],
         cmmode: 'lua',
         execLocal: ({ notebook }) => ([
             'lua', notebook.absdir + '/' + notebook.mainfilename,
@@ -80,7 +80,7 @@ function getRecipes() {
         key: 'php',
         name: 'PHP',
         language: 'PHP',
-        mainfile: ['main.php', 'index.php'],
+        mainfile: ['index.php', 'main.php'],
         cmmode: 'php',
         execLocal: ({ notebook }) => ([
             'php', notebook.absdir + '/' + notebook.mainfilename,
@@ -97,7 +97,7 @@ function getRecipes() {
         key: 'go',
         name: 'Go',
         language: 'Go',
-        mainfile: ['main.go'],
+        mainfile: ['index.go', 'main.go'],
         cmmode: 'go',
         execLocal: ({ notebook }) => ([
             'go', 'run', notebook.absdir + '/' + notebook.mainfilename,
@@ -114,7 +114,7 @@ function getRecipes() {
         key: 'java',
         name: 'Java',
         language: 'Java',
-        mainfile: ['main.java'],
+        mainfile: ['index.java', 'main.java'],
         cmmode: 'clike',
         execLocal: ({ notebook }) => ([
             'sh', '-c', 'javac -d /tmp ' + notebook.absdir + '/' + notebook.mainfilename + ' && cd /tmp && java Main',
@@ -131,7 +131,7 @@ function getRecipes() {
         key: 'python3',
         name: 'Python 3',
         language: 'Python',
-        mainfile: ['main.py', 'index.py'],
+        mainfile: ['index.py', 'main.py'],
         cmmode: 'python',
         execLocal: ({ notebook }) => ([
             'python', notebook.absdir + '/' + notebook.mainfilename,
@@ -148,7 +148,7 @@ function getRecipes() {
         key: 'c',
         name: 'C11',
         language: 'C',
-        mainfile: ['main.c'],
+        mainfile: ['index.c', 'main.c'],
         cmmode: 'clike',
         execLocal: ({ notebook }) => ([
             'sh', '-c', "gcc -Wall -o /tmp/code.out '" + notebook.abspath + "' && /tmp/code.out"
@@ -165,7 +165,7 @@ function getRecipes() {
         key: 'ruby',
         name: 'Ruby',
         language: 'Ruby',
-        mainfile: ['main.rb', 'index.rb'],
+        mainfile: ['index.rb', 'main.rb'],
         cmmode: 'ruby',
         execLocal: ({ notebook }) => ([
             'ruby', notebook.absdir + '/' + notebook.mainfilename,
@@ -182,7 +182,7 @@ function getRecipes() {
         key: 'c++',
         name: 'C++14',
         language: 'C++',
-        mainfile: ['main.cpp'],
+        mainfile: ['index.cpp', 'main.cpp'],
         cmmode: 'clike',
         execLocal: ({ notebook }) => ([
             'sh', '-c', "g++ -std=c++14 -Wall -o /tmp/code.out '" + notebook.abspath + "' && /tmp/code.out"
@@ -199,7 +199,7 @@ function getRecipes() {
         key: 'rust',
         name: 'Rust',
         language: 'Rust',
-        mainfile: ['main.rs'],
+        mainfile: ['index.rs', 'main.rs'],
         cmmode: 'rust',
         execLocal: ({ notebook }) => ([
             'sh', '-c', "rustc -o /tmp/code.out '" + notebook.abspath + "' && /tmp/code.out"
@@ -216,7 +216,7 @@ function getRecipes() {
         key: 'swift',
         name: 'Swift',
         language: 'Swift',
-        mainfile: ['main.swift'],
+        mainfile: ['index.swift', 'main.swift'],
         cmmode: 'swift',
         execLocal: ({ notebook }) => ([
             'swift', notebook.abspath,
@@ -233,7 +233,7 @@ function getRecipes() {
         key: 'r',
         name: 'R',
         language: 'R',
-        mainfile: ['main.r', 'main.R'],
+        mainfile: ['index.r', 'index.R', 'main.r', 'main.R'],
         cmmode: 'r',
         execLocal: ({ notebook }) => ([
             'Rscript', notebook.abspath,
@@ -249,7 +249,7 @@ function getRecipes() {
     recipes.push({
         key: 'plaintext',
         name: 'Plain text',
-        mainfile: [],
+        mainfile: ['index.txt', 'main.txt'],
         cmmode: 'plaintext',
         execLocal: ({ notebook }) => ([
             'cat', notebook.absdir + '/' + notebook.mainfilename,

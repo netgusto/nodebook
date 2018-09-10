@@ -35,7 +35,7 @@ describe('notebook functions', function () {
                         name: "NodeJS",
                         language: "JavaScript",
                         cmmode: "javascript",
-                        mainfile: ["index.js"],
+                        mainfile: ["index.js", "main.js"],
                         execDocker: undefined,
                         execLocal: undefined,
                     },
