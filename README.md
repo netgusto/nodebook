@@ -7,11 +7,11 @@ Nodebook - Minimalistic code REPL with web UI
 Nodebook is an in-browser REPL supporting many programming languages. Code's on the left, Console's on the right. Click "Run" or press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> or <kbd>Cmd</kbd>+<kbd>Enter</kbd> to run your code.
 Code is automatically persisted on the file system.
 
-![nodebook](https://user-images.githubusercontent.com/4974818/45084039-8f2b6380-b0fd-11e8-94d4-dadcab34c7f6.png)
+![nodebook](https://user-images.githubusercontent.com/4974818/45320903-2cdec280-b544-11e8-9b2e-067b646de751.png)
 
 A notebook is a folder containing an `{index|main}.{js,py,c,cpp,...}` file. The homepage lists all of the available notebooks.
 
-![home](https://user-images.githubusercontent.com/4974818/45084276-3c9e7700-b0fe-11e8-9ed0-d2b7cb5b7bb3.png)
+![home](https://user-images.githubusercontent.com/4974818/45320797-ed17db00-b543-11e8-91ae-db813debab5b.png)
 
 ## Supported environments
 
