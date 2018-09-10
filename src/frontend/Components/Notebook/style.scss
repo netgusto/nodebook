@@ -1,15 +1,35 @@
-body { margin: 0; padding: 0; }
+body {
+    margin: 0; padding: 0;
+    background: #272822;
+
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+    .notebook-recipe {
+        color: #FFC312;
+    }
+
+    .notebook-recipe:before {
+        display: inline-block;
+        content: '—';   // mdash
+        margin: 0 10px;
+    }
+}
 
 .home-app {
     padding: 10px;
+    &, a {
+        color: white;
+        &:visited {
+            color: #aaa;
+        }
+    }
+    font-size: 18px;
 }
 
 .notebook-app {
 
-    background: #272822; font-size: 14px; 
-
-    pre, code {
-        font-family: 'Roboto Mono', Menlo, 'Ubuntu Mono', Monaco, Consolas, 'source-code-pro', monospace;
+    body {
+        font-size: 14px; 
     }
 
     .CodeMirror {
@@ -32,8 +52,8 @@ body { margin: 0; padding: 0; }
         display: grid;
         grid-template-rows: 50px auto;
         grid-template-columns: auto 5px 40%;
-        grid-template-areas: "top top top"
-                                "code gutter console";
+        grid-template-areas: 'top top top'
+                             'code gutter console';
     }
 
     #top {
@@ -44,7 +64,7 @@ body { margin: 0; padding: 0; }
 
         display: grid;
         grid-template-columns: 100px auto 100px;
-        grid-template-areas: "btn-run notebook-header btn-home";
+        grid-template-areas: 'btn-run notebook-header btn-home';
     }
 
     #top button {
@@ -65,22 +85,12 @@ body { margin: 0; padding: 0; }
         grid-area: notebook-header;
         font-size: 20px;
         line-height: 30px;
-        font-family: Helvetica Neue, Helvetica, Arial, sans-serif;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     }
 
     #top #notebook-header .notebook-name {
         color: white;
         font-weight: bold;
-    }
-
-    #top #notebook-header .notebook-recipe {
-        color: #FFC312;
-    }
-
-    #top #notebook-header .notebook-recipe:before {
-        display: inline-block;
-        content: '—';   // mdash
-        margin: 0 10px;
     }
 
     #top #btn-home {

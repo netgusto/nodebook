@@ -19,7 +19,7 @@ portfinder.getPort(function (err, port) {
     const homeurl = baseurl;
     const notebookspath = resolve(dirname(__filename) + '/../fixtures/notebooks');
 
-    const validNotebook = 'My first notebook';
+    const validNotebook = 'Javascript';
     const validNotebookRelativeUrl = buildUrl('notebook', { name: validNotebook });
 
     const notebookUrl = baseurl + validNotebookRelativeUrl;
@@ -62,7 +62,7 @@ portfinder.getPort(function (err, port) {
                     expect(res).has.status(200);
 
                     expect(res.text).matches(/route\s?=\s?"notebook"/g);
-                    expect(res.text).contains('"content":"console.log(\'OK\');"');
+                    expect(res.text).contains('"content":"console.log(\'Hello, World!\');"');
 
                     expect(res.text).contains(validNotebook);
 

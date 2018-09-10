@@ -67,6 +67,10 @@ function execNotebook(notebook, execCommand, res) {
         const command = execCommand({ notebook });
         const child = spawn(command[0], command.slice(1));
 
+        child.on('error', function (err) {
+            res.write(JSON.stringify({ chan: 'stderr', data: JSON.stringify(err.message + "\n") }) + '\n');
+        });
+
         child.stdout.on('data', (chunk) => {
             res.write(JSON.stringify({ chan: 'stdout', data: JSON.stringify(chunk.toString('utf-8')) }) + '\n');
         });

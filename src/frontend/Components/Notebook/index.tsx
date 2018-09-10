@@ -6,9 +6,19 @@ const CM = CodeMirror as any;
 
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/monokai.css';
-import 'codemirror/addon/hint/show-hint.css';
 
 import 'codemirror/mode/javascript/javascript';
+import 'codemirror/mode/clike/clike';
+import 'codemirror/mode/go/go';
+import 'codemirror/mode/haskell/haskell';
+import 'codemirror/mode/lua/lua';
+import 'codemirror/mode/php/php';
+import 'codemirror/mode/python/python';
+import 'codemirror/mode/r/r';
+import 'codemirror/mode/ruby/ruby';
+import 'codemirror/mode/rust/rust';
+import 'codemirror/mode/swift/swift';
+
 import 'codemirror/keymap/sublime';
 
 import 'codemirror/addon/selection/active-line';
@@ -19,8 +29,6 @@ import 'codemirror/addon/search/matchesonscrollbar';
 import 'codemirror/addon/search/searchcursor';
 import 'codemirror/addon/search/match-highlighter';
 import 'codemirror/addon/fold/indent-fold';
-import 'codemirror/addon/hint/show-hint';
-import 'codemirror/addon/hint/javascript-hint';
 import 'codemirror/addon/scroll/scrollpastend';
 
 import "./style.scss";
@@ -34,6 +42,7 @@ export default class NotebookComponent extends React.Component<Props> {
 
     boundHandleKeyDown: EventListener;
     editorvalue: string;
+    props: Props;
 
     constructor(props: Props) {
         super(props);
@@ -80,8 +89,8 @@ export default class NotebookComponent extends React.Component<Props> {
                         </div>
 
                         <div id="notebook-header">
-                            <span class="notebook-name">{notebook.name}</span>
-                            <span class="notebook-recipe">{notebook.recipe.name}</span>
+                            <span className="notebook-name">{notebook.name}</span>
+                            <span className="notebook-recipe">{notebook.recipe.name}</span>
                         </div>
 
                         <div id="btn-home">
@@ -91,10 +100,9 @@ export default class NotebookComponent extends React.Component<Props> {
                     <div id="left">
                         <div id="code">
                             <CM
-                                ref={(el) => this.editor = el}
                                 value={notebook.content}
                                 options={{
-                                    mode: 'javascript',
+                                    mode: notebook.recipe.cmmode,
                                     theme: 'monokai',
                                     lineNumbers: true,
                                     lineWrapping: true,

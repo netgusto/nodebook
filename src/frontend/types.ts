@@ -16,4 +16,5 @@ export interface Recipe {
     key: string;
     name: string;
     language: string;
+    cmmode: string;
 }

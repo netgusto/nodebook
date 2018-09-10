@@ -18,6 +18,7 @@ function extractFrontendNotebookSummary(notebook) {
             key: notebook.recipe.key,
             name: notebook.recipe.name,
             language: notebook.recipe.language,
+            cmmode: notebook.recipe.cmmode,
         }
     };
 }

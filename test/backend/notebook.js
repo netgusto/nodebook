@@ -9,7 +9,7 @@ chai.use(chaiAsPromised);
 
 describe('notebook functions', function () {
 
-    const validNotebook = 'My first notebook';
+    const validNotebook = 'Javascript';
     const validDirpath = resolve(dirname(__filename) + '/../fixtures/notebooks');
     const validNotebookPath = validDirpath + '/' + validNotebook;
     const validNotebookFilePath = validNotebookPath + '/index.js';
@@ -25,7 +25,7 @@ describe('notebook functions', function () {
             return res;
         }))
             .to.eventually.deep.include({
-                'My first notebook': {
+                [validNotebook]: {
                     name: validNotebook,
                     mainfilename: 'index.js',
                     absdir: validNotebookPath,
@@ -34,6 +34,7 @@ describe('notebook functions', function () {
                         key: "nodejs",
                         name: "NodeJS",
                         language: "JavaScript",
+                        cmmode: "javascript",
                         mainfile: ["index.js"],
                         execDocker: undefined,
                         execLocal: undefined,
@@ -44,6 +45,6 @@ describe('notebook functions', function () {
 
     it('should get notebook content', () => {
         return expect(getFileContent(validNotebookFilePath))
-            .to.eventually.eq('console.log(\'OK\');');
+            .to.eventually.eq('console.log(\'Hello, World!\');');
     });
 });
