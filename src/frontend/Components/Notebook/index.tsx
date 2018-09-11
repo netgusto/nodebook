@@ -38,11 +38,19 @@ export interface Props {
     homeurl: string;
 }
 
-export default class NotebookComponent extends React.Component<Props> {
+export interface State {
+    autoclear: boolean;
+}
 
-    boundHandleKeyDown: EventListener;
-    editorvalue: string;
-    props: Props;
+export default class NotebookComponent extends React.Component<Props, State> {
+
+    private props: Props;
+    private state: State = {
+        autoclear: false,
+    };
+
+    private boundHandleKeyDown: EventListener;
+    private editorvalue: string;
 
     constructor(props: Props) {
         super(props);
@@ -63,34 +71,37 @@ export default class NotebookComponent extends React.Component<Props> {
     }
 
     handleKeyDown(event) {
-        if ((event.metaKey || event.ctrlKey) && event.keyCode == 13) {          // cmd + Enter
-            const { notebook } = this.props;
-            
+        if ((event.metaKey || event.ctrlKey) && event.keyCode == 13) {          // cmd + Enter          
             event.preventDefault();
-            execNotebook(notebook);
+            this.execNotebook();
         } else if ((event.metaKey || event.ctrlKey) && event.key == 's') {      // cmd + S
 
             const { notebook } = this.props;
 
             event.preventDefault();
-            persist(notebook, this.editorvalue).then(() => execNotebook(notebook));
+            persist(notebook, this.editorvalue).then(() => this.execNotebook());
         }
     }
 
     render() {
         const { notebook, homeurl } = this.props;
+        const { autoclear } = this.state;
 
         return (
             <div className="notebook-app">
                 <div id="layout">
                     <div id="top">
                         <div id="btn-run">
-                            <button onClick={() => execNotebook(notebook)}>Run&nbsp;&nbsp;▶</button>
+                            <button onClick={() => this.execNotebook()}>Run&nbsp;&nbsp;▶</button>
                         </div>
 
                         <div id="notebook-header">
                             <span className="notebook-name">{notebook.name}</span>
                             <span className="notebook-recipe">{notebook.recipe.name}</span>
+                        </div>
+
+                        <div id="console-options">
+                            <label><input type="checkbox" checked={autoclear} onChange={e => { this.setState({ autoclear: e.target.checked }); }} /> Clear console every run</label>
                         </div>
 
                         <div id="btn-home">
@@ -133,70 +144,78 @@ export default class NotebookComponent extends React.Component<Props> {
             </div>
         );
     }
-}
 
-function execNotebook(notebook: Notebook) {
-    consoleLog('--- Running...\n', 'info');
-    const { execurl } = notebook;
+    protected execNotebook() {
 
-    return window.fetch(execurl, {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-    })
-    .then(res => {
-        if (!res.body) {
-            // response not streamable; use it in one piece
-            return res.text()
-                .then(text => text.split('\n').map(jsonline => {
-        
-                    if (jsonline.trim().length === 0) return;
+        const { autoclear } = this.state;
+        const { notebook } = this.props;
 
-                    const data = JSON.parse(jsonline);
-                    consoleLog(JSON.parse(data.data), data.chan);
-                }));
-        } else {
-            return new Promise((resolve, reject) => {
-                const reader = res.body.getReader();
-                const decoder = new TextDecoder("utf-8");
-                let hasLastNewLine = true;
-                function pump() {
-                    reader.read().then(({ done, value }) => {
-                        if (done) {
-                            resolve({ hasLastNewLine });
-                            return;
-                        }
+        if (autoclear) consoleClear();
+    
+        consoleLog('--- Running...\n', 'info');
+        const { execurl } = notebook;
+    
+        return window.fetch(execurl, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+        })
+        .then(res => {
+            if (!res.body) {
+                // response not streamable; use it in one piece
+                return res.text()
+                    .then(text => text.split('\n').map(jsonline => {
             
-                        decoder.decode(value).split('\n').map(jsonline => {
-            
-                            if (jsonline.trim().length === 0) return;
-
-                            const data = JSON.parse(jsonline);
-                            const txt = JSON.parse(data.data);
-                            const lastnl = txt.lastIndexOf('\n');
-                            hasLastNewLine = (lastnl === txt.length - 1);
-                            consoleLog(JSON.parse(data.data), data.chan);
+                        if (jsonline.trim().length === 0) return;
+    
+                        const data = JSON.parse(jsonline);
+                        consoleLog(JSON.parse(data.data), data.chan);
+                    }));
+            } else {
+                return new Promise((resolve, reject) => {
+                    const reader = res.body.getReader();
+                    const decoder = new TextDecoder("utf-8");
+                    let hasLastNewLine = true;
+                    function pump() {
+                        reader.read().then(({ done, value }) => {
+                            if (done) {
+                                resolve({ hasLastNewLine });
+                                return;
+                            }
+                
+                            decoder.decode(value).split('\n').map(jsonline => {
+                
+                                if (jsonline.trim().length === 0) return;
+    
+                                const data = JSON.parse(jsonline);
+                                const txt = JSON.parse(data.data);
+                                const lastnl = txt.lastIndexOf('\n');
+                                hasLastNewLine = (lastnl === txt.length - 1);
+                                consoleLog(JSON.parse(data.data), data.chan);
+                            });
+                            
+                            // Get the data and send it to the browser via the controller
+                            pump();
                         });
-                        
-                        // Get the data and send it to the browser via the controller
-                        pump();
-                    });
-                }
-
-                pump();
-            });
-        }
-    })
-    .then(({ hasLastNewLine }) => {
-        if (!hasLastNewLine) {
-            consoleLog('%\n', 'forcednl');
-        }
-
-        consoleLog('--- Done.\n\n', 'info');
-    });
+                    }
+    
+                    pump();
+                });
+            }
+        })
+        .then(({ hasLastNewLine }) => {
+            if (!hasLastNewLine) {
+                consoleLog('%\n', 'forcednl');
+            }
+    
+            consoleLog('--- Done.\n\n', 'info');
+        });
+    }
 }
+
+
 
 function consoleLog(msg: string, cls: string) {
     const consoleObj = document.getElementById('console');
@@ -204,12 +223,10 @@ function consoleLog(msg: string, cls: string) {
     consoleObj.scrollTop = consoleObj.scrollHeight;
 }
 
-// function lastConsoleLine() {
-//     const consoleObj = document.getElementById('console');
-//     const lastnl = consoleObj.innerHTML.lastIndexOf('\n');
-//     if (lastnl === consoleObj.innerHTML.length - 1) return '';
-//     return consoleObj.innerHTML.substr(lastnl);
-// }
+function consoleClear() {
+    const consoleObj = document.getElementById('console');
+    consoleObj.innerHTML = '';
+}
 
 function persist(notebook: Notebook, value: string) {
     return window.fetch(notebook.persisturl, {

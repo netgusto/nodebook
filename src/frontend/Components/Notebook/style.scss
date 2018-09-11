@@ -63,8 +63,8 @@ body {
         vertical-align: middle;
 
         display: grid;
-        grid-template-columns: 100px auto 100px;
-        grid-template-areas: 'btn-run notebook-header btn-home';
+        grid-template-columns: 100px auto auto 100px;
+        grid-template-areas: 'btn-run notebook-header console-options btn-home';
     }
 
     #top button {
@@ -91,6 +91,15 @@ body {
     #top #notebook-header .notebook-name {
         color: white;
         font-weight: bold;
+    }
+
+    #top #console-options {
+        grid-area: console-options;
+        text-align: right;
+
+        color: white;
+        line-height: 30px;
+        padding-right: 30px;
     }
 
     #top #btn-home {
