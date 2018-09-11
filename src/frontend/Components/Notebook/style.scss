@@ -1,3 +1,5 @@
+$yellowcolor: #FFC312;
+
 body {
     margin: 0; padding: 0;
     background: #272822;
@@ -5,7 +7,7 @@ body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
     .notebook-recipe {
-        color: #FFC312;
+        color: $yellowcolor;
     }
 
     .notebook-recipe:before {
@@ -13,17 +15,66 @@ body {
         content: '—';   // mdash
         margin: 0 10px;
     }
+
+    .bigbutton {
+        height: 30px;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        cursor: pointer;
+    }
 }
 
 .home-app {
+
     padding: 10px;
+    font-size: 18px;
+
     &, a {
         color: white;
         &:visited {
             color: #aaa;
         }
     }
-    font-size: 18px;
+
+    display: grid;
+    grid-template-columns: auto 150px;
+    grid-template-areas: "notebooklist tools";
+
+    .notebook-list {
+        grid-area: notebooklist;
+    }
+
+    .tools {
+        grid-area: tools;
+        text-align: left;
+        padding-top: 15px;
+
+        .btn-new {
+            background-color: #00a8ff;
+            text-align: right;
+            width: 113px;
+            white-space: nowrap;
+        }
+
+        .recipe-list {
+            padding: 10px;
+        }
+
+        .recipe-list .recipe-item {
+            display: block;
+            cursor: pointer;
+            text-decoration: underline;
+
+            padding-top: 5px;
+
+            &:hover {
+                color: $yellowcolor;
+            }
+        }
+    }
 }
 
 .notebook-app {
@@ -67,16 +118,6 @@ body {
         grid-template-areas: 'btn-run notebook-header console-options btn-home';
     }
 
-    #top button {
-        height: 30px;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        font-size: 1.1rem;
-        font-weight: bold;
-        cursor: pointer;
-    }
-
     #top #btn-run {
         grid-area: btn-run;
     }
@@ -91,6 +132,7 @@ body {
     #top #notebook-header .notebook-name {
         color: white;
         font-weight: bold;
+        cursor: text;
     }
 
     #top #console-options {
@@ -107,12 +149,12 @@ body {
         text-align: right;
     }
 
-    #top #btn-run button {
+    #top #btn-run .bigbutton {
         width: 90px;
         background-color: rgb(107, 183, 175);
     }
 
-    #top #btn-home button {
+    #top #btn-home .bigbutton {
         background-color: #9b59b6;
     }
 

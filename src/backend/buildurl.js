@@ -11,8 +11,10 @@ function buildUrl(name, params) {
     switch (name) {
         case 'home': return '/';
         case 'notebook': return replaceParamsInUrl('/notebook/:name', params);
+        case 'notebooknew': return '/api/notebook/new';
         case 'notebooksetcontent': return replaceParamsInUrl('/api/notebook/:name/setcontent', params);
         case 'notebookexec': return replaceParamsInUrl('/api/notebook/:name/exec', params);
+        case 'notebookrename': return replaceParamsInUrl('/api/notebook/:name/rename', params);
     }
 
     return undefined;

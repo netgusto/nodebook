@@ -36,10 +36,12 @@ import "./style.scss";
 export interface Props {
     notebook: Notebook;
     homeurl: string;
+    renamenotebookurl: string;
 }
 
 export interface State {
     autoclear: boolean;
+    newname: string|undefined;
 }
 
 export default class NotebookComponent extends React.Component<Props, State> {
@@ -47,6 +49,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
     private props: Props;
     private state: State = {
         autoclear: false,
+        newname: undefined,
     };
 
     private boundHandleKeyDown: EventListener;
@@ -85,18 +88,25 @@ export default class NotebookComponent extends React.Component<Props, State> {
 
     render() {
         const { notebook, homeurl } = this.props;
-        const { autoclear } = this.state;
+        const { autoclear, newname } = this.state;
 
         return (
             <div className="notebook-app">
                 <div id="layout">
                     <div id="top">
                         <div id="btn-run">
-                            <button onClick={() => this.execNotebook()}>Run&nbsp;&nbsp;▶</button>
+                            <button className="bigbutton" onClick={() => this.execNotebook()}>Run&nbsp;&nbsp;▶</button>
                         </div>
 
                         <div id="notebook-header">
-                            <span className="notebook-name">{notebook.name}</span>
+                            <span
+                                contentEditable={true}
+                                className="notebook-name"
+                                onBlur={e => this.onNotebookNameCommit()}
+                                onInput={e => this.onNotebookNameChange((e.target as HTMLElement).innerText)}
+                            >
+                                {newname === undefined ? notebook.name : newname}
+                            </span>
                             <span className="notebook-recipe">{notebook.recipe.name}</span>
                         </div>
 
@@ -105,7 +115,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
                         </div>
 
                         <div id="btn-home">
-                            <button onClick={() => document.location.href = homeurl}>Home&nbsp;&nbsp;🏠</button>
+                            <button className="bigbutton" onClick={() => document.location.href = homeurl}>Home&nbsp;&nbsp;🏠</button>
                         </div>
                     </div>
                     <div id="left">
@@ -145,7 +155,76 @@ export default class NotebookComponent extends React.Component<Props, State> {
         );
     }
 
-    protected execNotebook() {
+    private sanitizeName(name: string) {
+        if (typeof name !== 'string') throw new Error('The notebook name should be a string');
+    
+        name = name.
+            replace(/\.{2,}/g, '.').
+            replace(/\\/g, '_').
+            replace(/\//g, '_').
+            replace(/[^a-zA-Z0-9\u00C0-\u017F\s+-_\.]/g, '').
+            replace(/\s+/g, ' ').
+            trim();
+        
+        if (name === '' || name[0] === '.') throw new Error('Invalid name');
+
+        return name;
+    }
+
+    private onNotebookNameChange(newname) {
+        // let sanitizedName;
+        // try {
+        //     sanitizedName = this.sanitizeName(newname);
+        // } catch(e) {
+        //     sanitizedName = newname;
+        // }
+
+        this.setState({ newname });
+    }
+
+    private onNotebookNameCommit() {
+
+        const { newname } = this.state;
+        const { notebook, renamenotebookurl } = this.props;
+
+        if (newname === undefined) return;
+
+        // Sanitize name
+
+        let sanitizedName;
+        try {
+            sanitizedName = this.sanitizeName(newname);
+        } catch(e) {
+            this.setState({ newname: undefined });
+            window.setTimeout(() => alert('Invalid name.'), 10);
+            return;
+        }
+
+        if (sanitizedName === notebook.name) {
+            this.setState({ newname: undefined });
+            return;
+        }
+
+        this.setState({ newname: sanitizedName });
+
+        // Persist name change
+
+        return window.fetch(renamenotebookurl, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                newname: sanitizedName,
+            })
+        })
+        .then(res => res.json())
+        .then(({ url }) => document.location.href = url)
+        .catch(_ => alert('Error: Notebook could not be renamed.'));
+    }
+
+    private execNotebook() {
 
         const { autoclear } = this.state;
         const { notebook } = this.props;
