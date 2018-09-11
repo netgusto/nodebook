@@ -26,7 +26,7 @@ A notebook is a folder containing an `{index|main}.{js,py,c,cpp,...}` file. The 
 * Python 3 `(.py)`
 * R `(.r, .R)`
 * Ruby `(.rb)`
-* Rust `(.rs)`
+* Rust `(.rs)` — Uses `cargo run` if `Cargo.toml` is present, and `rustc` otherwise
 * Swift `(.swift)`
 
 If `--docker` is set on the command line, each of these environments will run inside a specific docker container.
