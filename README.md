@@ -11,7 +11,7 @@ Code is automatically persisted on the file system.
 
 A notebook is a folder containing an `{index|main}.{js,py,c,cpp,...}` file. The homepage lists all of the available notebooks.
 
-![home](https://user-images.githubusercontent.com/4974818/45320797-ed17db00-b543-11e8-91ae-db813debab5b.png)
+![home](https://user-images.githubusercontent.com/4974818/45383977-fde05380-b60c-11e8-91cc-06548dd4fae8.png)
 
 ## Supported environments
 
