@@ -62,9 +62,9 @@ function setFileContent(abspath, content) {
 
 
 function execNotebook(notebook, execCommand, res) {
-    return new Promise((resolve, _) => {
+    return new Promise(async (resolve, _) => {
         
-        const command = execCommand({ notebook });
+        const command = await execCommand({ notebook });
         const child = spawn(command[0], command.slice(1));
 
         child.on('error', function (err) {
