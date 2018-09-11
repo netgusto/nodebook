@@ -1,5 +1,5 @@
-const fs = require('fs');
-const { resolve: resolvePath, basename, dirname } = require('path');
+const { statSync, lstat, readFile, writeFile, rename: renameDir } = require('fs-extra');
+const { resolve: resolvePath, basename, dirname, join: pathJoin } = require('path');
 const { spawn } = require('child_process');
 const globby = require('globby');
 
@@ -15,6 +15,7 @@ module.exports = {
     extractFrontendRecipeSummary,
     newNotebook,
     sanitizeNotebookName,
+    renameNotebook,
 };
 
 function listNotebooks(notebookspath) {
@@ -26,7 +27,7 @@ function listNotebooks(notebookspath) {
 
             items
                 .map(path => resolvePath(path))
-                .filter(abspath => fs.statSync(abspath).isFile())
+                .filter(abspath => statSync(abspath).isFile())
                 .sort((a, b) => a.toLowerCase() < b.toLowerCase() ? -1 : 1)
                 .map(abspath => {
                     const absdir = dirname(abspath);
@@ -49,7 +50,7 @@ function listNotebooks(notebookspath) {
 
 function getFileContent(abspath) {
     return new Promise((resolve, reject) => {
-        fs.readFile(abspath, 'utf8', function (err, contents) {
+        readFile(abspath, 'utf8', function (err, contents) {
             if (err) return reject(err);
             resolve(contents);
         });
@@ -58,7 +59,7 @@ function getFileContent(abspath) {
 
 function setFileContent(abspath, content) {
     return new Promise((resolve, reject) => {
-        fs.writeFile(abspath, content, 'utf8', function (err) {
+        writeFile(abspath, content, 'utf8', function (err) {
             if (err) reject(err);
             resolve();
         });
@@ -98,16 +99,35 @@ async function newNotebook(notebookspath, name, recipe, defaultcontentsdir) {
     return await recipe.initNotebook({ name, notebookspath, defaultcontentsdir });
 }
 
+async function renameNotebook(notebook, newname) {
+
+    const newabsdir = pathJoin(dirname(notebook.absdir), newname);
+    const exists = await new Promise(resolve => lstat(newabsdir, err => resolve(!err)));
+    if (exists) {
+        throw new Error('Notebook already exists');
+    }
+
+    const ok = await new Promise(resolve => 
+        renameDir(notebook.absdir, newabsdir, err => resolve(!err))
+    );
+
+    if (!ok) throw new Error('Notebook could not be renamed');
+
+    return true;
+}
+
 function sanitizeNotebookName(name) {
     if (typeof name !== 'string') throw new Error('The notebook name should be a string');
     
     name = name.
-        replace(/\s/g, ' ').
         replace(/\.{2,}/g, '.').
+        replace(/\\/g, '_').
+        replace(/\//g, '_').
         replace(/[^a-zA-Z0-9\u00C0-\u017F\s+-_\.]/g, '').
+        replace(/\s+/g, ' ').
         trim();
     
-    if (name === '' || name === '.') throw new Error('Invalid name');
+    if (name === '' || name[0] === '.') throw new Error('Invalid name');
 
     return name;
 }

@@ -11,6 +11,7 @@ const {
     extractFrontendNotebookSummary,
     extractFrontendRecipeSummary,
     sanitizeNotebookName,
+    renameNotebook,
 } = require('./notebook');
 
 const { buildUrl } = require('./buildurl');
@@ -23,6 +24,7 @@ module.exports = {
     handleAPINoteBookSetContent,
     handleAPINoteBookExec,
     handleAPINoteBookNew,
+    handleAPINoteBookRename,
 };
 
 function generatePageHtml(route, params = {}) {
@@ -60,10 +62,12 @@ function handleNoteBook({ notebookspath }) {
 
         const persisturl = buildUrl('notebooksetcontent', { name });
         const execurl = buildUrl('notebookexec', { name });
+        const renamenotebookurl = buildUrl('notebookrename', { name });
         const homeurl = buildUrl('home');
 
         res.send(await generatePageHtml("notebook", {
             homeurl,
+            renamenotebookurl,
             notebook: {
                 ...extractFrontendNotebookSummary(notebook),
                 execurl,
@@ -109,7 +113,6 @@ function handleAPINoteBookExec({ notebookspath, docker }) {
 }
 
 function handleAPINoteBookNew({ notebookspath, defaultcontentsdir }) {
-
     return async function (req, res) {
         const { recipekey } = req.body;
         res.set('Content-Type', 'text/plain');
@@ -127,7 +130,13 @@ function handleAPINoteBookNew({ notebookspath, defaultcontentsdir }) {
             name = sanitizeNotebookName(titleCase(generateName().spaced));
         } while(notebooksBefore.has(name));
 
-        const done = await newNotebook(notebookspath, name, recipe, defaultcontentsdir);
+        let done;
+        try {
+            done = await newNotebook(notebookspath, name, recipe, defaultcontentsdir);
+        } catch(e) {
+            done = false;
+        }
+
         if (!done) {
             return res.status(400).send('Notebook initialization failed');
         }
@@ -141,5 +150,52 @@ function handleAPINoteBookNew({ notebookspath, defaultcontentsdir }) {
 
         res.set('Content-Type', 'application/json');
         res.send(JSON.stringify(extractFrontendNotebookSummary(notebook)));
+    };
+}
+
+function handleAPINoteBookRename({ notebookspath }) {
+    return async function (req, res) {
+        const { name: oldname } = req.params;
+        const { newname } = req.body;
+
+        res.set('Content-Type', 'text/plain');
+
+        // Generate name
+        const notebooks = await listNotebooks(notebookspath);
+        if (!notebooks.has(oldname)) {
+            return res.status(400).send('Notebook does not exist.');
+        }
+
+        const notebook = notebooks.get(oldname);
+
+        // Sanitize new name
+        let sanitizedNewName;
+        try {
+            sanitizedNewName = sanitizeNotebookName(newname);
+        } catch(e) {
+            return res.status(400).send('Invalid Notebook name.');
+        }
+        
+        let done;
+        try {
+            done = await renameNotebook(notebook, sanitizedNewName);
+        } catch(e) {
+            console.log(e);
+            done = false;
+        }
+
+        if (!done) {
+            return res.status(400).send('Notebook rename failed');
+        }
+
+        const notebooksAfter = await listNotebooks(notebookspath);
+        if (!notebooksAfter.has(sanitizedNewName)) {
+            return res.status(400).send('Notebook rename failed');
+        }
+
+        const notebookRenamed = notebooksAfter.get(sanitizedNewName);
+
+        res.set('Content-Type', 'application/json');
+        res.send(JSON.stringify(extractFrontendNotebookSummary(notebookRenamed)));
     };
 }

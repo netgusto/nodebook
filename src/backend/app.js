@@ -10,6 +10,7 @@ const {
     handleAPINoteBookSetContent,
     handleAPINoteBookExec,
     handleAPINoteBookNew,
+    handleAPINoteBookRename,
 } = require('./handlers');
 
 const { sanitizeParameters } = require('./sanitizeparameters');
@@ -30,6 +31,7 @@ function app({ port, bindaddress, notebookspath, logger, docker }) {
     app.get('/', handleHomePage({ notebookspath }));
     app.get('/notebook/:name', handleNoteBook({ notebookspath }));
     app.post('/api/notebook/new', handleAPINoteBookNew({ notebookspath, defaultcontentsdir }));
+    app.post('/api/notebook/:name/rename', handleAPINoteBookRename({ notebookspath }));
     app.post('/api/notebook/:name/setcontent', handleAPINoteBookSetContent({ notebookspath }));
     app.post('/api/notebook/:name/exec', handleAPINoteBookExec({ notebookspath, docker }));
 
