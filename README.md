@@ -72,7 +72,7 @@ $ node . --notebooks path/to/notebooks --docker
 * **--notebooks**: path to notebook folders; required
 * **--bindaddress**: IP address the http server should bind to; defaults to `127.0.0.1`
 * **--port**: Port used by the application; defaults to `8000`
-* **--docker**: Execute code in disposable docker containers instead of local system's Node; defaults to `false`
+* **--docker**: Execute code in disposable docker containers instead of local system; defaults to `false`
 
 ## ⚠️ A bit of warning ⚠️
 
