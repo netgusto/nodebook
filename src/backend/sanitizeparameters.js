@@ -1,7 +1,6 @@
 const minimist = require('minimist');
 const fs = require('fs');
 const { resolve: resolvePath } = require('path');
-const { exec } = require('child_process');
 
 module.exports = {
     sanitizeParameters,
@@ -38,9 +37,6 @@ async function sanitizeParameters(rawargv) {
     // --docker
 
     const docker = ("docker" in argv);
-    if (docker && !await isDockerRunning()) {
-        throw new Error('docker is not running on the host, but --docker requested.')
-    }
 
     // --notebooks
 
@@ -69,11 +65,4 @@ async function sanitizeParameters(rawargv) {
     }
 
     return { notebooks, port, bindaddress, docker };
-}
-
-
-function isDockerRunning() {
-    return new Promise(resolve => {
-        exec('docker ps', err => resolve(err === null));
-    });
 }
