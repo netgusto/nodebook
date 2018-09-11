@@ -1,3 +1,6 @@
+const { lstat } = require('fs');
+const { join: pathJoin } = require('path');
+
 module.exports = {
     getRecipeForMainFilename,
     getGlobFileMatchingPatterns,
@@ -195,21 +198,52 @@ function getRecipes() {
         ]),
     });
 
+    function hasCargo(absdir) {
+        return new Promise((resolve) => {
+            lstat(pathJoin(absdir, 'Cargo.toml'), (err, stats) => {
+                resolve(!err && stats.isFile());
+            });
+        });
+    }
+
     recipes.push({
         key: 'rust',
         name: 'Rust',
         language: 'Rust',
         mainfile: ['index.rs', 'main.rs'],
         cmmode: 'rust',
-        execLocal: ({ notebook }) => ([
-            'sh', '-c', "rustc -o /tmp/code.out '" + notebook.abspath + "' && /tmp/code.out"
-        ]),
-        execDocker: ({ notebook }) => ([
-            'docker', 'run', '--rm',
-            '-v', notebook.absdir + ':/code',
-            'rust:latest',
-            'sh', '-c', "rustc -o /tmp/code.out /code/" + notebook.mainfilename + " && /tmp/code.out"
-        ]),
+        execLocal: async ({ notebook }) => {
+
+            if (await hasCargo(notebook.absdir)) {
+                return [
+                    'sh', '-c', 'cd ' + notebook.absdir + ' && cargo run --quiet',
+                ];
+            }
+
+            return [
+                'sh', '-c', "rustc -o /tmp/code.out '" + notebook.abspath + "' && /tmp/code.out"
+            ];
+        },
+        execDocker: async ({ notebook }) => {
+            let cmd;
+
+            if (await hasCargo(notebook.absdir)) {
+                cmd = [
+                    'sh', '-c', 'cd /code && cargo run --quiet',
+                ];
+            } else {
+                cmd = [
+                    'sh', '-c', "rustc -o /tmp/code.out /code/" + notebook.mainfilename + " && /tmp/code.out"
+                ];
+            }
+
+            return [
+                'docker', 'run', '--rm',
+                '-v', notebook.absdir + ':/code',
+                'rust:latest',
+                ...cmd,
+            ];
+        },
     });
 
     recipes.push({
