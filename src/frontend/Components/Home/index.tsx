@@ -63,6 +63,7 @@ export default class Home extends React.Component<Props, State> {
             })
         })
         .then(res => res.json())
-        .then(({ url }) => document.location.href = url);
+        .then(({ url }) => document.location.href = url)
+        .catch(_ => alert('Error: Notebook could not be created.'));
     }
 }
