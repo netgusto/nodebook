@@ -45,6 +45,14 @@ $ npm install --production
 
 ### Create a Notebook
 
+Click on the **+ Notebook** button on the Home page, then select the language of the notebook to be created.
+
+Once on the notebook edition page, you can rename the notebook by clicking on it's name.
+
+Notebooks are created in the directory specified by the parameter `--notebooks`.
+
+### Create a Notebook manually
+
 In the directory where you want your notebooks to be stored, simply create a folder containing a file named `{index|main}.{js,py,c,cpp,...}`.
 
 The notebook's name will be the name of the folder. The notebook language is determined automatically.
