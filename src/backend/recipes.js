@@ -1,5 +1,6 @@
 const { lstat } = require('fs');
 const { join: pathJoin } = require('path');
+const { homedir } = require('os');
 
 module.exports = {
     getRecipeForMainFilename,
@@ -206,6 +207,11 @@ function getRecipes() {
         });
     }
 
+    function cargoHome() {
+        if (process.env['CARGO_HOME']) return process.env['CARGO_HOME'];
+        return pathJoin(homedir(), '.cargo');
+    }
+
     recipes.push({
         key: 'rust',
         name: 'Rust',
@@ -216,7 +222,7 @@ function getRecipes() {
 
             if (await hasCargo(notebook.absdir)) {
                 return [
-                    'sh', '-c', 'cd ' + notebook.absdir + ' && cargo run --quiet',
+                    'sh', '-c', 'cd ' + notebook.absdir + ' && cargo run',
                 ];
             }
 
@@ -225,11 +231,15 @@ function getRecipes() {
             ];
         },
         execDocker: async ({ notebook }) => {
-            let cmd;
+            let cmd = [];
+            let mounts = [];
 
             if (await hasCargo(notebook.absdir)) {
+                const cargoregistry = pathJoin(cargoHome(), 'registry');
+                mounts = ['-v', cargoregistry + ':/usr/local/cargo/registry'];
+
                 cmd = [
-                    'sh', '-c', 'cd /code && cargo run --quiet',
+                    'sh', '-c', 'cd /code && cargo run',
                 ];
             } else {
                 cmd = [
@@ -240,6 +250,7 @@ function getRecipes() {
             return [
                 'docker', 'run', '--rm',
                 '-v', notebook.absdir + ':/code',
+                ...mounts,
                 'rust:latest',
                 ...cmd,
             ];
