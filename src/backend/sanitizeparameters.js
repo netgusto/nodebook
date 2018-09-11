@@ -7,7 +7,7 @@ module.exports = {
     sanitizeParameters,
 };
 
-function sanitizeParameters(rawargv) {
+async function sanitizeParameters(rawargv) {
     const argv = minimist(rawargv);
 
     // --port
@@ -38,7 +38,7 @@ function sanitizeParameters(rawargv) {
     // --docker
 
     const docker = ("docker" in argv);
-    if (docker && !isDockerRunning()) {
+    if (docker && !await isDockerRunning()) {
         throw new Error('docker is not running on the host, but --docker requested.')
     }
 

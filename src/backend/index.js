@@ -1,10 +1,10 @@
 const { app, sanitizeParameters } = require('./app');
 
-function start() {
+async function start() {
 
     let parameters;
     try {
-        parameters = sanitizeParameters(process.argv.slice(2));
+        parameters = await sanitizeParameters(process.argv.slice(2));
     } catch(e) {
         return console.error(e.message);
     }
