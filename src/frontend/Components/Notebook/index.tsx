@@ -92,7 +92,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
                 <div id="layout">
                     <div id="top">
                         <div id="btn-run">
-                            <button onClick={() => this.execNotebook()}>Run&nbsp;&nbsp;▶</button>
+                            <button className="bigbutton" onClick={() => this.execNotebook()}>Run&nbsp;&nbsp;▶</button>
                         </div>
 
                         <div id="notebook-header">
@@ -105,7 +105,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
                         </div>
 
                         <div id="btn-home">
-                            <button onClick={() => document.location.href = homeurl}>Home&nbsp;&nbsp;🏠</button>
+                            <button className="bigbutton" onClick={() => document.location.href = homeurl}>Home&nbsp;&nbsp;🏠</button>
                         </div>
                     </div>
                     <div id="left">

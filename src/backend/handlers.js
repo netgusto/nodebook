@@ -1,27 +1,29 @@
 const path = require('path');
+const generateName = require('project-name-generator');
+const titleCase = require('title-case');
 
-const { listNotebooks, getFileContent, setFileContent, execNotebook } = require('./notebook');
+const {
+    listNotebooks,
+    getFileContent,
+    setFileContent,
+    execNotebook,
+    newNotebook,
+    extractFrontendNotebookSummary,
+    extractFrontendRecipeSummary,
+    sanitizeNotebookName,
+} = require('./notebook');
+
 const { buildUrl } = require('./buildurl');
+
+const { getRecipes, getRecipeByKey } = require('./recipes');
 
 module.exports = {
     handleHomePage,
     handleNoteBook,
     handleAPINoteBookSetContent,
     handleAPINoteBookExec,
+    handleAPINoteBookNew,
 };
-
-function extractFrontendNotebookSummary(notebook) {
-    return {
-        name: notebook.name,
-        url: buildUrl("notebook", { name: notebook.name }),
-        recipe: {
-            key: notebook.recipe.key,
-            name: notebook.recipe.name,
-            language: notebook.recipe.language,
-            cmmode: notebook.recipe.cmmode,
-        }
-    };
-}
 
 function generatePageHtml(route, params = {}) {
     return getFileContent(path.resolve(__dirname + '/../../dist/index.html'))
@@ -35,10 +37,16 @@ function generatePageHtml(route, params = {}) {
 function handleHomePage({ notebookspath }) {
     return async function (req, res) {
         const notebooks = await listNotebooks(notebookspath);
+        const recipes = await getRecipes();
+
         const data = [];
         notebooks.forEach((notebook) => data.push(extractFrontendNotebookSummary(notebook)));
 
-        res.send(await generatePageHtml("home", { notebooks: data }));
+        res.send(await generatePageHtml("home", {
+            newnotebookurl: buildUrl('notebooknew'),
+            notebooks: data,
+            recipes: recipes.map(extractFrontendRecipeSummary),
+        }));
     };
 }
 
@@ -87,14 +95,51 @@ function handleAPINoteBookExec({ notebookspath, docker }) {
     return async function (req, res) {
         const { name } = req.params;
 
+        res.set('Content-Type', 'text/plain');
+
         const notebooks = await listNotebooks(notebookspath);
 
         if (!notebooks.has(name)) return res.send('Notebook not found');
         const notebook = notebooks.get(name);
         const execCommand = notebook.recipe[docker ? 'execDocker' : 'execLocal'];
 
-        res.set('Content-Type', 'text/plain');
         await execNotebook(notebook, execCommand, res);
         res.end();
+    };
+}
+
+function handleAPINoteBookNew({ notebookspath, defaultcontentsdir }) {
+
+    return async function (req, res) {
+        const { recipekey } = req.body;
+        res.set('Content-Type', 'text/plain');
+
+        // find recipe
+        const recipe = getRecipeByKey(recipekey);
+        if (recipe === undefined) {
+            return res.status(400).send('Recipe does not exist');
+        }
+
+        // Generate name
+        const notebooksBefore = await listNotebooks(notebookspath);
+        let name;
+        do {
+            name = sanitizeNotebookName(titleCase(generateName().spaced));
+        } while(notebooksBefore.has(name));
+
+        const done = await newNotebook(notebookspath, name, recipe, defaultcontentsdir);
+        if (!done) {
+            return res.status(400).send('Notebook initialization failed');
+        }
+
+        const notebooks = await listNotebooks(notebookspath);
+        if (!notebooks.has(name)) {
+            return res.status(400).send('Notebook initialization failed');
+        }
+
+        const notebook = notebooks.get(name);
+
+        res.set('Content-Type', 'application/json');
+        res.send(JSON.stringify(extractFrontendNotebookSummary(notebook)));
     };
 }

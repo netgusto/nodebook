@@ -21,6 +21,7 @@ describe('notebook functions', function () {
                 res[key] = value;
                 res[key].recipe.execDocker = undefined;
                 res[key].recipe.execLocal = undefined;
+                res[key].recipe.initNotebook = undefined;
             });
             return res;
         }))
@@ -38,6 +39,7 @@ describe('notebook functions', function () {
                         mainfile: ["index.js", "main.js"],
                         execDocker: undefined,
                         execLocal: undefined,
+                        initNotebook: undefined,
                     },
                 }
             });

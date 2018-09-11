@@ -1,21 +1,26 @@
 const fs = require('fs');
-const { resolve: resolvePath, basename, dirname, join: pathJoin } = require('path');
+const { resolve: resolvePath, basename, dirname } = require('path');
 const { spawn } = require('child_process');
 const globby = require('globby');
 
 const { getGlobFileMatchingPatterns, getRecipeForMainFilename } = require('./recipes');
+const { buildUrl } = require('./buildurl');
 
 module.exports = {
     listNotebooks,
     getFileContent,
     setFileContent,
     execNotebook,
+    extractFrontendNotebookSummary,
+    extractFrontendRecipeSummary,
+    newNotebook,
+    sanitizeNotebookName,
 };
 
-function listNotebooks(basepath) {
-    const resolvedbasepath = resolvePath(basepath);
+function listNotebooks(notebookspath) {
+    const resolvedbasepath = resolvePath(notebookspath);
 
-    return globby(getGlobFileMatchingPatterns(basepath), { gitignore: true })
+    return globby(getGlobFileMatchingPatterns(notebookspath), { gitignore: true })
         .then(items => {
             const res = new Map();
 
@@ -87,4 +92,39 @@ function execNotebook(notebook, execCommand, res) {
             resolve();
         });
     });
+}
+
+async function newNotebook(notebookspath, name, recipe, defaultcontentsdir) {
+    return await recipe.initNotebook({ name, notebookspath, defaultcontentsdir });
+}
+
+function sanitizeNotebookName(name) {
+    if (typeof name !== 'string') throw new Error('The notebook name should be a string');
+    
+    name = name.
+        replace(/\s/g, ' ').
+        replace(/\.{2,}/g, '.').
+        replace(/[^a-zA-Z0-9\u00C0-\u017F\s+-_\.]/g, '').
+        trim();
+    
+    if (name === '' || name === '.') throw new Error('Invalid name');
+
+    return name;
+}
+
+function extractFrontendNotebookSummary(notebook) {
+    return {
+        name: notebook.name,
+        url: buildUrl("notebook", { name: notebook.name }),
+        recipe: extractFrontendRecipeSummary(notebook.recipe),
+    };
+}
+
+function extractFrontendRecipeSummary(recipe) {
+    return {
+        key: recipe.key,
+        name: recipe.name,
+        language: recipe.language,
+        cmmode: recipe.cmmode,
+    };
 }
