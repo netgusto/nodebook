@@ -62,6 +62,24 @@ function getRecipes() {
     });
 
     recipes.push({
+        key: 'typescript',
+        name: 'TypeScript',
+        language: 'TypeScript',
+        mainfile: ['index.ts', 'main.ts'],
+        cmmode: 'javascript',
+        execLocal: ({ notebook }) => ([
+            'sh', '-c', 'cd "' + notebook.absdir + '" && (npm i --quiet --silent > /dev/null) && "`npm bin --quiet`/ts-node" index.ts',
+        ]),
+        execDocker: ({ notebook }) => ([
+            'docker', 'run', '--rm',
+            '-v', notebook.absdir + ':/app',
+            'sandrokeil/typescript',
+            'sh', '-c', '(npm i --quiet --silent > /dev/null) && "`npm bin --quiet`/ts-node" index.ts',
+        ]),
+        initNotebook: ({ name, notebookspath, defaultcontentsdir }) => defaultInitNotebook(name, notebookspath, defaultcontentsdir, 'typescript'),
+    });
+
+    recipes.push({
         key: 'c',
         name: 'C11',
         language: 'C',
