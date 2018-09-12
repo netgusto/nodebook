@@ -123,7 +123,7 @@ function sanitizeNotebookName(name) {
         replace(/\.{2,}/g, '.').
         replace(/\\/g, '_').
         replace(/\//g, '_').
-        replace(/[^a-zA-Z0-9\u00C0-\u017F\s+-_\.]/g, '').
+        replace(/[^a-zA-Z0-9àâäéèëêìïîùûüÿŷ\s-_\.]/g, '').
         replace(/\s+/g, ' ').
         trim();
     
