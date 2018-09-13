@@ -27,6 +27,10 @@ module.exports = {
     handleAPINoteBookRename,
 };
 
+function setNoCache(res) {
+    res.set('Cache-Control', 'max-age=0');
+}
+
 function generatePageHtml(route, params = {}) {
     return getFileContent(path.resolve(__dirname + '/../../dist/index.html'))
         .then(html => {
@@ -37,13 +41,15 @@ function generatePageHtml(route, params = {}) {
 }
 
 function handleHomePage({ notebookspath }) {
-    return async function (req, res) {
+    return async function (_, res) {
         const notebooks = await listNotebooks(notebookspath);
         const recipes = await getRecipes();
 
         const data = [];
         notebooks.forEach((notebook) => data.push(extractFrontendNotebookSummary(notebook)));
 
+        res.set('Content-Type', 'text/html');
+        setNoCache(res);
         res.send(await generatePageHtml("home", {
             newnotebookurl: buildUrl('notebooknew'),
             notebooks: data,
@@ -65,6 +71,8 @@ function handleNoteBook({ notebookspath }) {
         const renamenotebookurl = buildUrl('notebookrename', { name });
         const homeurl = buildUrl('home');
 
+        res.set('Content-Type', 'text/html');
+        setNoCache(res);
         res.send(await generatePageHtml("notebook", {
             homeurl,
             renamenotebookurl,
@@ -91,6 +99,7 @@ function handleAPINoteBookSetContent({ notebookspath }) {
 
         await setFileContent(notebook.abspath, content);
         res.set('Content-Type', 'application/json');
+        setNoCache(res);
         res.send('"OK"');
     };
 }
@@ -107,6 +116,7 @@ function handleAPINoteBookExec({ notebookspath, docker }) {
         const notebook = notebooks.get(name);
         const execCommand = notebook.recipe[docker ? 'execDocker' : 'execLocal'];
 
+        setNoCache(res);
         await execNotebook(notebook, execCommand, res);
         res.end();
     };
@@ -149,6 +159,7 @@ function handleAPINoteBookNew({ notebookspath, defaultcontentsdir }) {
         const notebook = notebooks.get(name);
 
         res.set('Content-Type', 'application/json');
+        setNoCache(res);
         res.send(JSON.stringify(extractFrontendNotebookSummary(notebook)));
     };
 }
@@ -196,6 +207,7 @@ function handleAPINoteBookRename({ notebookspath }) {
         const notebookRenamed = notebooksAfter.get(sanitizedNewName);
 
         res.set('Content-Type', 'application/json');
+        setNoCache(res);
         res.send(JSON.stringify(extractFrontendNotebookSummary(notebookRenamed)));
     };
 }
