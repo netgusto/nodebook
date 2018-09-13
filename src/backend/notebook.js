@@ -45,6 +45,9 @@ function listNotebooks(notebookspath) {
                 });
 
             return res;
+        })
+        .catch(err => {
+            console.log(err);
         });
 }
 

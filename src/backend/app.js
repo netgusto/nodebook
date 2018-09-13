@@ -23,6 +23,8 @@ module.exports = {
 
 function app({ port, bindaddress, notebookspath, logger, docker }) {
 
+    process.chdir(notebookspath);
+
     const app = express();
 
     app.use(bodyParser.json());
