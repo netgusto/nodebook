@@ -1,5 +1,5 @@
 const { lstat } = require('fs');
-const { join: pathJoin } = require('path');
+const { join: pathJoin } = require('path');
 const { homedir } = require('os');
 
 const { defaultInitNotebook } = require('../defaultInitNotebook');

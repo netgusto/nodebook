@@ -1,3 +1,4 @@
+const { lstat } = require('fs');
 const { join: pathJoin } = require('path');
 const { exec } = require('child_process');
 const { defaultInitNotebook } = require('../defaultInitNotebook');
@@ -9,15 +10,42 @@ const recipe = ({
     mainfile: ['index.ts', 'main.ts'],
     cmmode: 'javascript',
     dir: __dirname,
-    execLocal: ({ notebook }) => ([
-        'sh', '-c', 'cd "' + notebook.absdir + '" && node_modules/.bin/ts-node index.ts',
-    ]),
-    execDocker: ({ notebook }) => ([
-        'docker', 'run', '--rm',
-        '-v', notebook.absdir + ':/app',
-        'sandrokeil/typescript',
-        'sh', '-c', 'node_modules/.bin/ts-node index.ts',
-    ]),
+    execLocal: async ({ notebook }) => {
+
+        let cmd;
+        if (await hasTsNode(notebook.absdir)) {
+            cmd = [
+                'sh', '-c', '"' + notebook.absdir + '/node_modules/.bin/ts-node" "' + notebook.abspath + '"',
+            ];
+        } else {
+            cmd = [
+                'sh', '-c', 'tsc --allowJs --outFile /tmp/code.js "' + notebook.abspath + "' && node /tmp/code.js",
+            ];
+        }
+
+        return cmd;
+    },
+    execDocker: async ({ notebook }) => {
+
+        let cmd;
+
+        if (await hasTsNode(notebook.absdir)) {
+            cmd = [
+                'sh', '-c', 'node_modules/.bin/ts-node index.ts'
+            ];
+        } else {
+            cmd = [
+                'sh', '-c', "tsc --allowJs --outFile /tmp/code.js /app/" + notebook.mainfilename + " && node /tmp/code.js"
+            ];
+        }
+
+        return [
+            'docker', 'run', '--rm',
+            '-v', notebook.absdir + ':/app',
+            'sandrokeil/typescript',
+            ...cmd,
+        ];
+    },
     initNotebook: async ({ name, notebookspath }) => {
         const copied = await defaultInitNotebook(recipe, notebookspath, name);
         if (!copied) return false;
@@ -33,3 +61,11 @@ const recipe = ({
 });
 
 module.exports = recipe;
+
+function hasTsNode(absdir) {
+    return new Promise((resolve) => {
+        lstat(pathJoin(absdir, 'node_modules', '.bin', 'ts-node'), (err, stats) => {
+            resolve(!err && (stats.isFile() || stats.isSymbolicLink()));
+        });
+    });
+}

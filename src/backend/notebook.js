@@ -158,5 +158,8 @@ function getAllRecipesGlobMatchingPattern(basepath) {
         value.mainfile.map(filename => filenames.push(filename));
     });
 
-    return [basepath + '/**/{' + filenames.join(',') + '}'];
+    return [
+        basepath + '/*/{' + filenames.join(',') + '}',
+        basepath + '/*/*/{' + filenames.join(',') + '}'
+    ];
 }
