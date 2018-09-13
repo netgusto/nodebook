@@ -1,7 +1,7 @@
 {
-  "name": "nodebook",
-  "version": "1.0.0",
-  "description": "Nodebook - Minimalist Node REPL with web UI",
+  "name": "nbk",
+  "version": "0.1.0",
+  "description": "Nodebook - Multi-Language REPL with web UI",
   "main": "src/backend/index.js",
   "scripts": {
     "test": "mocha test/backend",
