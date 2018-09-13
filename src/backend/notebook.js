@@ -1,4 +1,4 @@
-const { statSync, lstat, readFile, writeFile, rename: renameDir } = require('fs-extra');
+const { statSync, lstat, readFile, writeFile, rename: renameDir } = require('fs');
 const { resolve: resolvePath, basename, dirname, join: pathJoin } = require('path');
 const { spawn } = require('child_process');
 const globby = require('globby');

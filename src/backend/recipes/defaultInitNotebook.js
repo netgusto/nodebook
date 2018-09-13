@@ -1,4 +1,4 @@
-const { copy: recursiveCopy } = require('fs-extra');
+const recursiveCopy = require('recursive-copy');
 const { join: pathJoin } = require('path');
 
 const defaultInitNotebook = (recipe, notebookspath, name) => copyFilesAndFolders(
@@ -11,7 +11,8 @@ async function copyFilesAndFolders(sourcedir, targetdir) {
     try {
         await recursiveCopy(sourcedir, targetdir, {
             overwrite: false,
-            errorOnExist: true,
+            dot: true,
+            junk: true,
         });
     } catch(e) {
         return false;

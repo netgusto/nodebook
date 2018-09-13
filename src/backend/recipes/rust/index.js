@@ -1,4 +1,4 @@
-const { lstat } = require('fs-extra');
+const { lstat } = require('fs');
 const { join: pathJoin } = require('path');
 const { homedir } = require('os');
 
