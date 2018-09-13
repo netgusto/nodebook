@@ -10,6 +10,7 @@ export interface Notebook extends NotebookHandle {
     execurl: string;
     persisturl: string;
     content: string;
+    stopurl: string;
 }
 
 export interface Recipe {

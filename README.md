@@ -28,12 +28,13 @@ A notebook is a folder containing an `{index|main}.{js,py,c,cpp,...}` file. The 
 * Ruby `(.rb)`
 * Rust `(.rs)` — Uses `cargo run` if `Cargo.toml` is present, and `rustc` otherwise
 * Swift `(.swift)`
+* TypeScript `(.ts)`
 
 If `--docker` is set on the command line, each of these environments will run inside a specific docker container.
 
 Otherwise, the development environments on your local machine will be used.
 
-## Installation
+## Install from source
 
 ```bash
 $ git clone https://github.com/netgusto/nodebook
@@ -94,7 +95,7 @@ To iterate on the code:
 
 ```bash
 $ npm install
-$ NOTEBOOKS=path/to/notebooks npm run dev
+$ PARAMS="--notebooks path/to/notebooks" npm run dev
 ```
 
 To build:

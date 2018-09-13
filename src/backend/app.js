@@ -9,6 +9,7 @@ const {
     handleNoteBook,
     handleAPINoteBookSetContent,
     handleAPINoteBookExec,
+    handleAPINoteBookStop,
     handleAPINoteBookNew,
     handleAPINoteBookRename,
 } = require('./handlers');
@@ -32,6 +33,7 @@ function app({ port, bindaddress, notebookspath, logger, docker }) {
     app.post('/api/notebook/:name/rename', handleAPINoteBookRename({ notebookspath }));
     app.post('/api/notebook/:name/setcontent', handleAPINoteBookSetContent({ notebookspath }));
     app.post('/api/notebook/:name/exec', handleAPINoteBookExec({ notebookspath, docker }));
+    app.post('/api/notebook/:name/stop', handleAPINoteBookStop({ notebookspath, docker }));
 
     app.use(express.static(__dirname + '/../../dist'));
 

@@ -57,6 +57,13 @@ body {
             text-align: right;
             width: 113px;
             white-space: nowrap;
+
+            &.creating {
+                text-align: center;
+                & .sk-spinner {
+                    margin: 0 auto;
+                }
+            }
         }
 
         .recipe-list {
@@ -149,9 +156,14 @@ body {
         text-align: right;
     }
 
-    #top #btn-run .bigbutton {
+    #top #btn-run .bigbutton.run {
         width: 90px;
+
         background-color: rgb(107, 183, 175);
+
+        &.running {
+            background-color: #f06;
+        }
     }
 
     #top #btn-home .bigbutton {
