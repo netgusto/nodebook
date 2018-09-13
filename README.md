@@ -1,6 +1,6 @@
 # nodebook [![Build Status](https://travis-ci.com/netgusto/nodebook.svg?branch=master)](https://travis-ci.com/netgusto/nodebook)
 
-Nodebook - Minimalistic code REPL with web UI
+Nodebook - Multi-Language REPL with Web UI
 
 ## What is it?
 
