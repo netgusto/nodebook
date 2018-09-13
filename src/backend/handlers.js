@@ -23,6 +23,7 @@ module.exports = {
     handleNoteBook,
     handleAPINoteBookSetContent,
     handleAPINoteBookExec,
+    handleAPINoteBookStop,
     handleAPINoteBookNew,
     handleAPINoteBookRename,
 };
@@ -68,6 +69,7 @@ function handleNoteBook({ notebookspath }) {
 
         const persisturl = buildUrl('notebooksetcontent', { name });
         const execurl = buildUrl('notebookexec', { name });
+        const stopurl = buildUrl('notebookstop', { name });
         const renamenotebookurl = buildUrl('notebookrename', { name });
         const homeurl = buildUrl('home');
 
@@ -79,6 +81,7 @@ function handleNoteBook({ notebookspath }) {
             notebook: {
                 ...extractFrontendNotebookSummary(notebook),
                 execurl,
+                stopurl,
                 persisturl,
                 content: await getFileContent(notebook.abspath),
             }
@@ -91,10 +94,10 @@ function handleAPINoteBookSetContent({ notebookspath }) {
         const { name } = req.params;
         const { content } = req.body;
 
-        if (content === undefined) return res.send('Notebook content not set on POST');
+        if (content === undefined) return res.status(400).send('Notebook content not set on POST');
         const notebooks = await listNotebooks(notebookspath);
 
-        if (!notebooks.has(name)) return res.send('Notebook not found');
+        if (!notebooks.has(name)) return res.status(400).send('Notebook not found');
         const notebook = notebooks.get(name);
 
         await setFileContent(notebook.abspath, content);
@@ -112,7 +115,7 @@ function handleAPINoteBookExec({ notebookspath, docker }) {
 
         const notebooks = await listNotebooks(notebookspath);
 
-        if (!notebooks.has(name)) return res.send('Notebook not found');
+        if (!notebooks.has(name)) return res.status(400).send('Notebook not found');
         const notebook = notebooks.get(name);
         const execCommand = notebook.recipe[docker ? 'execDocker' : 'execLocal'];
 
@@ -122,7 +125,25 @@ function handleAPINoteBookExec({ notebookspath, docker }) {
     };
 }
 
-function handleAPINoteBookNew({ notebookspath, defaultcontentsdir }) {
+function handleAPINoteBookStop({ notebookspath, docker }) {
+    return async function (req, res) {
+        const { name } = req.params;
+
+        res.set('Content-Type', 'text/plain');
+
+        const notebooks = await listNotebooks(notebookspath);
+        if (!notebooks.has(name)) return res.status(400).send('Notebook not found');
+
+        const notebook = notebooks.get(name);
+        const stopCommand = () => 'TODO';
+
+        setNoCache(res);
+        await stopCommand();
+        res.end();
+    };
+}
+
+function handleAPINoteBookNew({ notebookspath }) {
     return async function (req, res) {
         const { recipekey } = req.body;
         res.set('Content-Type', 'text/plain');
@@ -142,8 +163,9 @@ function handleAPINoteBookNew({ notebookspath, defaultcontentsdir }) {
 
         let done;
         try {
-            done = await newNotebook(notebookspath, name, recipe, defaultcontentsdir);
+            done = await newNotebook(notebookspath, name, recipe);
         } catch(e) {
+            console.log(e);
             done = false;
         }
 

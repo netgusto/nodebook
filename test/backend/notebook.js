@@ -22,6 +22,7 @@ describe('notebook functions', function () {
                 res[key].recipe.execDocker = undefined;
                 res[key].recipe.execLocal = undefined;
                 res[key].recipe.initNotebook = undefined;
+                res[key].recipe.dir = undefined;
             });
             return res;
         }))
@@ -36,6 +37,7 @@ describe('notebook functions', function () {
                         name: "NodeJS",
                         language: "JavaScript",
                         cmmode: "javascript",
+                        dir: undefined,
                         mainfile: ["index.js", "main.js"],
                         execDocker: undefined,
                         execLocal: undefined,

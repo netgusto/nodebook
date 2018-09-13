@@ -1,4 +1,5 @@
 import * as React from 'react';
+import cx from 'classnames';
 import { Notebook } from "../../types";
 
 import {UnControlled as CodeMirror} from 'react-codemirror2'
@@ -42,14 +43,16 @@ export interface Props {
 export interface State {
     autoclear: boolean;
     newname: string|undefined;
+    running: boolean;
 }
 
 export default class NotebookComponent extends React.Component<Props, State> {
 
-    private props: Props;
-    private state: State = {
+    props: Props;
+    state: State = {
         autoclear: false,
         newname: undefined,
+        running: false,
     };
 
     private boundHandleKeyDown: EventListener;
@@ -61,7 +64,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
         this.editorvalue = props.notebook.content;
     }
 
-    componentWillMount(props: Props) {
+    componentWillMount() {
         document.addEventListener('keydown', this.boundHandleKeyDown);
     }
 
@@ -88,14 +91,16 @@ export default class NotebookComponent extends React.Component<Props, State> {
 
     render() {
         const { notebook, homeurl } = this.props;
-        const { autoclear, newname } = this.state;
+        const { autoclear, newname, running } = this.state;
 
         return (
             <div className="notebook-app">
                 <div id="layout">
                     <div id="top">
                         <div id="btn-run">
-                            <button className="bigbutton" onClick={() => this.execNotebook()}>Run&nbsp;&nbsp;▶</button>
+                            <button className={cx('bigbutton', 'run', { running })} onClick={() => running ? this.stopExecution() : this.execNotebook()}>
+                                {running ? <span>Stop&nbsp;&nbsp;■</span> : <span>Run&nbsp;&nbsp;▶</span>}
+                            </button>
                         </div>
 
                         <div id="notebook-header">
@@ -162,7 +167,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
             replace(/\.{2,}/g, '.').
             replace(/\\/g, '_').
             replace(/\//g, '_').
-            replace(/[^a-zA-Z0-9\u00C0-\u017F\s+-_\.]/g, '').
+            replace(/[^a-zA-Z0-9àâäéèëêìïîùûüÿŷ\s-_\.]/g, '').
             replace(/\s+/g, ' ').
             trim();
         
@@ -172,13 +177,6 @@ export default class NotebookComponent extends React.Component<Props, State> {
     }
 
     private onNotebookNameChange(newname) {
-        // let sanitizedName;
-        // try {
-        //     sanitizedName = this.sanitizeName(newname);
-        // } catch(e) {
-        //     sanitizedName = newname;
-        // }
-
         this.setState({ newname });
     }
 
@@ -224,10 +222,37 @@ export default class NotebookComponent extends React.Component<Props, State> {
         .catch(_ => alert('Error: Notebook could not be renamed.'));
     }
 
+    private stopExecution() {
+        const { running } = this.state;
+        if (!running) return; 
+
+        const { notebook } = this.props;
+        const { stopurl } = notebook;
+
+        return window.fetch(stopurl, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+        })
+        .then(() => {
+            consoleLog('--- Execution stopped.\n\n', 'info');
+            this.setState({ running: false });
+        })
+        .catch(() => {
+            alert('An error occured when stopping the current execution.');
+        });
+    }
+
     private execNotebook() {
 
-        const { autoclear } = this.state;
+        const { autoclear, running } = this.state;
         const { notebook } = this.props;
+
+        if (running) return;
+
+        this.setState({ running: true });
 
         if (autoclear) consoleClear();
     
@@ -250,14 +275,14 @@ export default class NotebookComponent extends React.Component<Props, State> {
                         if (jsonline.trim().length === 0) return;
     
                         const data = JSON.parse(jsonline);
-                        consoleLog(JSON.parse(data.data), data.chan);
+                        if (this.state.running) consoleLog(JSON.parse(data.data), data.chan);
                     }));
             } else {
                 return new Promise((resolve, reject) => {
                     const reader = res.body.getReader();
                     const decoder = new TextDecoder("utf-8");
                     let hasLastNewLine = true;
-                    function pump() {
+                    const pump = () => {
                         reader.read().then(({ done, value }) => {
                             if (done) {
                                 resolve({ hasLastNewLine });
@@ -272,7 +297,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
                                 const txt = JSON.parse(data.data);
                                 const lastnl = txt.lastIndexOf('\n');
                                 hasLastNewLine = (lastnl === txt.length - 1);
-                                consoleLog(JSON.parse(data.data), data.chan);
+                                if (this.state.running) consoleLog(JSON.parse(data.data), data.chan);
                             });
                             
                             // Get the data and send it to the browser via the controller
@@ -286,10 +311,15 @@ export default class NotebookComponent extends React.Component<Props, State> {
         })
         .then(({ hasLastNewLine }) => {
             if (!hasLastNewLine) {
-                consoleLog('%\n', 'forcednl');
+                if (this.state.running) consoleLog('%\n', 'forcednl');
             }
     
-            consoleLog('--- Done.\n\n', 'info');
+            if (this.state.running) consoleLog('--- Done.\n\n', 'info');
+            this.setState({ running: false });
+        })
+        .catch(err => {
+            if (this.state.running) consoleLog('\n--- An error occurred during execution.\n\n', 'stderr');
+            this.setState({ running: false });
         });
     }
 }

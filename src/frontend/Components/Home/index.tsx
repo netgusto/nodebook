@@ -1,5 +1,8 @@
 import * as React from 'react';
+import cx from 'classnames';
 import { NotebookHandle, Recipe } from "../../types";
+
+import Spinner from 'react-spinkit';
 
 export interface Props {
     notebooks: NotebookHandle[];
@@ -9,12 +12,14 @@ export interface Props {
 
 interface State {
     menuopen: boolean;
+    creating: boolean;
 }
 
 export default class Home extends React.Component<Props, State> {
 
     state: State = {
         menuopen: false,
+        creating: false,
     };
 
     props: Props;
@@ -22,7 +27,7 @@ export default class Home extends React.Component<Props, State> {
     render() {
 
         const { notebooks, recipes } = this.props;
-        const { menuopen } = this.state;
+        const { menuopen, creating } = this.state;
 
         return (
             <div className="home-app">
@@ -37,8 +42,10 @@ export default class Home extends React.Component<Props, State> {
                     </ul>
                 </div>
                 <div className="tools">
-                    <button className="bigbutton btn-new" onClick={() => this.setState({ menuopen: !menuopen })}>
-                        {menuopen ? '-' : '+'} Notebook
+                    <button className={cx('bigbutton', 'btn-new', { creating })} onClick={() => this.setState({ menuopen: !menuopen })}>
+                        {creating ? <Spinner fadeIn="none" name="wave" color="white" /> : (
+                            <span>{menuopen ? '-' : '+'} Notebook</span>
+                        )}
                     </button>
                     {menuopen && (
                         <div className="recipe-list">{recipes.map(recipe => (
@@ -52,6 +59,11 @@ export default class Home extends React.Component<Props, State> {
 
     private selectRecipe(recipekey: string) {
         const { newnotebookurl } = this.props;
+        const { creating } = this.state;
+        if (creating) return;
+
+        this.setState({ creating: true });
+
         return window.fetch(newnotebookurl, {
             method: 'POST',
             headers: {
@@ -63,7 +75,11 @@ export default class Home extends React.Component<Props, State> {
             })
         })
         .then(res => res.json())
-        .then(({ url }) => document.location.href = url)
-        .catch(_ => alert('Error: Notebook could not be created.'));
+        .then(({ url }) => {
+            document.location.href = url;
+        })
+        .catch(_ => {
+            alert('Error: Notebook could not be created.');
+        });
     }
 }
