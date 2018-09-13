@@ -3,7 +3,7 @@ const { resolve: resolvePath, basename, dirname, join: pathJoin } = require('pat
 const { spawn } = require('child_process');
 const globby = require('globby');
 
-const { getGlobFileMatchingPatterns, getRecipeForMainFilename } = require('./recipes');
+const { getRecipes, getRecipeForMainFilename } = require('./recipes');
 const { buildUrl } = require('./buildurl');
 
 module.exports = {
@@ -21,7 +21,7 @@ module.exports = {
 function listNotebooks(notebookspath) {
     const resolvedbasepath = resolvePath(notebookspath);
 
-    return globby(getGlobFileMatchingPatterns(notebookspath), { gitignore: true })
+    return globby(getAllRecipesGlobMatchingPattern(notebookspath), { gitignore: true })
         .then(items => {
             const res = new Map();
 
@@ -95,8 +95,8 @@ function execNotebook(notebook, execCommand, res) {
     });
 }
 
-async function newNotebook(notebookspath, name, recipe, defaultcontentsdir) {
-    return await recipe.initNotebook({ name, notebookspath, defaultcontentsdir });
+async function newNotebook(notebookspath, name, recipe) {
+    return await recipe.initNotebook({ name, notebookspath });
 }
 
 async function renameNotebook(notebook, newname) {
@@ -147,4 +147,13 @@ function extractFrontendRecipeSummary(recipe) {
         language: recipe.language,
         cmmode: recipe.cmmode,
     };
+}
+
+function getAllRecipesGlobMatchingPattern(basepath) {
+    const filenames = [];
+    getRecipes().forEach(value => {
+        value.mainfile.map(filename => filenames.push(filename));
+    });
+
+    return [basepath + '/**/{' + filenames.join(',') + '}'];
 }

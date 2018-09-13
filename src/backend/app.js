@@ -24,13 +24,11 @@ function app({ port, bindaddress, notebookspath, logger, docker }) {
 
     const app = express();
 
-    const defaultcontentsdir = resolve(pathJoin(dirname(__filename), 'defaultcontent'));
-
     app.use(bodyParser.json());
 
     app.get('/', handleHomePage({ notebookspath }));
     app.get('/notebook/:name', handleNoteBook({ notebookspath }));
-    app.post('/api/notebook/new', handleAPINoteBookNew({ notebookspath, defaultcontentsdir }));
+    app.post('/api/notebook/new', handleAPINoteBookNew({ notebookspath }));
     app.post('/api/notebook/:name/rename', handleAPINoteBookRename({ notebookspath }));
     app.post('/api/notebook/:name/setcontent', handleAPINoteBookSetContent({ notebookspath }));
     app.post('/api/notebook/:name/exec', handleAPINoteBookExec({ notebookspath, docker }));

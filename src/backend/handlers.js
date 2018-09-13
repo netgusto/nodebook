@@ -122,7 +122,7 @@ function handleAPINoteBookExec({ notebookspath, docker }) {
     };
 }
 
-function handleAPINoteBookNew({ notebookspath, defaultcontentsdir }) {
+function handleAPINoteBookNew({ notebookspath }) {
     return async function (req, res) {
         const { recipekey } = req.body;
         res.set('Content-Type', 'text/plain');
@@ -142,8 +142,9 @@ function handleAPINoteBookNew({ notebookspath, defaultcontentsdir }) {
 
         let done;
         try {
-            done = await newNotebook(notebookspath, name, recipe, defaultcontentsdir);
+            done = await newNotebook(notebookspath, name, recipe);
         } catch(e) {
+            console.log(e);
             done = false;
         }
 
