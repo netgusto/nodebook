@@ -1,6 +1,5 @@
-const { statSync, lstat, readFile, writeFile, rename: renameDir } = require('fs');
+const { lstat, readFile, writeFile, rename: renameDir } = require('fs');
 const { resolve: resolvePath, basename, dirname, join: pathJoin } = require('path');
-const { spawn } = require('child_process');
 const globby = require('globby');
 
 const { getRecipes, getRecipeForMainFilename } = require('./recipes');
@@ -82,36 +81,14 @@ function setFileContent(abspath, content) {
     });
 }
 
-function execNotebook(notebook, execCommand, res) {
-    return new Promise(async (resolve, _) => {
-        
-        const command = await execCommand({ notebook });
-        const child = spawn(command[0], command.slice(1));
-
-        child.on('error', function (err) {
-            res.write(JSON.stringify({ chan: 'stderr', data: JSON.stringify(err.message + "\n") }) + '\n');
-        });
-
-        child.stdout.on('data', (chunk) => {
-            res.write(JSON.stringify({ chan: 'stdout', data: JSON.stringify(chunk.toString('utf-8')) }) + '\n');
-        });
-
-        child.stderr.on('data', (chunk) => {
-            res.write(JSON.stringify({ chan: 'stderr', data: JSON.stringify(chunk.toString('utf-8')) }) + '\n');
-        });
-
-        child.on('close', (code) => {
-            if (code !== 0) {
-                res.write(JSON.stringify({ chan: 'stderr', data: JSON.stringify("Process exited with status code " + code + "\n") }) + '\n');
-            }
-
-            resolve();
-        });
-    });
+function execNotebook(notebook, docker, res) {
+    const writeStdOut = data => res.write(JSON.stringify({ chan: 'stdout', data: JSON.stringify(data) }) + '\n');
+    const writeStdErr = data => res.write(JSON.stringify({ chan: 'stderr', data: JSON.stringify(data) }) + '\n');
+    return notebook.recipe.exec({ notebook, docker, writeStdOut, writeStdErr });
 }
 
-async function newNotebook(notebookspath, name, recipe) {
-    return await recipe.initNotebook({ name, notebookspath });
+function newNotebook(notebookspath, name, recipe) {
+    return recipe.init({ name, notebookspath });
 }
 
 async function renameNotebook(notebook, newname) {

@@ -3,6 +3,7 @@ const { join: pathJoin } = require('path');
 const { homedir } = require('os');
 
 const { defaultInitNotebook } = require('../defaultInitNotebook');
+const stdExec = require('../../stdexec');
 
 const recipe = ({
     key: 'rust',
@@ -11,44 +12,51 @@ const recipe = ({
     mainfile: ['index.rs', 'main.rs'],
     cmmode: 'rust',
     dir: __dirname,
-    execLocal: async ({ notebook }) => {
 
-        if (await rustHasCargo(notebook.absdir)) {
-            return [
-                'sh', '-c', 'cd ' + notebook.absdir + ' && cargo run',
-            ];
-        }
+    exec: async ({ notebook, docker, writeStdOut, writeStdErr }) => {
+        let command;
 
-        return [
-            'sh', '-c', "rustc -o /tmp/code.out '" + notebook.abspath + "' && /tmp/code.out"
-        ];
-    },
-    execDocker: async ({ notebook }) => {
-        let cmd = [];
-        let mounts = [];
+        const cargo = await rustHasCargo(notebook.absdir);
 
-        if (await rustHasCargo(notebook.absdir)) {
-            const cargoregistry = pathJoin(rustCargoHome(), 'registry');
-            mounts = ['-v', cargoregistry + ':/usr/local/cargo/registry'];
+        if (docker) {
+            let mounts = [];
+            let subcmd = [];
 
-            cmd = [
-                'sh', '-c', 'cd /code && cargo run',
+            if (cargo) {
+                const cargoregistry = pathJoin(rustCargoHome(), 'registry');
+                mounts = ['-v', cargoregistry + ':/usr/local/cargo/registry'];
+                subcmd = [
+                    'sh', '-c', 'cd /code && cargo run',
+                ];
+            } else {
+                subcmd = [
+                    'sh', '-c', "rustc -o /tmp/code.out /code/" + notebook.mainfilename + " && /tmp/code.out"
+                ];
+            }
+
+            command = [
+                'docker', 'run', '--rm',
+                '-v', notebook.absdir + ':/code',
+                ...mounts,
+                'rust:latest',
+                ...subcmd,
             ];
         } else {
-            cmd = [
-                'sh', '-c', "rustc -o /tmp/code.out /code/" + notebook.mainfilename + " && /tmp/code.out"
-            ];
+            if (cargo) {
+                command = [
+                    'sh', '-c', 'cd ' + notebook.absdir + ' && cargo run',
+                ];
+            } else {
+                command = [
+                    'sh', '-c', "rustc -o /tmp/code.out '" + notebook.abspath + "' && /tmp/code.out"
+                ];
+            }
         }
 
-        return [
-            'docker', 'run', '--rm',
-            '-v', notebook.absdir + ':/code',
-            ...mounts,
-            'rust:latest',
-            ...cmd,
-        ];
+        return stdExec(command, writeStdOut, writeStdErr);
     },
-    initNotebook: async ({ name, notebookspath }) => await defaultInitNotebook(recipe, notebookspath, name),
+
+    init: async ({ name, notebookspath }) => await defaultInitNotebook(recipe, notebookspath, name),
 });
 
 function rustHasCargo(absdir) {
