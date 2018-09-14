@@ -82,9 +82,11 @@ function setFileContent(abspath, content) {
 }
 
 function execNotebook(notebook, docker, res) {
-    const writeStdOut = data => res.write(JSON.stringify({ chan: 'stdout', data: JSON.stringify(data) }) + '\n');
-    const writeStdErr = data => res.write(JSON.stringify({ chan: 'stderr', data: JSON.stringify(data) }) + '\n');
-    return notebook.recipe.exec({ notebook, docker, writeStdOut, writeStdErr });
+    const write = (data, chan) => res.writable && !res.finished && res.write(JSON.stringify({ chan, data: JSON.stringify(data) }) + '\n');
+    const writeStdOut = data => write(data, 'stdout');
+    const writeStdErr = data => write(data, 'stderr');
+    const { start, stop } = notebook.recipe.exec({ notebook, docker, writeStdOut, writeStdErr });
+    return { start, stop };
 }
 
 function newNotebook(notebookspath, name, recipe) {
