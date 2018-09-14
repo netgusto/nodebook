@@ -48,7 +48,7 @@ const recipe = ({
                 ], writeStdOut, writeStdErr, writeInfo);
             } else {
                 return stdExec([
-                    'sh', '-c', 'tsc --allowJs --outFile /tmp/code.js "' + notebook.abspath + "' && node /tmp/code.js",
+                    'sh', '-c', 'tsc --allowJs --outFile /tmp/code.js "' + notebook.abspath + '" && node /tmp/code.js',
                 ], writeStdOut, writeStdErr, writeInfo);
             }
         }
@@ -70,7 +70,7 @@ const recipe = ({
 function hasTsNode(absdir) {
     return new Promise((resolve) => {
         lstat(pathJoin(absdir, 'node_modules/.bin/ts-node'), (err, stats) => {
-            resolve(!err && stats.isFile());
+            resolve(!err && (stats.isFile() || stats.isSymbolicLink()));
         });
     });
 }
