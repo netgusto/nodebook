@@ -13,12 +13,13 @@ const recipe = ({
         let command;
 
         if (docker) {
-            return stdExecDocker([
-                'docker', 'run', '--rm',
-                '-v', notebook.absdir + ':/code',
-                'node:alpine',
-                'node', '--harmony', '/code/' + notebook.mainfilename,
-            ], writeStdOut, writeStdErr);
+            return stdExecDocker({
+                image: 'node:alpine',
+                cmd: ['node', '--harmony', '/code/' + notebook.mainfilename],
+                mounts: [
+                    { from: notebook.absdir, to: '/code' },
+                ],
+            }, writeStdOut, writeStdErr);
         } else {
             return stdExec([
                 'node', '--harmony', notebook.absdir + '/' + notebook.mainfilename,
