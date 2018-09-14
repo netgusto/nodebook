@@ -81,12 +81,12 @@ function setFileContent(abspath, content) {
     });
 }
 
-function execNotebook(notebook, docker, res) {
+async function execNotebook(notebook, docker, res) {
     const write = (data, chan) => res.writable && !res.finished && res.write(JSON.stringify({ chan, data: JSON.stringify(data) }) + '\n');
     const writeStdOut = data => write(data, 'stdout');
     const writeStdErr = data => write(data, 'stderr');
     const writeInfo = data => write(data, 'info');
-    const { start, stop } = notebook.recipe.exec({ notebook, docker, writeStdOut, writeStdErr, writeInfo });
+    const { start, stop } = await notebook.recipe.exec({ notebook, docker, writeStdOut, writeStdErr, writeInfo });
     return { start, stop };
 }
 

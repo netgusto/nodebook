@@ -121,7 +121,7 @@ function handleAPINoteBookExec({ notebookspath, docker }) {
         const notebook = notebooks.get(name);
 
         setNoCache(res);
-        const { start, stop } = execNotebook(notebook, docker, res);
+        const { start, stop } = await execNotebook(notebook, docker, res);
 
         running.push(stop);
         await start();
