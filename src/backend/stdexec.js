@@ -24,7 +24,6 @@ module.exports = function stdExec(command, writeStdOut, writeStdErr) {
             });
         }),
         stop: () => {
-            console.log('STOPPING child', child.pid);
             return Promise.resolve(child && kill(child.pid, 'SIGKILL'));
         },
     };

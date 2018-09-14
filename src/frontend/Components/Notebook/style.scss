@@ -85,9 +85,9 @@ body {
 }
 
 .notebook-app {
-
+    
     body {
-        font-size: 14px; 
+        font-size: 14px;
     }
 
     .CodeMirror {
@@ -186,7 +186,7 @@ body {
     #console {
         color: #f8f8f2;
         width: 100%;
-        height: calc(100vh - 50px);
+        height: calc(100vh - 70px); // 70: 50 + 10 (padding) * 2
         overflow: scroll;
         unicode-bidi: embed;
         font-family: 'Roboto Mono', Menlo, 'Ubuntu Mono', Monaco, Consolas, 'source-code-pro', monospace;
