@@ -3,6 +3,7 @@ const { exec } = require('child_process');
 const { defaultInitNotebook } = require('../defaultInitNotebook');
 
 const stdExec = require('../../stdexec');
+const stdExecDocker = require('../../stdexecdocker');
 
 const recipe = ({
     key: 'typescript',
@@ -11,23 +12,21 @@ const recipe = ({
     mainfile: ['index.ts', 'main.ts'],
     cmmode: 'javascript',
     dir: __dirname,
-    exec: ({ notebook, docker, writeStdOut, writeStdErr }) => {
-        let command;
-
+    exec: ({ notebook, docker, writeStdOut, writeStdErr, writeInfo }) => {
         if (docker) {
-            command = [
-                'docker', 'run', '--rm',
-                '-v', notebook.absdir + ':/app',
-                'sandrokeil/typescript',
-                'sh', '-c', 'node_modules/.bin/ts-node index.ts',
-            ];
+            return stdExecDocker({
+                image: 'sandrokeil/typescript',
+                cmd: ['sh', '-c', 'node_modules/.bin/ts-node index.ts'],
+                cwd: '/app',
+                mounts: [
+                    { from: notebook.absdir, to: '/app', mode: 'rw' },
+                ],
+            }, writeStdOut, writeStdErr, writeInfo);
         } else {
-            command = [
+            return stdExec([
                 'sh', '-c', 'cd "' + notebook.absdir + '" && node_modules/.bin/ts-node index.ts',
-            ];
+            ], writeStdOut, writeStdErr, writeInfo);
         }
-
-        return stdExec(command, writeStdOut, writeStdErr);
     },
     init: async ({ name, notebookspath }) => {
         const copied = await defaultInitNotebook(recipe, notebookspath, name);

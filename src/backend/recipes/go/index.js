@@ -1,5 +1,6 @@
 const { defaultInitNotebook } = require('../defaultInitNotebook');
 const stdExec = require('../../stdexec');
+const stdExecDocker = require('../../stdexecdocker');
 
 const recipe = ({
     key: 'go',
@@ -8,23 +9,21 @@ const recipe = ({
     mainfile: ['index.go', 'main.go'],
     cmmode: 'go',
     dir: __dirname,
-    exec: ({ notebook, docker, writeStdOut, writeStdErr }) => {
-        let command;
-
+    exec: ({ notebook, docker, writeStdOut, writeStdErr, writeInfo }) => {
         if (docker) {
-            command = [
-                'docker', 'run', '--rm',
-                '-v', notebook.absdir + ':/code',
-                'golang:latest',
-                'go', 'run', '/code/' + notebook.mainfilename,
-            ];
+            return stdExecDocker({
+                image: 'golang:latest',
+                cmd: ['go', 'run', '/code/' + notebook.mainfilename,],
+                cwd: '/code',
+                mounts: [
+                    { from: notebook.absdir, to: '/code', mode: 'rw' },
+                ],
+            }, writeStdOut, writeStdErr, writeInfo);
         } else {
-            command = [
+            return stdExec([
                 'go', 'run', notebook.absdir + '/' + notebook.mainfilename,
-            ];
+            ], writeStdOut, writeStdErr, writeInfo);
         }
-
-        return stdExec(command, writeStdOut, writeStdErr);
     },
     init: async ({ name, notebookspath }) => await defaultInitNotebook(recipe, notebookspath, name),
 });

@@ -107,7 +107,7 @@ function handleAPINoteBookSetContent({ notebookspath }) {
     };
 }
 
-const running = [];
+let running = [];
 
 function handleAPINoteBookExec({ notebookspath, docker }) {
     return async function (req, res) {
@@ -139,9 +139,8 @@ function handleAPINoteBookStop({ notebookspath, docker }) {
         const notebooks = await listNotebooks(notebookspath);
         if (!notebooks.has(name)) return res.status(400).send('Notebook not found');
 
-        console.log('STOP', running);
-
         running.map(async stop => await stop());
+        running = [];
 
         res.end();
     };

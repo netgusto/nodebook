@@ -1,5 +1,6 @@
 const { defaultInitNotebook } = require('../defaultInitNotebook');
 const stdExec = require('../../stdexec');
+const stdExecDocker = require('../../stdexecdocker');
 
 const recipe = ({
     key: 'lua',
@@ -8,23 +9,22 @@ const recipe = ({
     mainfile: ['index.lua', 'main.lua'],
     cmmode: 'lua',
     dir: __dirname,
-    exec: ({ notebook, docker, writeStdOut, writeStdErr }) => {
-        let command;
+    exec: ({ notebook, docker, writeStdOut, writeStdErr, writeInfo }) => {
 
         if (docker) {
-            command = [
-                'docker', 'run', '--rm',
-                '-v', notebook.absdir + ':/code',
-                'superpaintman/lua:latest',
-                'lua', '/code/' + notebook.mainfilename,
-            ];
+            return stdExecDocker({
+                image: 'superpaintman/lua:latest',
+                cmd: ['lua', '/code/' + notebook.mainfilename,],
+                cwd: '/code',
+                mounts: [
+                    { from: notebook.absdir, to: '/code', mode: 'rw' },
+                ],
+            }, writeStdOut, writeStdErr, writeInfo);
         } else {
-            command = [
+            return stdExec([
                 'lua', notebook.absdir + '/' + notebook.mainfilename,
-            ];
+            ]);
         }
-
-        return stdExec(command, writeStdOut, writeStdErr);
     },
     init: async ({ name, notebookspath }) => await defaultInitNotebook(recipe, notebookspath, name),
 });
