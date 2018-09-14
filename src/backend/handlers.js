@@ -117,10 +117,9 @@ function handleAPINoteBookExec({ notebookspath, docker }) {
 
         if (!notebooks.has(name)) return res.status(400).send('Notebook not found');
         const notebook = notebooks.get(name);
-        const execCommand = notebook.recipe[docker ? 'execDocker' : 'execLocal'];
 
         setNoCache(res);
-        await execNotebook(notebook, execCommand, res);
+        await execNotebook(notebook, docker, res);
         res.end();
     };
 }

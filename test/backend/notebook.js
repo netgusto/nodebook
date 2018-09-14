@@ -19,9 +19,8 @@ describe('notebook functions', function () {
             const res = {};
             map.forEach((value, key) => {
                 res[key] = value;
-                res[key].recipe.execDocker = undefined;
-                res[key].recipe.execLocal = undefined;
-                res[key].recipe.initNotebook = undefined;
+                res[key].recipe.exec = undefined;
+                res[key].recipe.init = undefined;
                 res[key].recipe.dir = undefined;
             });
             return res;
@@ -39,9 +38,8 @@ describe('notebook functions', function () {
                         cmmode: "javascript",
                         dir: undefined,
                         mainfile: ["index.js", "main.js"],
-                        execDocker: undefined,
-                        execLocal: undefined,
-                        initNotebook: undefined,
+                        exec: undefined,
+                        init: undefined,
                     },
                 }
             });

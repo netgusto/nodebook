@@ -1,4 +1,5 @@
 const { defaultInitNotebook } = require('../defaultInitNotebook');
+const stdExec = require('../../stdexec');
 
 const recipe = ({
     key: 'ruby',
@@ -7,16 +8,25 @@ const recipe = ({
     mainfile: ['index.rb', 'main.rb'],
     cmmode: 'ruby',
     dir: __dirname,
-    execLocal: ({ notebook }) => ([
-        'ruby', notebook.absdir + '/' + notebook.mainfilename,
-    ]),
-    execDocker: ({ notebook }) => ([
-        'docker', 'run', '--rm',
-        '-v', notebook.absdir + ':/code',
-        'ruby:latest',
-        'ruby', '/code/' + notebook.mainfilename,
-    ]),
-    initNotebook: async ({ name, notebookspath }) => await defaultInitNotebook(recipe, notebookspath, name),
+    exec: ({ notebook, docker, writeStdOut, writeStdErr }) => {
+        let command;
+
+        if (docker) {
+            command = [
+                'docker', 'run', '--rm',
+                '-v', notebook.absdir + ':/code',
+                'ruby:latest',
+                'ruby', '/code/' + notebook.mainfilename,
+            ];
+        } else {
+            command = [
+                'ruby', notebook.absdir + '/' + notebook.mainfilename,
+            ];
+        }
+
+        return stdExec(command, writeStdOut, writeStdErr);
+    },
+    init: async ({ name, notebookspath }) => await defaultInitNotebook(recipe, notebookspath, name),
 });
 
 module.exports = recipe;
