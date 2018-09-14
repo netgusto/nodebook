@@ -1,5 +1,6 @@
 const { defaultInitNotebook } = require('../defaultInitNotebook');
 const stdExec = require('../../stdexec');
+const stdExecDocker = require('../../stdexecdocker');
 
 const recipe = ({
     key: 'swift',
@@ -8,23 +9,22 @@ const recipe = ({
     mainfile: ['index.swift', 'main.swift'],
     cmmode: 'swift',
     dir: __dirname,
-    exec: ({ notebook, docker, writeStdOut, writeStdErr }) => {
-        let command;
+    exec: ({ notebook, docker, writeStdOut, writeStdErr, writeInfo }) => {
 
         if (docker) {
-            command = [
-                'docker', 'run', '--rm',
-                '-v', notebook.absdir + ':/code',
-                'swift:latest',
-                "swift", "/code/" + notebook.mainfilename,
-            ];
+            return stdExecDocker({
+                image: 'swift:latest',
+                cmd: ["swift", "/code/" + notebook.mainfilename],
+                cwd: '/code',
+                mounts: [
+                    { from: notebook.absdir, to: '/code', mode: 'rw' },
+                ],
+            }, writeStdOut, writeStdErr, writeInfo);
         } else {
-            command = [
+            return stdExec([
                 'swift', notebook.abspath,
-            ];
+            ], writeStdOut, writeStdErr, writeInfo);
         }
-
-        return stdExec(command, writeStdOut, writeStdErr);
     },
     init: async ({ name, notebookspath }) => await defaultInitNotebook(recipe, notebookspath, name),
 });

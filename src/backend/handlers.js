@@ -107,6 +107,8 @@ function handleAPINoteBookSetContent({ notebookspath }) {
     };
 }
 
+let running = [];
+
 function handleAPINoteBookExec({ notebookspath, docker }) {
     return async function (req, res) {
         const { name } = req.params;
@@ -119,7 +121,11 @@ function handleAPINoteBookExec({ notebookspath, docker }) {
         const notebook = notebooks.get(name);
 
         setNoCache(res);
-        await execNotebook(notebook, docker, res);
+        const { start, stop } = await execNotebook(notebook, docker, res);
+
+        running.push(stop);
+        await start();
+
         res.end();
     };
 }
@@ -133,11 +139,9 @@ function handleAPINoteBookStop({ notebookspath, docker }) {
         const notebooks = await listNotebooks(notebookspath);
         if (!notebooks.has(name)) return res.status(400).send('Notebook not found');
 
-        const notebook = notebooks.get(name);
-        const stopCommand = () => 'TODO';
+        running.map(async stop => await stop());
+        running = [];
 
-        setNoCache(res);
-        await stopCommand();
         res.end();
     };
 }
@@ -164,7 +168,6 @@ function handleAPINoteBookNew({ notebookspath }) {
         try {
             done = await newNotebook(notebookspath, name, recipe);
         } catch(e) {
-            console.log(e);
             done = false;
         }
 

@@ -1,5 +1,6 @@
 const { defaultInitNotebook } = require('../defaultInitNotebook');
 const stdExec = require('../../stdexec');
+const stdExecDocker = require('../../stdexecdocker');
 
 const recipe = ({
     key: 'c',
@@ -8,23 +9,23 @@ const recipe = ({
     mainfile: ['index.c', 'main.c'],
     cmmode: 'clike',
     dir: __dirname,
-    exec: ({ notebook, docker, writeStdOut, writeStdErr }) => {
+    exec: ({ notebook, docker, writeStdOut, writeStdErr, writeInfo }) => {
         let command;
 
         if (docker) {
-            command = [
-                'docker', 'run', '--rm',
-                '-v', notebook.absdir + ':/code',
-                'gcc:latest',
-                'sh', '-c', "gcc -Wall -o /tmp/code.out /code/" + notebook.mainfilename + " && /tmp/code.out"
-            ];
+            return stdExecDocker({
+                image: 'gcc:latest',
+                cmd: ['sh', '-c', "gcc -Wall -o /tmp/code.out /code/" + notebook.mainfilename + " && /tmp/code.out"],
+                cwd: '/code',
+                mounts: [
+                    { from: notebook.absdir, to: '/code', mode: 'rw' },
+                ],
+            }, writeStdOut, writeStdErr, writeInfo);
         } else {
-            command = [
+            return stdExec([
                 'sh', '-c', "gcc -Wall -o /tmp/code.out '" + notebook.abspath + "' && /tmp/code.out"
-            ];
+            ], writeStdOut, writeStdErr, writeInfo);
         }
-
-        return stdExec(command, writeStdOut, writeStdErr);
     },
     init: async ({ name, notebookspath }) => await defaultInitNotebook(recipe, notebookspath, name),
 });

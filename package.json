@@ -16,12 +16,14 @@
   "dependencies": {
     "body-parser": "^1.18.3",
     "codemirror": "^5.40.0",
+    "dockerode": "^2.5.6",
     "express": "^4.16.3",
     "globby": "^8.0.1",
     "minimist": "^1.2.0",
     "project-name-generator": "^2.1.5",
     "recursive-copy": "^2.0.9",
-    "title-case": "^2.1.1"
+    "title-case": "^2.1.1",
+    "tree-kill": "^1.2.0"
   },
   "devDependencies": {
     "chai": "^4.1.2",

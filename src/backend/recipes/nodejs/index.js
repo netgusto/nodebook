@@ -1,5 +1,6 @@
 const { defaultInitNotebook } = require('../defaultInitNotebook');
 const stdExec = require('../../stdexec');
+const stdExecDocker = require('../../stdexecdocker');
 
 const recipe = ({
     key: 'nodejs',
@@ -8,23 +9,22 @@ const recipe = ({
     mainfile: ['index.js', 'main.js'],
     cmmode: 'javascript',
     dir: __dirname,
-    exec: ({ notebook, docker, writeStdOut, writeStdErr }) => {
-        let command;
+    exec: ({ notebook, docker, writeStdOut, writeStdErr, writeInfo }) => {
 
         if (docker) {
-            command = [
-                'docker', 'run', '--rm',
-                '-v', notebook.absdir + ':/code',
-                'node:alpine',
-                'node', '--harmony', '/code/' + notebook.mainfilename,
-            ];
+            return stdExecDocker({
+                image: 'node:alpine',
+                cmd: ['node', '--harmony', '/code/' + notebook.mainfilename],
+                cwd: '/code',
+                mounts: [
+                    { from: notebook.absdir, to: '/code', mode: 'rw' },
+                ],
+            }, writeStdOut, writeStdErr, writeInfo);
         } else {
-            command = [
+            return stdExec([
                 'node', '--harmony', notebook.absdir + '/' + notebook.mainfilename,
-            ];
+            ], writeStdOut, writeStdErr, writeInfo);
         }
-
-        return stdExec(command, writeStdOut, writeStdErr);
     },
     init: async ({ name, notebookspath }) => await defaultInitNotebook(recipe, notebookspath, name),
 });

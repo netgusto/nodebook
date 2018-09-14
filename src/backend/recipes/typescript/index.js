@@ -1,8 +1,11 @@
 const { join: pathJoin } = require('path');
 const { exec } = require('child_process');
+const { lstat } = require('fs');
+
 const { defaultInitNotebook } = require('../defaultInitNotebook');
 
 const stdExec = require('../../stdexec');
+const stdExecDocker = require('../../stdexecdocker');
 
 const recipe = ({
     key: 'typescript',
@@ -11,23 +14,44 @@ const recipe = ({
     mainfile: ['index.ts', 'main.ts'],
     cmmode: 'javascript',
     dir: __dirname,
-    exec: ({ notebook, docker, writeStdOut, writeStdErr }) => {
-        let command;
+    exec: async ({ notebook, docker, writeStdOut, writeStdErr, writeInfo }) => {
+
+        const tsnode = await hasTsNode(notebook.absdir);
 
         if (docker) {
-            command = [
-                'docker', 'run', '--rm',
-                '-v', notebook.absdir + ':/app',
-                'sandrokeil/typescript',
-                'sh', '-c', 'node_modules/.bin/ts-node index.ts',
-            ];
-        } else {
-            command = [
-                'sh', '-c', 'cd "' + notebook.absdir + '" && node_modules/.bin/ts-node index.ts',
-            ];
-        }
 
-        return stdExec(command, writeStdOut, writeStdErr);
+            let cmd;
+
+            if (tsnode) {
+                cmd = [
+                    'sh', '-c', 'node_modules/.bin/ts-node ' + notebook.mainfilename,
+                ];
+            } else {
+                cmd = [
+                    'sh', '-c', "tsc --allowJs --outFile /tmp/code.js " + notebook.mainfilename + " && node /tmp/code.js"
+                ];
+            }
+
+            return stdExecDocker({
+                image: 'sandrokeil/typescript',
+                cmd,
+                cwd: '/app',
+                mounts: [
+                    { from: notebook.absdir, to: '/app', mode: 'rw' },
+                ],
+            }, writeStdOut, writeStdErr, writeInfo);
+
+        } else {
+            if (tsnode) {
+                return stdExec([
+                    'sh', '-c', '"' + notebook.absdir + '/node_modules/.bin/ts-node" "' + notebook.abspath + '"',
+                ], writeStdOut, writeStdErr, writeInfo);
+            } else {
+                return stdExec([
+                    'sh', '-c', 'tsc --allowJs --outFile /tmp/code.js "' + notebook.abspath + '" && node /tmp/code.js',
+                ], writeStdOut, writeStdErr, writeInfo);
+            }
+        }
     },
     init: async ({ name, notebookspath }) => {
         const copied = await defaultInitNotebook(recipe, notebookspath, name);
@@ -42,5 +66,13 @@ const recipe = ({
         });
     },
 });
+
+function hasTsNode(absdir) {
+    return new Promise((resolve) => {
+        lstat(pathJoin(absdir, 'node_modules/.bin/ts-node'), (err, stats) => {
+            resolve(!err && (stats.isFile() || stats.isSymbolicLink()));
+        });
+    });
+}
 
 module.exports = recipe;

@@ -1,5 +1,6 @@
 const { defaultInitNotebook } = require('../defaultInitNotebook');
 const stdExec = require('../../stdexec');
+const stdExecDocker = require('../../stdexecdocker');
 
 const recipe = ({
     key: 'java',
@@ -8,23 +9,22 @@ const recipe = ({
     mainfile: ['index.java', 'main.java'],
     cmmode: 'clike',
     dir: __dirname,
-    exec: ({ notebook, docker, writeStdOut, writeStdErr }) => {
-        let command;
+    exec: ({ notebook, docker, writeStdOut, writeStdErr, writeInfo }) => {
 
         if (docker) {
-            command = [
-                'docker', 'run', '--rm',
-                '-v', notebook.absdir + ':/code',
-                'java:latest',
-                'sh', '-c', 'javac -d /tmp "/code/' + notebook.mainfilename + '" && cd /tmp && java Main'
-            ];
+            return stdExecDocker({
+                image: 'java:latest',
+                cmd: ['sh', '-c', 'javac -d /tmp "/code/' + notebook.mainfilename + '" && cd /tmp && java Main'],
+                cwd: '/code',
+                mounts: [
+                    { from: notebook.absdir, to: '/code', mode: 'rw' },
+                ],
+            }, writeStdOut, writeStdErr, writeInfo);
         } else {
-            command = [
+            return stdExec([
                 'sh', '-c', 'javac -d /tmp "' + notebook.absdir + '/' + notebook.mainfilename + '" && cd /tmp && java Main',
-            ];
+            ], writeStdOut, writeStdErr, writeInfo);
         }
-
-        return stdExec(command, writeStdOut, writeStdErr);
     },
     init: async ({ name, notebookspath }) => await defaultInitNotebook(recipe, notebookspath, name),
 });
