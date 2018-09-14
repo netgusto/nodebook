@@ -1,4 +1,4 @@
-const minimist = require('minimist');
+const parseArgs = require('minimist');
 const fs = require('fs');
 const { resolve: resolvePath } = require('path');
 
@@ -7,7 +7,10 @@ module.exports = {
 };
 
 async function sanitizeParameters(rawargv) {
-    const argv = minimist(rawargv);
+    const argv = parseArgs(rawargv, {
+        boolean: 'docker',
+        string: ['notebooks', 'bindaddress'],
+    });
 
     // --port
 
@@ -27,7 +30,7 @@ async function sanitizeParameters(rawargv) {
 
     let bindaddress = '127.0.0.1';
     if ('bindaddress' in argv) {
-        bindaddress = argv.bindaddress.toString();
+        bindaddress = argv.bindaddress;
     }
 
     if (bindaddress.trim() === '') {
@@ -36,19 +39,28 @@ async function sanitizeParameters(rawargv) {
 
     // --docker
 
-    const docker = ("docker" in argv);
+    const docker = argv.docker;
 
     // --notebooks
+    let notebooks;
+    if (!("notebooks" in argv) || typeof argv.notebooks !== "string" || argv.notebooks.trim() === '') {
+        if (argv['_'].length > 0) {
+            notebooks = argv['_'].shift().trim();
+        } else {
+            throw new Error("--notebooks path/to/notebooks is required if path not provided as argument.");
+        }
+    } else {
+        notebooks = argv.notebooks;
+    }
 
-    if (!("notebooks" in argv) || typeof argv.notebooks !== "string" || argv.notebooks.trim() === '') throw new Error("--notebooks path/to/notebooks is required.");
-    const notebooks = resolvePath(argv.notebooks);
+    notebooks = resolvePath(notebooks);
 
     if (!fs.existsSync(notebooks)) {
-        throw new Error("--notebooks does not exist.");
+        throw new Error("Notebooks path does not exist.");
     }
 
     if (!fs.statSync(notebooks).isDirectory()) {
-        throw new Error("--notebooks is not a directory.");
+        throw new Error("Notebooks path is not a directory.");
     }
 
     // Check for unknown parameters

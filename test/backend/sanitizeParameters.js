@@ -5,17 +5,19 @@ const { dirname, resolve } = require('path');
 describe('sanitizeParameters()', function () {
 
     const missingNotebookError = '--notebooks path/to/notebooks is required';
-    const nonexistingNotebookError = '--notebooks does not exist';
-    const notDirectoryNotebookError = '--notebooks is not a directory';
+    const nonexistingNotebookError = 'Notebooks path does not exist';
+    const notDirectoryNotebookError = 'Notebooks path is not a directory';
     const invalidPortError = 'Invalid port';
     const outOfRangePortError = 'Port is out of range';
     const invalidBindAddressError = '--bindaddress is invalid';
 
     const someFilepath = __filename;
     const validDirpath = resolve(dirname(__filename) + '/../fixtures/notebooks');
+    const invalidDirPath = '/' + Math.random();
     const validBindAddress = '0.0.0.0';
 
     const validRequiredParams = ['--notebooks', validDirpath];
+    const validRequiredArguments = [validDirpath];
 
     // Defaults
 
@@ -42,29 +44,34 @@ describe('sanitizeParameters()', function () {
 
     // --notebooks
 
-    it('should throw for missing --notebooks', () => {
+    it('should throw for missing --notebooks', async () => {
         const rawargv = [];
-        expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith(missingNotebookError);
+        await expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith(missingNotebookError);
     });
 
-    it('should throw for empty --notebooks', () => {
+    it('should throw for empty --notebooks', async () => {
         const rawargv = ['--notebooks', ''];
-        expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith(missingNotebookError);
+        await expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith(missingNotebookError);
     });
 
-    it('should throw for boolean --notebooks', () => {
+    it('should throw for boolean --notebooks', async () => {
         const rawargv = ['--notebooks'];
-        expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith(missingNotebookError);
+        await expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith(missingNotebookError);
     });
 
-    it('should throw for non existing --notebooks', () => {
-        const rawargv = ['--notebooks', '/' + Math.random()];
-        expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith(nonexistingNotebookError);
+    it('should throw for non existing --notebooks', async () => {
+        const rawargv = ['--notebooks', invalidDirPath];
+        await expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith(nonexistingNotebookError);
     });
 
-    it('should throw if --notebooks is not a directory', () => {
+    it('should throw for invalid notebook path given as argument', async () => {
+        const rawargv = [invalidDirPath];
+        await expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith(nonexistingNotebookError);
+    });
+
+    it('should throw if --notebooks is not a directory', async () => {
         const rawargv = ['--notebooks', someFilepath];
-        expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith(notDirectoryNotebookError);
+        await expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith(notDirectoryNotebookError);
     });
 
     it('should pass for valid --notebooks', async () => {
@@ -74,23 +81,35 @@ describe('sanitizeParameters()', function () {
         });
     });
 
+    it('should pass for valid notebooks given as argument', async () => {
+        const rawargv = [...validRequiredArguments];
+        expect(await sanitizeParameters(rawargv)).to.contain({
+            notebooks: validDirpath
+        });
+    });
+
+    it('should throw if the notebook path is both given as an argument and a parameter', async () => {
+        const rawargv = [...validRequiredArguments, ...validRequiredParams];
+        await expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith('Unknown argument(s): ' + validDirpath);
+    });
+
     // --port
 
     it('should throw for invalid port', async () => {
         // Non numeric
         let rawargv = [...validRequiredParams, '--port', '123abcd'];
-        expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith(invalidPortError);
+        await expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith(invalidPortError);
 
         // Contains non digit
         rawargv = [...validRequiredParams, '--port', '-50'];
-        expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith(invalidPortError);
+        await expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith(invalidPortError);
 
         // Out of range
         rawargv = [...validRequiredParams, '--port', '0'];
-        expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith(outOfRangePortError);
+        await expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith(outOfRangePortError);
 
         rawargv = [...validRequiredParams, '--port', '65536'];
-        expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith(outOfRangePortError);
+        await expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith(outOfRangePortError);
     });
 
     it('should pass for valid port', async () => {
@@ -112,9 +131,9 @@ describe('sanitizeParameters()', function () {
 
     // --bindaddress
 
-    it('should throw for empty bind address', () => {
+    it('should throw for empty bind address', async () => {
         let rawargv = [...validRequiredParams, '--bindaddress', ''];
-        expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith(invalidBindAddressError);
+        await expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith(invalidBindAddressError);
     });
 
     it('should pass for valid bind address', async () => {
@@ -133,17 +152,17 @@ describe('sanitizeParameters()', function () {
     });
 
     // Unknown parameters
-    it('should throw for unknown parameters', () => {
+    it('should throw for unknown parameters', async () => {
         let rawargv = [...validRequiredParams, '--somethingunknown'];
-        expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith('Unknown parameter(s): somethingunknown');
+        await expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith('Unknown parameter(s): somethingunknown');
 
         rawargv = [...validRequiredParams, '--somethingunknown', 'abcdef'];
-        expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith('Unknown parameter(s): somethingunknown');
+        await expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith('Unknown parameter(s): somethingunknown');
     });
 
     // Unknown arguments
-    it('should throw for unknown arguments', () => {
+    it('should throw for unknown arguments', async () => {
         let rawargv = [...validRequiredParams, 'abcdef'];
-        expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith('Unknown argument(s): abcdef');
+        await expect(sanitizeParameters(rawargv)).to.eventually.be.rejectedWith('Unknown argument(s): abcdef');
     });
 });
