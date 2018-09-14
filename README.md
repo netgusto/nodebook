@@ -41,6 +41,8 @@ Otherwise, the development environments on your local machine will be used.
 $ npm i -g --production nbk
 
 # Run
+$ nbk path/to/notebooks
+# Or
 $ nbk --notebooks path/to/notebooks
 ```
 
