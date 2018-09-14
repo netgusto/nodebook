@@ -18,37 +18,50 @@ module.exports = {
     renameNotebook,
 };
 
-function listNotebooks(notebookspath) {
+async function listNotebooks(notebookspath) {
     const resolvedbasepath = resolvePath(notebookspath);
 
-    return globby(getAllRecipesGlobMatchingPattern(notebookspath), { gitignore: true })
-        .then(items => {
-            const res = new Map();
+    const items = await globby(
+        notebookspath,
+        {
+            absolute: true,
+            onlyFiles: true,
+            deep: 2,
+            case: false,
+            ignore: ['**/node_modules'],    // in the case not .gitignore is set in the notebook!
+            gitignore: true,
+            nobrace: true,
+            noext: true,
+            expandDirectories: {
+                files: getAllRecipesMainFiles(),
+            }
+        }
+    );
 
-            items
-                .map(path => resolvePath(path))
-                .filter(abspath => statSync(abspath).isFile())
-                .sort((a, b) => a.toLowerCase() < b.toLowerCase() ? -1 : 1)
-                .map(abspath => {
-                    const absdir = dirname(abspath);
-                    const mainfilename = basename(abspath);
-                    const name = absdir.substr(resolvedbasepath.length + 1);
-                    const recipe = getRecipeForMainFilename(mainfilename);
+    const res = new Map();
 
-                    res.set(name, {
-                        name,
-                        mainfilename,
-                        absdir,
-                        abspath,
-                        recipe,
-                    });
-                });
+    items
+        .sort((a, b) => a.toLowerCase() < b.toLowerCase() ? -1 : 1)
+        .map(abspath => {
 
-            return res;
+            const mainfilename = basename(abspath);
+            const recipe = getRecipeForMainFilename(mainfilename);
+            if (!recipe) return undefined;
+
+            const absdir = dirname(abspath);
+            const name = absdir.substr(resolvedbasepath.length + 1);            
+
+            res.set(name, {
+                name,
+                mainfilename,
+                absdir,
+                abspath,
+                recipe,
+            });
         })
-        .catch(err => {
-            console.log(err);
-        });
+        .filter(v => !!v);
+
+    return res;
 }
 
 function getFileContent(abspath) {
@@ -68,7 +81,6 @@ function setFileContent(abspath, content) {
         });
     });
 }
-
 
 function execNotebook(notebook, execCommand, res) {
     return new Promise(async (resolve, _) => {
@@ -152,11 +164,6 @@ function extractFrontendRecipeSummary(recipe) {
     };
 }
 
-function getAllRecipesGlobMatchingPattern(basepath) {
-    const filenames = [];
-    getRecipes().forEach(value => {
-        value.mainfile.map(filename => filenames.push(filename));
-    });
-
-    return [basepath + '/**/{' + filenames.join(',') + '}'];
+function getAllRecipesMainFiles() {
+    return getRecipes().reduce((carry, recipe) => carry = [...carry, ...recipe.mainfile], []);
 }

@@ -4,7 +4,7 @@ const recipe = ({
     key: 'r',
     name: 'R',
     language: 'R',
-    mainfile: ['index.r', 'index.R', 'main.r', 'main.R'],
+    mainfile: ['index.r', 'main.r'],
     cmmode: 'r',
     dir: __dirname,
     execLocal: ({ notebook }) => ([
