@@ -23,7 +23,7 @@ const recipe = ({
         } else {
             return stdExec([
                 'sh', '-c', 'javac -d /tmp "' + notebook.absdir + '/' + notebook.mainfilename + '" && cd /tmp && java Main',
-            ]);
+            ], writeStdOut, writeStdErr, writeInfo);
         }
     },
     init: async ({ name, notebookspath }) => await defaultInitNotebook(recipe, notebookspath, name),

@@ -23,7 +23,7 @@ const recipe = ({
         } else {
             return stdExec([
                 'lua', notebook.absdir + '/' + notebook.mainfilename,
-            ]);
+            ], writeStdOut, writeStdErr, writeInfo);
         }
     },
     init: async ({ name, notebookspath }) => await defaultInitNotebook(recipe, notebookspath, name),

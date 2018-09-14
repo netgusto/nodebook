@@ -59,7 +59,17 @@ module.exports = function stdExecDocker(ctnrinfo, writeStdOut, writeStdErr, writ
                         }
 
                         function onProgress(event) {
-                            stdinfo.write(event.status + (event.id ? " " + event.id : '') + "\n");
+                            let percent;
+
+                            if (event.progressDetail) {
+                                const { current, total } = event.progressDetail;
+                                if (total) {
+                                    percent = ((current / total) * 100).toFixed(2);
+                                    if (percent < 10) percent = '0' + percent.toString();
+                                }
+                            }
+                            
+                            stdinfo.write(event.status + (event.id ? ' ' + event.id : '') + (percent ? ' ' + percent + '%' : '') + "\n");
                         }
                     }));
                     container = await docker.createContainer(ctnroptions);
