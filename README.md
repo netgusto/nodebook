@@ -34,12 +34,26 @@ If `--docker` is set on the command line, each of these environments will run in
 
 Otherwise, the development environments on your local machine will be used.
 
-## Install from source
+## Install and run from $PATH
 
 ```bash
+# Install
+$ npm i -g --production nbk
+
+# Run
+$ nbk --notebooks path/to/notebooks
+```
+
+## Install and run from source
+
+```bash
+# Install
 $ git clone https://github.com/netgusto/nodebook
 $ cd nodebook
 $ npm install --production
+
+# Run
+$ node . --notebooks path/to/notebooks
 ```
 
 ## Usage
@@ -58,27 +72,9 @@ In the directory where you want your notebooks to be stored, simply create a fol
 
 The notebook's name will be the name of the folder. The notebook language is determined automatically.
 
-### Run the REPL
+### Command line options
 
-```bash
-# Default usage; local execution, bound to 127.0.0.1:8000
-$ node . --notebooks path/to/notebooks
-# open http://127.0.0.1:8000 in a browser
-```
-
-```bash
-# Set bindaddress and port
-$ node . --notebooks path/to/notebooks --bindaddress 0.0.0.0 --port 12000
-```
-
-```bash
-# Execute code in disposable docker containers (node:alpine)
-$ node . --notebooks path/to/notebooks --docker
-```
-
-#### Command line options
-
-* **--notebooks**: path to notebook folders; required
+* **--notebooks**: path to notebook folders; *required*
 * **--bindaddress**: IP address the http server should bind to; defaults to `127.0.0.1`
 * **--port**: Port used by the application; defaults to `8000`
 * **--docker**: Execute code in disposable docker containers instead of local system; defaults to `false`
