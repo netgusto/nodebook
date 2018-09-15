@@ -1,6 +1,6 @@
 {
   "name": "nbk",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "Nodebook - Multi-Language REPL with web UI",
   "main": "src/backend/index.js",
   "scripts": {
@@ -33,6 +33,7 @@
     "classnames": "^2.2.6",
     "concurrently": "^4.0.1",
     "electron": "^2.0.9",
+    "date-fns": "^1.29.0",
     "mocha": "^5.2.0",
     "node-sass": "^4.9.3",
     "nodemon": "^1.18.4",
