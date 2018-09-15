@@ -1,8 +1,30 @@
 import * as React from 'react';
 import cx from 'classnames';
+import subDays from 'date-fns/sub_days';
+import isBefore from 'date-fns/is_before';
+import Spinner from 'react-spinkit';
+
 import { NotebookHandle, Recipe } from "../../types";
 
-import Spinner from 'react-spinkit';
+interface NotebooksListProps {
+     notebooks: NotebookHandle[];
+}
+
+function NotebooksList(props: NotebooksListProps) {
+    const { notebooks } = props;
+    return (
+        <div className="notebook-list">
+            <ul>
+                {notebooks.map(notebook => (
+                    <li key={notebook.name}>
+                        <a href={notebook.url}>{notebook.name}</a>
+                        <span className="notebook-recipe">{notebook.recipe.name}</span>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+}
 
 export interface Props {
     notebooks: NotebookHandle[];
@@ -29,18 +51,38 @@ export default class Home extends React.Component<Props, State> {
         const { notebooks, recipes } = this.props;
         const { menuopen, creating } = this.state;
 
+        const recents = [];
+        const horizon = subDays(new Date(), 1);
+
+        notebooks.forEach(notebook => {
+            if (!isBefore(new Date(notebook.mtime), horizon)) {
+                recents.push(notebook);
+            }
+        });
+
+        recents.sort((a, b) => a.mtime > b.mtime ? -1 : 1);
+
+        const showTitle = recents.length > 0;
+
         return (
             <div className="home-app">
-                <div className="notebook-list">
-                    <ul>
-                        {notebooks.map(notebook => (
-                            <li key={notebook.name}>
-                                <a href={notebook.url}>{notebook.name}</a>
-                                <span className="notebook-recipe">{notebook.recipe.name}</span>
-                            </li>
-                        ))}
-                    </ul>
+
+                <div className="list">
+                    {recents.length > 0 && (
+                        <div>
+                            <h2>Recently used</h2>
+                            <NotebooksList notebooks={recents} />
+                        </div>
+                    )}
+
+                    {notebooks.length > 0 && notebooks.length > recents.length && (
+                        <div>
+                            {showTitle && <h2>All notebooks</h2>}
+                            <NotebooksList notebooks={notebooks} />
+                        </div>
+                    )}
                 </div>
+                
                 <div className="tools">
                     <button className={cx('bigbutton', 'btn-new', { creating })} onClick={() => this.setState({ menuopen: !menuopen })}>
                         {creating ? <Spinner fadeIn="none" name="wave" color="white" /> : (

@@ -4,6 +4,7 @@ export interface NotebookHandle {
     name: string;
     url: string;
     recipe: Recipe;
+    mtime: string;
 }
 
 export interface Notebook extends NotebookHandle {
