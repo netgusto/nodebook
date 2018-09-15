@@ -1,15 +1,24 @@
 const { app, BrowserWindow } = require('electron');
+const { sanitizeParameters } = require('./sanitizeParameters');
 
 require('./index'); // main express app
 
 let win;
 
-function createWindow() {
+async function createWindow() {
+    let parameters;
+    try {
+        parameters = await sanitizeParameters(process.argv.slice(2));
+    } catch(e) {
+        return console.error(e.message);
+    }
+
     mainWindow = new BrowserWindow({
         width: 1280,
         height: 720
     });
-    mainWindow.loadURL('http://localhost:8000/');
+
+    mainWindow.loadURL(`http://${parameters.bindaddress}:${parameters.port}/`);
     mainWindow.focus();
 }
 
