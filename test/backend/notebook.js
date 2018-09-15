@@ -22,6 +22,7 @@ describe('notebook functions', function () {
                 res[key].recipe.exec = undefined;
                 res[key].recipe.init = undefined;
                 res[key].recipe.dir = undefined;
+                res[key].mtime = undefined;
             });
             return res;
         }))
@@ -41,6 +42,7 @@ describe('notebook functions', function () {
                         exec: undefined,
                         init: undefined,
                     },
+                    mtime: undefined,
                 }
             });
     });

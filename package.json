@@ -31,6 +31,7 @@
     "chai-http": "^4.2.0",
     "classnames": "^2.2.6",
     "concurrently": "^4.0.1",
+    "date-fns": "^1.29.0",
     "mocha": "^5.2.0",
     "node-sass": "^4.9.3",
     "nodemon": "^1.18.4",

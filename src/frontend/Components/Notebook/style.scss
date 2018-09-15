@@ -43,8 +43,12 @@ body {
     grid-template-columns: auto 150px;
     grid-template-areas: "notebooklist tools";
 
-    .notebook-list {
+    .list {
         grid-area: notebooklist;
+
+        h2 {
+            margin-left: 16px;
+        }
     }
 
     .tools {

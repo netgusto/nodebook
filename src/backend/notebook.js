@@ -37,28 +37,36 @@ async function listNotebooks(notebookspath) {
         }
     );
 
-    const res = new Map();
-
-    items
-        .sort((a, b) => a.toLowerCase() < b.toLowerCase() ? -1 : 1)
-        .map(abspath => {
+    const notebooks = await Promise.all(items
+        .map(async abspath => {
 
             const mainfilename = basename(abspath);
             const recipe = getRecipeForMainFilename(mainfilename);
             if (!recipe) return undefined;
 
             const absdir = dirname(abspath);
-            const name = absdir.substr(resolvedbasepath.length + 1);            
+            const name = absdir.substr(resolvedbasepath.length + 1);
 
-            res.set(name, {
+            const stat = await new Promise(resolve => lstat(abspath, function(err, stat) {
+                resolve(stat);
+            }));
+
+            return {
                 name,
                 mainfilename,
                 absdir,
                 abspath,
                 recipe,
-            });
+                mtime: stat.mtime,
+            };
         })
-        .filter(v => !!v);
+    );
+
+    const res = new Map();
+
+    notebooks
+        .sort((a, b) => a.abspath.toLowerCase() < b.abspath.toLowerCase() ? -1 : 1)
+        .forEach(notebook => res.set(notebook.name, notebook));
 
     return res;
 }
@@ -131,6 +139,7 @@ function extractFrontendNotebookSummary(notebook) {
     return {
         name: notebook.name,
         url: buildUrl("notebook", { name: notebook.name }),
+        mtime: notebook.mtime,
         recipe: extractFrontendRecipeSummary(notebook.recipe),
     };
 }
