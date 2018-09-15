@@ -7,10 +7,7 @@ let win;
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 1280,
-        height: 720,
-        autoHideMenuBar: true,
-        useContentSize: true,
-        resizable: false
+        height: 720
     });
     mainWindow.loadURL('http://localhost:8000/');
     mainWindow.focus();
