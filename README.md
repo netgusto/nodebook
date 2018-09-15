@@ -67,7 +67,7 @@ $ cd nodebook
 $ npm install --production
 
 # Run
-$ node run electron --notebooks path/to/notebooks
+$ npm run electron --notebooks path/to/notebooks
 ```
 
 ## Usage
