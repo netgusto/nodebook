@@ -12,10 +12,7 @@ module.exports = function stdExec(processinfo, writeStdOut, writeStdErr, writeIn
 
             child = spawn(cmd[0], cmd.slice(1), {
                 cwd,
-                env: {
-                    ...process.env,
-                    ...env,
-                }
+                env: Object.assign({}, process.env, env),
             });
 
             child.on('error', err => writeStdErr(err.message + "\n"));
