@@ -1,6 +1,6 @@
 import * as React from 'react';
 import cx from 'classnames';
-import { Notebook } from "../../types";
+import { AllHtmlEntities as Entities } from 'html-entities';
 
 import {UnControlled as CodeMirror} from 'react-codemirror2'
 const CM = CodeMirror as any;
@@ -32,6 +32,7 @@ import 'codemirror/addon/search/match-highlighter';
 import 'codemirror/addon/fold/indent-fold';
 import 'codemirror/addon/scroll/scrollpastend';
 
+import { Notebook } from "../../types";
 import "./style.scss";
 
 export interface Props {
@@ -57,11 +58,14 @@ export default class NotebookComponent extends React.Component<Props, State> {
 
     private boundHandleKeyDown: EventListener;
     private editorvalue: string;
+    private entities: any;
+    private console: HTMLElement;
 
     constructor(props: Props) {
         super(props);
         this.boundHandleKeyDown = this.handleKeyDown.bind(this);
         this.editorvalue = props.notebook.content;
+        this.entities = new Entities();
     }
 
     componentWillMount() {
@@ -69,7 +73,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
     }
 
     componentDidMount() {
-        consoleLog('Ready.\n', 'info');
+        this.consoleLog('Ready.\n', 'info');
     }
 
     componentWillUnmount() {
@@ -153,7 +157,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
                     </div>
                     <div id="gutter"></div>
                     <div id="right">
-                        <div id="console"></div>
+                        <div id="console" ref={el => this.console = el}></div>
                     </div>
                 </div>
             </div>
@@ -237,7 +241,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
             },
         })
         .then(() => {
-            consoleLog('--- Execution stopped.\n\n', 'info');
+            this.consoleLog('--- Execution stopped.\n\n', 'info');
             this.setState({ running: false });
         })
         .catch(() => {
@@ -254,9 +258,9 @@ export default class NotebookComponent extends React.Component<Props, State> {
 
         this.setState({ running: true });
 
-        if (autoclear) consoleClear();
+        if (autoclear) this.consoleClear();
     
-        consoleLog('--- Running...\n', 'info');
+        this.consoleLog('--- Running...\n', 'info');
         const { execurl } = notebook;
     
         return window.fetch(execurl, {
@@ -275,7 +279,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
                         if (jsonline.trim().length === 0) return;
     
                         const data = JSON.parse(jsonline);
-                        if (this.state.running) consoleLog(JSON.parse(data.data), data.chan);
+                        if (this.state.running) this.consoleLog(JSON.parse(data.data), data.chan);
                     }));
             } else {
                 return new Promise((resolve, reject) => {
@@ -297,7 +301,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
                                 const txt = JSON.parse(data.data);
                                 const lastnl = txt.lastIndexOf('\n');
                                 hasLastNewLine = (lastnl === txt.length - 1);
-                                if (this.state.running) consoleLog(JSON.parse(data.data), data.chan);
+                                if (this.state.running) this.consoleLog(JSON.parse(data.data), data.chan);
                             });
                             
                             // Get the data and send it to the browser via the controller
@@ -311,30 +315,26 @@ export default class NotebookComponent extends React.Component<Props, State> {
         })
         .then(({ hasLastNewLine }) => {
             if (!hasLastNewLine) {
-                if (this.state.running) consoleLog('%\n', 'forcednl');
+                if (this.state.running) this.consoleLog('%\n', 'forcednl');
             }
     
-            if (this.state.running) consoleLog('--- Done.\n\n', 'info');
+            if (this.state.running) this.consoleLog('--- Done.\n\n', 'info');
             this.setState({ running: false });
         })
         .catch(err => {
-            if (this.state.running) consoleLog('\n--- An error occurred during execution.\n\n', 'stderr');
+            if (this.state.running) this.consoleLog('\n--- An error occurred during execution.\n\n', 'stderr');
             this.setState({ running: false });
         });
     }
-}
 
+    consoleLog(msg: string, cls: string) {
+        this.console.innerHTML += '<span class="' + cls + '">' + this.entities.encode(msg) + '</span>';
+        this.console.scrollTop = this.console.scrollHeight;
+    }
 
-
-function consoleLog(msg: string, cls: string) {
-    const consoleObj = document.getElementById('console');
-    consoleObj.innerHTML += '<span class="' + cls + '">' + msg + '</span>';
-    consoleObj.scrollTop = consoleObj.scrollHeight;
-}
-
-function consoleClear() {
-    const consoleObj = document.getElementById('console');
-    consoleObj.innerHTML = '';
+    consoleClear() {
+        this.console.innerHTML = '';
+    }
 }
 
 function persist(notebook: Notebook, value: string) {
