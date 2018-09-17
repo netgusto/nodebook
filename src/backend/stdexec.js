@@ -1,13 +1,22 @@
 const { spawn } = require('child_process');
 const kill = require('tree-kill');
 
-module.exports = function stdExec(command, writeStdOut, writeStdErr) {
+module.exports = function stdExec(processinfo, writeStdOut, writeStdErr, writeInfo) {
 
     let child;
 
     return {
         start: () => new Promise(resolve => {
-            child = spawn(command[0], command.slice(1));
+
+            const { cmd, cwd, env } = processinfo;
+
+            child = spawn(cmd[0], cmd.slice(1), {
+                cwd,
+                env: {
+                    ...process.env,
+                    ...env,
+                }
+            });
 
             child.on('error', err => writeStdErr(err.message + "\n"));
 
