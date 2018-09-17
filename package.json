@@ -9,7 +9,8 @@
     "dev-frontend": "parcel watch src/frontend/*.html",
     "dev-backend": "nodemon --watch src/backend src/backend",
     "prebuild": "rm -Rf dist/*.js dist/*.css dist/*.map",
-    "build": "npm test && npm run prebuild && parcel build src/frontend/*.html"
+    "build": "npm test && npm run prebuild && parcel build src/frontend/*.html",
+    "electron": "electron ./src/backend/electron.js"
   },
   "author": "@netgusto",
   "license": "ISC",
@@ -31,6 +32,7 @@
     "chai-http": "^4.2.0",
     "classnames": "^2.2.6",
     "concurrently": "^4.0.1",
+    "electron": "^2.0.9",
     "date-fns": "^1.29.0",
     "mocha": "^5.2.0",
     "node-sass": "^4.9.3",

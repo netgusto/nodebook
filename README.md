@@ -58,6 +58,18 @@ $ npm install --production
 $ node . --notebooks path/to/notebooks
 ```
 
+## Install and run from source as an electron app
+
+```bash
+# Install
+$ git clone https://github.com/netgusto/nodebook
+$ cd nodebook
+$ npm install
+
+# Run
+$ npm run electron -- --notebooks path/to/notebooks
+```
+
 ## Usage
 
 ### Create a Notebook
