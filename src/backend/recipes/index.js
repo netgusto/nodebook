@@ -16,6 +16,31 @@ const recipeRust = require('./rust');
 const recipeSwift = require('./swift');
 const recipePlaintext = require('./plaintext');
 
+const recipes = [
+    recipeNodeJS,
+    recipeTypescript,
+    recipeC,
+    recipeCpp,
+    recipeGo,
+    recipeHaskell,
+    recipeJava,
+    recipeLua,
+    recipePHP,
+    recipePython3,
+    recipeR,
+    recipeRuby,
+    recipeRust,
+    recipeSwift,
+    recipePlaintext,
+];
+
+const recipesByKey = new Map();
+const recipesByMainFile = new Map();
+recipes.forEach(recipe => {
+    recipesByKey.set(recipe.key, recipe);
+    recipe.mainfile.forEach(file => recipesByMainFile.set(file, recipe));
+});
+
 module.exports = {
     getRecipes,
     getRecipeForMainFilename,
@@ -23,36 +48,15 @@ module.exports = {
 };
 
 function getRecipeForMainFilename(filename) {
-    const recipes = getRecipes();
-    const recipe = recipes.find(recipe => recipe.mainfile.includes(filename));
-    if (!recipe) return undefined;
-
-    return recipe;
+    const recipe = recipesByMainFile.get(filename);
+    return recipe ? recipe : undefined;
 }
 
 function getRecipeByKey(key) {
-    const recipes = getRecipes();
-    const recipe = recipes.find(recipe => recipe.key === key);
-    if (!recipe) return undefined;
-    return recipe;
+    const recipe = recipesByKey.get(key);
+    return recipe ? recipe : undefined;
 }
 
 function getRecipes() {
-    return [
-        recipeNodeJS,
-        recipeTypescript,
-        recipeC,
-        recipeCpp,
-        recipeGo,
-        recipeHaskell,
-        recipeJava,
-        recipeLua,
-        recipePHP,
-        recipePython3,
-        recipeR,
-        recipeRuby,
-        recipeRust,
-        recipeSwift,
-        recipePlaintext,
-    ];
+    return recipes;
 }

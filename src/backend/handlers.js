@@ -4,9 +4,10 @@ const titleCase = require('title-case');
 
 const {
     listNotebooks,
+    getNotebookByName,
     getFileContent,
-    setFileContent,
     execNotebook,
+    updateNotebookContent,
     newNotebook,
     extractFrontendNotebookSummary,
     extractFrontendRecipeSummary,
@@ -62,10 +63,9 @@ function handleHomePage({ notebookspath }) {
 function handleNoteBook({ notebookspath }) {
     return async function (req, res) {
         const { name } = req.params;
-        const notebooks = await listNotebooks(notebookspath);
+        const notebook = await getNotebookByName(notebookspath, name);
 
-        if (!notebooks.has(name)) return res.send('Notebook not found');
-        const notebook = notebooks.get(name);
+        if (!notebook) return res.send('Notebook not found');
 
         const persisturl = buildUrl('notebooksetcontent', { name });
         const execurl = buildUrl('notebookexec', { name });
@@ -100,12 +100,11 @@ function handleAPINoteBookSetContent({ notebookspath }) {
         const { content } = req.body;
 
         if (content === undefined) return res.status(400).send('Notebook content not set on POST');
-        const notebooks = await listNotebooks(notebookspath);
 
-        if (!notebooks.has(name)) return res.status(400).send('Notebook not found');
-        const notebook = notebooks.get(name);
+        const notebook = await getNotebookByName(notebookspath, name);
+        if (!notebook) return res.status(400).send('Notebook not found');
 
-        await setFileContent(notebook.abspath, content);
+        const success = await updateNotebookContent(notebookspath, notebook, content);
         res.set('Content-Type', 'application/json');
         setNoCache(res);
         res.send('"OK"');
@@ -120,10 +119,9 @@ function handleAPINoteBookExec({ notebookspath, docker }) {
 
         res.set('Content-Type', 'text/plain');
 
-        const notebooks = await listNotebooks(notebookspath);
+        const notebook = await getNotebookByName(notebookspath, name);
 
-        if (!notebooks.has(name)) return res.status(400).send('Notebook not found');
-        const notebook = notebooks.get(name);
+        if (!notebook) return res.status(400).send('Notebook not found');
 
         setNoCache(res);
         const { start, stop } = await execNotebook(notebook, docker, res);
@@ -141,8 +139,8 @@ function handleAPINoteBookStop({ notebookspath, docker }) {
 
         res.set('Content-Type', 'text/plain');
 
-        const notebooks = await listNotebooks(notebookspath);
-        if (!notebooks.has(name)) return res.status(400).send('Notebook not found');
+        const notebook = await getNotebookByName(notebookspath, name);
+        if (!notebook) return res.status(400).send('Notebook not found');
 
         running.map(async stop => await stop());
         running = [];
@@ -163,11 +161,10 @@ function handleAPINoteBookNew({ notebookspath }) {
         }
 
         // Generate name
-        const notebooksBefore = await listNotebooks(notebookspath);
         let name;
         do {
             name = sanitizeNotebookName(titleCase(generateName().spaced));
-        } while(notebooksBefore.has(name));
+        } while (await getNotebookByName(notebookspath, name));
 
         let done;
         try {
@@ -180,12 +177,10 @@ function handleAPINoteBookNew({ notebookspath }) {
             return res.status(400).send('Notebook initialization failed');
         }
 
-        const notebooks = await listNotebooks(notebookspath);
-        if (!notebooks.has(name)) {
+        const notebook = await getNotebookByName(notebookspath, name);
+        if (!notebook) {
             return res.status(400).send('Notebook initialization failed');
         }
-
-        const notebook = notebooks.get(name);
 
         res.set('Content-Type', 'application/json');
         setNoCache(res);
@@ -201,12 +196,10 @@ function handleAPINoteBookRename({ notebookspath }) {
         res.set('Content-Type', 'text/plain');
 
         // Generate name
-        const notebooks = await listNotebooks(notebookspath);
-        if (!notebooks.has(oldname)) {
+        const notebook = await getNotebookByName(notebookspath, oldname);
+        if (!notebook) {
             return res.status(400).send('Notebook does not exist.');
         }
-
-        const notebook = notebooks.get(oldname);
 
         // Sanitize new name
         let sanitizedNewName;
@@ -218,7 +211,7 @@ function handleAPINoteBookRename({ notebookspath }) {
         
         let done;
         try {
-            done = await renameNotebook(notebook, sanitizedNewName);
+            done = await renameNotebook(notebookspath, notebook, sanitizedNewName);
         } catch(e) {
             console.log(e);
             done = false;
@@ -228,12 +221,10 @@ function handleAPINoteBookRename({ notebookspath }) {
             return res.status(400).send('Notebook rename failed');
         }
 
-        const notebooksAfter = await listNotebooks(notebookspath);
-        if (!notebooksAfter.has(sanitizedNewName)) {
+        const notebookRenamed = await getNotebookByName(notebookspath, sanitizedNewName);
+        if (!notebookRenamed) {
             return res.status(400).send('Notebook rename failed');
         }
-
-        const notebookRenamed = notebooksAfter.get(sanitizedNewName);
 
         res.set('Content-Type', 'application/json');
         setNoCache(res);
