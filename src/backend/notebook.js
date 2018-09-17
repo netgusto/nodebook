@@ -38,14 +38,17 @@ async function listNotebooks(notebookspath) {
         }
     );
 
-    const notebooks = await Promise.all(items
+    const notebooks = await Promise.all(
+        items
         .map(async abspath => {
+
+            const absdir = dirname(abspath);
+            if (absdir === notebookspath) return; // avoid depth === 0
 
             const mainfilename = basename(abspath);
             const recipe = getRecipeForMainFilename(mainfilename);
             if (!recipe) return undefined;
 
-            const absdir = dirname(abspath);
             const name = absdir.substr(resolvedbasepath.length + 1);
 
             const stat = await new Promise(resolve => lstat(abspath, function(err, stat) {
@@ -66,6 +69,7 @@ async function listNotebooks(notebookspath) {
     const res = new Map();
 
     notebooks
+        .filter(notebook => notebook !== undefined)
         .sort((a, b) => a.abspath.toLowerCase() < b.abspath.toLowerCase() ? -1 : 1)
         .forEach(notebook => res.set(notebook.name, notebook));
 

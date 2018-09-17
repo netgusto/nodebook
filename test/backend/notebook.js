@@ -47,6 +47,17 @@ describe('notebook functions', function () {
             });
     });
 
+    it('should not list notebooks at depth 0', function (done) {
+        listNotebooks(validDirpath)
+        .then(notebooks => {
+            notebooks.forEach((notebook, key) => {
+                expect(notebook.absdir).to.not.eq(validDirpath);
+            });
+        })
+        .then(done)
+        .catch(done);
+    });
+
     it('should get notebook content', () => {
         return expect(getFileContent(validNotebookFilePath))
             .to.eventually.eq('console.log(\'Hello, World!\');');
