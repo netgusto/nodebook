@@ -64,7 +64,7 @@ $ node . --notebooks path/to/notebooks
 # Install
 $ git clone https://github.com/netgusto/nodebook
 $ cd nodebook
-$ npm install --production
+$ npm install
 
 # Run
 $ npm run electron -- --notebooks path/to/notebooks
