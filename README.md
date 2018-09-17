@@ -81,6 +81,18 @@ The notebook's name will be the name of the folder. The notebook language is det
 * **--port**: Port used by the application; defaults to `8000`
 * **--docker**: Execute code in disposable docker containers instead of local system; defaults to `false`
 
+### Notebook environment
+
+If your notebook dir contains a `.env` file, the corresponding environment will be set up during notebook execution.
+
+Exemple `.env`:
+
+```
+HELLO=World!
+```
+
+More information about the expected file format here: <https://github.com/motdotla/dotenv#rules>
+
 ## ⚠️ A bit of warning ⚠️
 
 Do not run this on a port open to public traffic! Doing so would allow remote code execution on your machine.
