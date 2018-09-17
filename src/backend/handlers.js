@@ -75,16 +75,21 @@ function handleNoteBook({ notebookspath }) {
 
         res.set('Content-Type', 'text/html');
         setNoCache(res);
-        res.send(await generatePageHtml("notebook", {
-            homeurl,
-            renamenotebookurl,
-            notebook: {
-                ...extractFrontendNotebookSummary(notebook),
+
+        const notebookinfo = Object.assign({},
+            extractFrontendNotebookSummary(notebook),
+            {
                 execurl,
                 stopurl,
                 persisturl,
                 content: await getFileContent(notebook.abspath),
             }
+        );
+
+        res.send(await generatePageHtml("notebook", {
+            homeurl,
+            renamenotebookurl,
+            notebook: notebookinfo,
         }));
     };
 }

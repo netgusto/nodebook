@@ -9,7 +9,7 @@ const recipe = ({
     mainfile: ['index.cpp', 'main.cpp'],
     cmmode: 'clike',
     dir: __dirname,
-    exec: ({ notebook, docker, writeStdOut, writeStdErr, writeInfo }) => {
+    exec: ({ notebook, docker, writeStdOut, writeStdErr, writeInfo, env }) => {
         let command;
 
         if (docker) {
@@ -20,11 +20,14 @@ const recipe = ({
                 mounts: [
                     { from: notebook.absdir, to: '/code', mode: 'rw' },
                 ],
+                env,
             }, writeStdOut, writeStdErr, writeInfo);
         } else {
-            return stdExec([
-                'sh', '-c', "g++ -std=c++14 -Wall -o /tmp/code.out '" + notebook.abspath + "' && /tmp/code.out"
-            ], writeStdOut, writeStdErr, writeInfo);
+            return stdExec({
+                cmd: ['sh', '-c', "g++ -std=c++14 -Wall -o /tmp/code.out " + notebook.mainfilename + " && /tmp/code.out"],
+                cwd: notebook.absdir,
+                env,
+            }, writeStdOut, writeStdErr, writeInfo);
         }
     },
     init: async ({ name, notebookspath }) => await defaultInitNotebook(recipe, notebookspath, name),

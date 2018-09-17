@@ -1,6 +1,7 @@
-const { lstat, readFile, writeFile, rename: renameDir } = require('fs');
+const { stat, lstat, readFile, writeFile, rename: renameDir } = require('fs');
 const { resolve: resolvePath, basename, dirname, join: pathJoin } = require('path');
 const globby = require('globby');
+const dotenv = require('dotenv');
 
 const { getRecipes, getRecipeForMainFilename } = require('./recipes');
 const { buildUrl } = require('./buildurl');
@@ -94,7 +95,18 @@ async function execNotebook(notebook, docker, res) {
     const writeStdOut = data => write(data, 'stdout');
     const writeStdErr = data => write(data, 'stderr');
     const writeInfo = data => write(data, 'info');
-    const { start, stop } = await notebook.recipe.exec({ notebook, docker, writeStdOut, writeStdErr, writeInfo });
+
+    // extracting .env from notebook if defined
+    const env = await getNotebookEnv(notebook);
+
+    const { start, stop } = await notebook.recipe.exec({
+        notebook,
+        docker,
+        writeStdOut,
+        writeStdErr,
+        writeInfo,
+        env,
+    });
     return { start, stop };
 }
 
@@ -155,4 +167,16 @@ function extractFrontendRecipeSummary(recipe) {
 
 function getAllRecipesMainFiles() {
     return getRecipes().reduce((carry, recipe) => carry = [...carry, ...recipe.mainfile], []);
+}
+
+async function getNotebookEnv(notebook) {
+    const abspath = pathJoin(notebook.absdir, '.env');
+    const exists = await new Promise(resolve => stat(abspath, function (err, stat) {
+        resolve(!err && stat.isFile());
+    }));
+
+    if (!exists) return {};
+
+    const dotenvcontent = await getFileContent(abspath);
+    return await dotenv.parse(dotenvcontent);
 }

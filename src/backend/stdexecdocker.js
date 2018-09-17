@@ -2,14 +2,25 @@ const stream = require('stream');
 const Docker = require('dockerode');
 const docker = new Docker();
 
-module.exports = function stdExecDocker(ctnrinfo, writeStdOut, writeStdErr, writeInfo) {
+const envToDockerEnv = env => {
+    const dockerenv = [];
+    if (!env) return dockerenv;
+
+    Object.keys(env).forEach(function (key) {
+        dockerenv.push(key + '=' + env[key]);
+    });
+
+    return dockerenv;
+};
+
+module.exports = function stdExecDocker(ctnrinfo, writeStdOut, writeStdErr, writeInfo, env) {
 
     let container;
 
     return {
         start: async () => {
 
-            const { image, cmd, cwd, mounts } = ctnrinfo;
+            const { image, cmd, cwd, mounts, env } = ctnrinfo;
 
             const stdout = new stream.Writable({
                 write: (chunk, encoding, done) => {
@@ -33,10 +44,11 @@ module.exports = function stdExecDocker(ctnrinfo, writeStdOut, writeStdErr, writ
             });
 
             const ctnroptions = {
-                image,
-                cmd,
+                Image: image,
+                Cmd: cmd,
                 Tty: false,
                 WorkingDir: cwd,
+                Env: envToDockerEnv(env),
                 HostConfig: {
                     Binds: mounts.map(m => m.from + ':' + m.to + ':' + m.mode),
                 },

@@ -14,7 +14,7 @@ const recipe = ({
     cmmode: 'rust',
     dir: __dirname,
 
-    exec: async ({ notebook, docker, writeStdOut, writeStdErr, writeInfo }) => {
+    exec: async ({ notebook, docker, writeStdOut, writeStdErr, writeInfo, env }) => {
 
         const cargo = await rustHasCargo(notebook.absdir);
 
@@ -42,16 +42,23 @@ const recipe = ({
                     { from: notebook.absdir, to: '/code', mode: 'rw' },
                     ...mounts,
                 ],
+                env,
             }, writeStdOut, writeStdErr, writeInfo);
         } else {
             if (cargo) {
-                return stdExec([
-                    'sh', '-c', 'cd ' + notebook.absdir + ' && cargo run',
-                ], writeStdOut, writeStdErr, writeInfo);
+                return stdExec({
+                    cmd: ['cargo', 'run'],
+                    cwd: notebook.absdir,
+                    env,
+                }, writeStdOut, writeStdErr, writeInfo);
             } else {
-                return stdExec([
-                    'sh', '-c', "rustc -o /tmp/code.out '" + notebook.abspath + "' && /tmp/code.out"
-                ], writeStdOut, writeStdErr, writeInfo);
+                return stdExec({
+                    cmd: [
+                        'sh', '-c', "rustc -o /tmp/code.out " + notebook.mainfilename + " && /tmp/code.out"
+                    ],
+                    cwd: notebook.absdir,
+                    env,
+                }, writeStdOut, writeStdErr, writeInfo);
             }
         }
     },

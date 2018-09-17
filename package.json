@@ -18,6 +18,7 @@
     "body-parser": "^1.18.3",
     "codemirror": "^5.40.0",
     "dockerode": "^2.5.6",
+    "dotenv": "^6.0.0",
     "express": "^4.16.3",
     "globby": "^8.0.1",
     "minimist": "^1.2.0",

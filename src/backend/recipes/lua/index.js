@@ -9,7 +9,7 @@ const recipe = ({
     mainfile: ['index.lua', 'main.lua'],
     cmmode: 'lua',
     dir: __dirname,
-    exec: ({ notebook, docker, writeStdOut, writeStdErr, writeInfo }) => {
+    exec: ({ notebook, docker, writeStdOut, writeStdErr, writeInfo, env }) => {
 
         if (docker) {
             return stdExecDocker({
@@ -19,11 +19,14 @@ const recipe = ({
                 mounts: [
                     { from: notebook.absdir, to: '/code', mode: 'rw' },
                 ],
+                env,
             }, writeStdOut, writeStdErr, writeInfo);
         } else {
-            return stdExec([
-                'lua', notebook.absdir + '/' + notebook.mainfilename,
-            ], writeStdOut, writeStdErr, writeInfo);
+            return stdExec({
+                cmd: ['lua', notebook.mainfilename],
+                cwd: notebook.absdir,
+                env,
+            }, writeStdOut, writeStdErr, writeInfo);
         }
     },
     init: async ({ name, notebookspath }) => await defaultInitNotebook(recipe, notebookspath, name),

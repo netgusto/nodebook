@@ -14,7 +14,7 @@ const recipe = ({
     mainfile: ['index.ts', 'main.ts'],
     cmmode: 'javascript',
     dir: __dirname,
-    exec: async ({ notebook, docker, writeStdOut, writeStdErr, writeInfo }) => {
+    exec: async ({ notebook, docker, writeStdOut, writeStdErr, writeInfo, env }) => {
 
         const tsnode = await hasTsNode(notebook.absdir);
 
@@ -39,17 +39,24 @@ const recipe = ({
                 mounts: [
                     { from: notebook.absdir, to: '/app', mode: 'rw' },
                 ],
+                env,
             }, writeStdOut, writeStdErr, writeInfo);
 
         } else {
             if (tsnode) {
-                return stdExec([
-                    'sh', '-c', '"' + notebook.absdir + '/node_modules/.bin/ts-node" "' + notebook.abspath + '"',
-                ], writeStdOut, writeStdErr, writeInfo);
+                return stdExec({
+                    cmd: ['sh', '-c', 'node_modules/.bin/ts-node ' + notebook.mainfilename],
+                    cwd: notebook.absdir,
+                    env,
+                }, writeStdOut, writeStdErr, writeInfo);
             } else {
-                return stdExec([
-                    'sh', '-c', 'tsc --allowJs --outFile /tmp/code.js "' + notebook.abspath + '" && node /tmp/code.js',
-                ], writeStdOut, writeStdErr, writeInfo);
+                return stdExec({
+                    cmd: [
+                        'sh', '-c', 'tsc --allowJs --outFile /tmp/code.js "' + notebook.mainfilename + '" && node /tmp/code.js',
+                    ],
+                    cwd: notebook.absdir,
+                    env,
+                }, writeStdOut, writeStdErr, writeInfo);
             }
         }
     },

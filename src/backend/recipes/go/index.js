@@ -9,7 +9,7 @@ const recipe = ({
     mainfile: ['index.go', 'main.go'],
     cmmode: 'go',
     dir: __dirname,
-    exec: ({ notebook, docker, writeStdOut, writeStdErr, writeInfo }) => {
+    exec: ({ notebook, docker, writeStdOut, writeStdErr, writeInfo, env }) => {
         if (docker) {
             return stdExecDocker({
                 image: 'golang:latest',
@@ -18,11 +18,14 @@ const recipe = ({
                 mounts: [
                     { from: notebook.absdir, to: '/code', mode: 'rw' },
                 ],
+                env,
             }, writeStdOut, writeStdErr, writeInfo);
         } else {
-            return stdExec([
-                'go', 'run', notebook.absdir + '/' + notebook.mainfilename,
-            ], writeStdOut, writeStdErr, writeInfo);
+            return stdExec({
+                cmd: ['go', 'run', notebook.mainfilename],
+                cwd: notebook.absdir,
+                env,
+            }, writeStdOut, writeStdErr, writeInfo);
         }
     },
     init: async ({ name, notebookspath }) => await defaultInitNotebook(recipe, notebookspath, name),
