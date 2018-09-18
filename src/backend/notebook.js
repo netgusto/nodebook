@@ -1,14 +1,11 @@
 const { stat, lstat, readFile, writeFile, rename: renameDir } = require('fs');
-const { resolve: resolvePath, basename, dirname, join: pathJoin } = require('path');
-const globby = require('globby');
+const { dirname, join: pathJoin } = require('path');
 const dotenv = require('dotenv');
 
-const { getRecipes, getRecipeForMainFilename } = require('./recipes');
 const { buildUrl } = require('./buildurl');
 
 module.exports = {
     listNotebooks,
-    getNotebookByName,
     getFileContent,
     updateNotebookContent,
     execNotebook,
@@ -19,87 +16,12 @@ module.exports = {
     renameNotebook,
 };
 
-let notebookscache = undefined;
-
-function globAllRecipesMainFiles({ notebookspath, depth }) {
-    return globby(
-        notebookspath,
-        {
-            absolute: true,
-            onlyFiles: true,
-            deep: depth,
-            case: false,
-            ignore: ['**/node_modules'],    // in the case not .gitignore is set in the notebook!
-            gitignore: true,
-            nobrace: true,
-            noext: true,
-            expandDirectories: {
-                files: getAllRecipesMainFiles(),
-            }
-        }
-    );
-}
-
-async function buildNotebooksCache(notebookspath) {
-
-    const items = await globAllRecipesMainFiles({ notebookspath, depth: 2 });
-
-    return await Promise.all(
-        items
-            .map(async abspath => await getNotebookByMainFilePath(notebookspath, abspath))
-    );
-}
-
-async function getNotebooksCache(notebookspath) {
-    if (notebookscache === undefined) {
-        notebookscache = await buildNotebooksCache(notebookspath);
-    }
-
-    return notebookscache;
-}
-
-async function getNotebookByMainFilePath(notebookspath, abspath) {
-    const absdir = dirname(abspath);
-    if (absdir === notebookspath) return undefined; // avoid depth === 0
-
-    const mainfilename = basename(abspath);
-    const recipe = getRecipeForMainFilename(mainfilename);
-    if (!recipe) return undefined;
-
-    const name = absdir.substr(notebookspath.length + 1);
-
-    const stat = await new Promise(resolve => lstat(abspath, function (err, stat) {
-        resolve(stat);
-    }));
-
-    return {
-        name,
-        mainfilename,
-        absdir,
-        abspath,
-        recipe,
-        mtime: stat.mtime,
-    };
-}
-
-async function getNotebookByName(notebookspath, name) {
-    const absdir = pathJoin(notebookspath, name);
-
-    const exists = await new Promise(resolve => lstat(absdir, err => resolve(!err)));
-    if (!exists) return undefined;
-
-    const mainfiles = await globAllRecipesMainFiles({ notebookspath: absdir, depth: 0 });  // depth 0: only files in given dir
-
-    if (mainfiles.length === 0) return undefined;   // no notebook found at given dir
-
-    return await getNotebookByMainFilePath(notebookspath, mainfiles[0]);
-}
-
-async function listNotebooks(notebookspath) {
+async function listNotebooks({ notebookregistry }) {
 
     const res = new Map();
 
-    (await getNotebooksCache(notebookspath))
+    notebookregistry
+        .getNotebooks()
         .filter(notebook => notebook !== undefined)
         .sort((a, b) => a.abspath.toLowerCase() < b.abspath.toLowerCase() ? -1 : 1)
         .forEach(notebook => res.set(notebook.name, notebook));
@@ -125,7 +47,7 @@ function setFileContent(abspath, content) {
     });
 }
 
-async function updateNotebookContent(notebookspath, notebook, content) {
+async function updateNotebookContent(notebook, content, notebookregistry) {
     try {
         await setFileContent(notebook.abspath, content);
     } catch(e) {
@@ -133,14 +55,7 @@ async function updateNotebookContent(notebookspath, notebook, content) {
         return false;
     }
 
-    const cache = (await getNotebooksCache(notebookspath));
-    const nbindex = cache.findIndex(nb => nb.name === notebook.name);
-    if (nbindex > -1) {
-        // Update notebook mtime
-        cache.splice(nbindex, 1);
-        cache.push(await getNotebookByName(notebookspath, notebook.name));
-    }
-
+    return await notebookregistry.refresh({ name: notebook.name, mainfile: notebook.mainfilename });
 }
 
 async function execNotebook(notebook, docker, res) {
@@ -163,20 +78,20 @@ async function execNotebook(notebook, docker, res) {
     return { start, stop };
 }
 
-async function newNotebook(notebookspath, name, recipe) {
+async function newNotebook(notebookspath, name, recipe, notebookregistry) {
     const success = await recipe.init({ notebookspath, name });
     if (success) {
-        const notebook = await getNotebookByName(notebookspath, name);
-        if (!notebook) return false;
-
         // update cache
-        (await getNotebooksCache(notebookspath)).push(notebook);
+        const notebook = await notebookregistry.register({ name });
+        if (!notebook) {
+            return false;
+        }
     }
 
     return success;
 }
 
-async function renameNotebook(notebookspath, notebook, newname) {
+async function renameNotebook(notebook, newname, notebookregistry) {
 
     const newabsdir = pathJoin(dirname(notebook.absdir), newname);
     const exists = await new Promise(resolve => lstat(newabsdir, err => resolve(!err)));
@@ -189,16 +104,9 @@ async function renameNotebook(notebookspath, notebook, newname) {
     );
 
     if (!ok) return false;
-    const renamedNotebook = await getNotebookByName(notebookspath, newname);
 
+    const renamedNotebook = await notebookregistry.renamed(notebook.name, newname);
     if (!renamedNotebook) return false;
-    (await getNotebooksCache(notebookspath)).push(renamedNotebook);
-
-    const nbindex = (await getNotebooksCache(notebookspath)).findIndex(nb => nb.name === notebook.name);
-    if (nbindex > -1) {
-        // remove old name
-        (await getNotebooksCache(notebookspath)).splice(nbindex, 1);
-    }
 
     return true;
 }
@@ -235,10 +143,6 @@ function extractFrontendRecipeSummary(recipe) {
         language: recipe.language,
         cmmode: recipe.cmmode,
     };
-}
-
-function getAllRecipesMainFiles() {
-    return getRecipes().reduce((carry, recipe) => carry = [...carry, ...recipe.mainfile], []);
 }
 
 async function getNotebookEnv(notebook) {
