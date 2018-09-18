@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const compression = require('compression');
 const http = require('http');
 
 const { Trunk } = require('trunk');
@@ -44,6 +45,7 @@ async function app({ port, bindaddress, notebookspath, logger, docker }) {
     const app = express();
 
     app.use(bodyParser.json());
+    app.use(compression());
 
     app.get('/', handleHomePage({ trunk }));
     app.get('/notebook/:name', handleNoteBook({ trunk }));
