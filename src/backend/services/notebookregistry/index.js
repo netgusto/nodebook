@@ -7,7 +7,7 @@ module.exports = class NotebookRegistry {
 
     constructor(notebookspath, reciperegistry) {
         this.notebookspath = notebookspath;
-        this.depth = 1;
+        this.depth = 2;
         this.watcher = undefined;
         this.ready = false;
         this.reciperegistry = reciperegistry;
@@ -37,8 +37,7 @@ module.exports = class NotebookRegistry {
                     this.initializeRegistry(this.watcher.getWatched());
 
                     this.watcher
-                        .on('add', path => this.addFile(path))
-                        .on('unlinkDir', path => this.unlinkDir(path));
+                        .on('add', path => this.addFile(path));
 
                     resolve();
                 })
@@ -82,6 +81,15 @@ module.exports = class NotebookRegistry {
         const recipe = this.reciperegistry.getRecipeForMainFilename(mainfilename);
         if (!recipe) return undefined;
 
+        // TODO: improve this
+        // Used right now for rust src/main.rs
+        const parts = notebookname.split('/');
+
+        if (parts.length > 1) {
+            mainfilename = parts.slice(1).join('/') + '/' + mainfilename;
+            notebookname = parts[0];
+        }
+
         const absdir = pathJoin(this.notebookspath, notebookname);
         const abspath = pathJoin(absdir, mainfilename)
     
@@ -106,10 +114,6 @@ module.exports = class NotebookRegistry {
             name: this.determineNotebookNameByAbsDir(absdir),
             mainfile,
         });
-    }
-
-    unlinkDir(path) {
-        console.log('unlinkDir', path);
     }
 
     getNotebooks() {
