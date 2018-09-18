@@ -1,8 +1,12 @@
 const chai = require('chai');
 const chaiAsPromised = require("chai-as-promised");
 const { dirname, resolve } = require('path');
+const { Trunk } = require('trunk');
 
 const { listNotebooks, getFileContent } = require('../../src/backend/notebook');
+
+const NotebookRegistry = require('../../src/backend/services/notebookregistry');
+const RecipeRegistry = require('../../src/backend/services/reciperegistry');
 
 const { expect } = chai;
 chai.use(chaiAsPromised);
@@ -14,52 +18,71 @@ describe('notebook functions', function () {
     const validNotebookPath = validDirpath + '/' + validNotebook;
     const validNotebookFilePath = validNotebookPath + '/index.js';
 
-    it('should list notebooks', function () {
-        return expect(listNotebooks(validDirpath).then(map => {
-            const res = {};
-            map.forEach((value, key) => {
-                res[key] = value;
-                res[key].recipe.exec = undefined;
-                res[key].recipe.init = undefined;
-                res[key].recipe.dir = undefined;
-                res[key].mtime = undefined;
-            });
-            return res;
-        }))
-            .to.eventually.deep.include({
-                [validNotebook]: {
-                    name: validNotebook,
-                    mainfilename: 'index.js',
-                    absdir: validNotebookPath,
-                    abspath: validNotebookFilePath,
-                    recipe: {
-                        key: "nodejs",
-                        name: "NodeJS",
-                        language: "JavaScript",
-                        cmmode: "javascript",
-                        dir: undefined,
-                        mainfile: ["index.js", "main.js"],
-                        exec: undefined,
-                        init: undefined,
-                    },
-                    mtime: undefined,
-                }
-            });
+    let trunk;
+
+    before(async () => {
+        trunk = await getTrunk();
     });
 
-    it('should not list notebooks at depth 0', function (done) {
-        listNotebooks(validDirpath)
-        .then(notebooks => {
-            notebooks.forEach((notebook, key) => {
-                expect(notebook.absdir).to.not.eq(validDirpath);
+    async function getTrunk() {
+        const trunk = new Trunk();
+        trunk
+            .add('notebookspath', () => validDirpath)
+            .add('reciperegistry', () => new RecipeRegistry())
+            .add('notebookregistry', ['notebookspath', 'reciperegistry'], async (notebookspath, reciperegistry) => {
+                const notebookregistry = new NotebookRegistry(notebookspath, reciperegistry);
+                await notebookregistry.mount();
+                return notebookregistry;
             });
-        })
-        .then(done)
-        .catch(done);
+        
+        await trunk.open();
+
+        return trunk;
+    }
+
+    it('should list notebooks', async () => {
+
+        const notebookregistry = trunk.get('notebookregistry');
+        const notebooks = await listNotebooks({ notebookregistry });
+        const notebook = notebooks.has(validNotebook) ? notebooks.get(validNotebook) : undefined;
+
+        expect(notebook).to.not.be.undefined;
+
+        expect(notebook).to.contain({
+            name: validNotebook,
+            mainfilename: 'index.js',
+            absdir: validNotebookPath,
+            abspath: validNotebookFilePath,
+        });
+
+        expect(notebook.recipe).to.not.be.undefined;
+
+        expect(notebook.recipe).to.deep.contain({
+            key: "nodejs",
+            name: "NodeJS",
+            language: "JavaScript",
+            cmmode: "javascript",
+            mainfile: ["index.js", "main.js"],
+        });
     });
 
-    it('should get notebook content', () => {
-        return expect(getFileContent(validNotebookFilePath))
-            .to.eventually.eq('console.log(\'Hello, World!\');');
+    it('should not list notebooks at depth 0', async () => {
+
+        const notebookregistry = trunk.get('notebookregistry');
+        const notebooks = await listNotebooks({ notebookregistry });
+
+        notebooks.forEach((notebook, key) => {
+            expect(notebook.absdir).to.not.eq(validDirpath);
+        });
+    });
+
+    it('should get notebook content', async () => {
+        expect(await getFileContent(validNotebookFilePath))
+            .to.eq('console.log(\'Hello, World!\');');
+    });
+
+    after(async () => {
+        const notebookregistry = trunk.get('notebookregistry');
+        await notebookregistry.unmount();
     });
 });

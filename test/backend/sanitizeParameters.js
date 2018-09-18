@@ -1,5 +1,5 @@
 const expect = require('chai').expect;
-const { sanitizeParameters } = require('../../src/backend/app');
+const { sanitizeParameters } = require('../../src/backend/sanitizeparameters');
 const { dirname, resolve } = require('path');
 
 describe('sanitizeParameters()', function () {

@@ -1,32 +1,36 @@
 const { app, BrowserWindow } = require('electron');
-const { sanitizeParameters } = require('./sanitizeParameters');
 
-require('./index'); // main express app
+const start = require('./start'); // main express app
 
 let win;
 
 async function createWindow() {
-    let parameters;
+    let info;
+
     try {
-        parameters = await sanitizeParameters(process.argv.slice(2));
+        info = await start();
+        if (info !== undefined) {
+            const { service, parameters } = info;
+
+            mainWindow = new BrowserWindow({
+                width: 1280,
+                height: 720
+            });
+
+            mainWindow.loadURL(`http://${parameters.bindaddress}:${parameters.port}/`);
+            mainWindow.focus();
+        } else {
+            app.quit();
+        }
     } catch(e) {
-        return console.error(e.message);
+        console.log(e.message);
+        app.quit();
     }
-
-    mainWindow = new BrowserWindow({
-        width: 1280,
-        height: 720
-    });
-
-    mainWindow.loadURL(`http://${parameters.bindaddress}:${parameters.port}/`);
-    mainWindow.focus();
 }
 
 app.on('ready', createWindow);
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
+    app.quit();
 });
 
 app.on('activate', () => {

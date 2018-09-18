@@ -4,7 +4,6 @@ const titleCase = require('title-case');
 
 const {
     listNotebooks,
-    getNotebookByName,
     getFileContent,
     execNotebook,
     updateNotebookContent,
@@ -16,8 +15,6 @@ const {
 } = require('./notebook');
 
 const { buildUrl } = require('./buildurl');
-
-const { getRecipes, getRecipeByKey } = require('./recipes');
 
 module.exports = {
     handleHomePage,
@@ -42,10 +39,13 @@ function generatePageHtml(route, params = {}) {
         });
 }
 
-function handleHomePage({ notebookspath }) {
+function handleHomePage({ trunk }) {
     return async function (_, res) {
-        const notebooks = await listNotebooks(notebookspath);
-        const recipes = await getRecipes();
+        const reciperegistry = trunk.get('reciperegistry');
+        const notebookregistry = trunk.get('notebookregistry');
+
+        const notebooks = await listNotebooks({ notebookregistry });
+        const recipes = reciperegistry.getRecipes();
 
         const data = [];
         notebooks.forEach((notebook) => data.push(extractFrontendNotebookSummary(notebook)));
@@ -60,11 +60,12 @@ function handleHomePage({ notebookspath }) {
     };
 }
 
-function handleNoteBook({ notebookspath }) {
+function handleNoteBook({ trunk }) {
     return async function (req, res) {
-        const { name } = req.params;
-        const notebook = await getNotebookByName(notebookspath, name);
+        const notebookregistry = trunk.get('notebookregistry');
 
+        const { name } = req.params;
+        const notebook = notebookregistry.getNotebookByName(name);
         if (!notebook) return res.send('Notebook not found');
 
         const persisturl = buildUrl('notebooksetcontent', { name });
@@ -94,17 +95,21 @@ function handleNoteBook({ notebookspath }) {
     };
 }
 
-function handleAPINoteBookSetContent({ notebookspath }) {
+function handleAPINoteBookSetContent({ trunk }) {
     return async function (req, res) {
+        const notebookregistry = trunk.get('notebookregistry');
+
         const { name } = req.params;
         const { content } = req.body;
 
         if (content === undefined) return res.status(400).send('Notebook content not set on POST');
 
-        const notebook = await getNotebookByName(notebookspath, name);
+        const notebook = notebookregistry.getNotebookByName(name);
         if (!notebook) return res.status(400).send('Notebook not found');
 
-        const success = await updateNotebookContent(notebookspath, notebook, content);
+        const success = await updateNotebookContent(notebook, content, notebookregistry);
+        if (!success) return res.status(400).send('Could not update notebook content');
+
         res.set('Content-Type', 'application/json');
         setNoCache(res);
         res.send('"OK"');
@@ -113,14 +118,16 @@ function handleAPINoteBookSetContent({ notebookspath }) {
 
 let running = [];
 
-function handleAPINoteBookExec({ notebookspath, docker }) {
+function handleAPINoteBookExec({ trunk }) {
     return async function (req, res) {
+        const docker = trunk.get('docker');
+        const notebookregistry = trunk.get('notebookregistry');
+
         const { name } = req.params;
 
         res.set('Content-Type', 'text/plain');
 
-        const notebook = await getNotebookByName(notebookspath, name);
-
+        const notebook = notebookregistry.getNotebookByName(name);
         if (!notebook) return res.status(400).send('Notebook not found');
 
         setNoCache(res);
@@ -133,13 +140,15 @@ function handleAPINoteBookExec({ notebookspath, docker }) {
     };
 }
 
-function handleAPINoteBookStop({ notebookspath, docker }) {
+function handleAPINoteBookStop({ trunk }) {
     return async function (req, res) {
+        const notebookregistry = trunk.get('notebookregistry');
+
         const { name } = req.params;
 
         res.set('Content-Type', 'text/plain');
 
-        const notebook = await getNotebookByName(notebookspath, name);
+        const notebook = notebookregistry.getNotebookByName(name);
         if (!notebook) return res.status(400).send('Notebook not found');
 
         running.map(async stop => await stop());
@@ -149,13 +158,17 @@ function handleAPINoteBookStop({ notebookspath, docker }) {
     };
 }
 
-function handleAPINoteBookNew({ notebookspath }) {
+function handleAPINoteBookNew({ trunk }) {
     return async function (req, res) {
+        const notebookspath = trunk.get('notebookspath');
+        const notebookregistry = trunk.get('notebookregistry');
+        const reciperegistry = trunk.get('reciperegistry');
+
         const { recipekey } = req.body;
         res.set('Content-Type', 'text/plain');
 
         // find recipe
-        const recipe = getRecipeByKey(recipekey);
+        const recipe = reciperegistry.getRecipeByKey(recipekey);
         if (recipe === undefined) {
             return res.status(400).send('Recipe does not exist');
         }
@@ -164,12 +177,13 @@ function handleAPINoteBookNew({ notebookspath }) {
         let name;
         do {
             name = sanitizeNotebookName(titleCase(generateName().spaced));
-        } while (await getNotebookByName(notebookspath, name));
+        } while (notebookregistry.getNotebookByName(name));
 
         let done;
         try {
-            done = await newNotebook(notebookspath, name, recipe);
+            done = await newNotebook(notebookspath, name, recipe, notebookregistry);
         } catch(e) {
+            console.log(e);
             done = false;
         }
 
@@ -177,9 +191,9 @@ function handleAPINoteBookNew({ notebookspath }) {
             return res.status(400).send('Notebook initialization failed');
         }
 
-        const notebook = await getNotebookByName(notebookspath, name);
+        const notebook = notebookregistry.getNotebookByName(name);
         if (!notebook) {
-            return res.status(400).send('Notebook initialization failed');
+            return res.status(400).send('Notebook initialization failed2');
         }
 
         res.set('Content-Type', 'application/json');
@@ -188,15 +202,17 @@ function handleAPINoteBookNew({ notebookspath }) {
     };
 }
 
-function handleAPINoteBookRename({ notebookspath }) {
+function handleAPINoteBookRename({ trunk }) {
     return async function (req, res) {
+        const notebookregistry = trunk.get('notebookregistry');
+
         const { name: oldname } = req.params;
         const { newname } = req.body;
 
         res.set('Content-Type', 'text/plain');
 
         // Generate name
-        const notebook = await getNotebookByName(notebookspath, oldname);
+        const notebook = notebookregistry.getNotebookByName(oldname);
         if (!notebook) {
             return res.status(400).send('Notebook does not exist.');
         }
@@ -211,7 +227,7 @@ function handleAPINoteBookRename({ notebookspath }) {
         
         let done;
         try {
-            done = await renameNotebook(notebookspath, notebook, sanitizedNewName);
+            done = await renameNotebook(notebook, sanitizedNewName, notebookregistry);
         } catch(e) {
             console.log(e);
             done = false;
@@ -221,7 +237,7 @@ function handleAPINoteBookRename({ notebookspath }) {
             return res.status(400).send('Notebook rename failed');
         }
 
-        const notebookRenamed = await getNotebookByName(notebookspath, sanitizedNewName);
+        const notebookRenamed = notebookregistry.getNotebookByName(sanitizedNewName);
         if (!notebookRenamed) {
             return res.status(400).send('Notebook rename failed');
         }
