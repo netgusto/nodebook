@@ -1,6 +1,7 @@
 import * as React from 'react';
 import cx from 'classnames';
 import { AllHtmlEntities as Entities } from 'html-entities';
+import Convert from 'ansi-to-html';
 
 import {UnControlled as CodeMirror} from 'react-codemirror2'
 const CM = CodeMirror as any;
@@ -58,7 +59,8 @@ export default class NotebookComponent extends React.Component<Props, State> {
 
     private boundHandleKeyDown: EventListener;
     private editorvalue: string;
-    private entities: any;
+    private entities: Entities;
+    private ansiConvert: Convert;
     private console: HTMLElement;
 
     constructor(props: Props) {
@@ -66,6 +68,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
         this.boundHandleKeyDown = this.handleKeyDown.bind(this);
         this.editorvalue = props.notebook.content;
         this.entities = new Entities();
+        this.ansiConvert = new Convert();
     }
 
     componentWillMount() {
@@ -328,7 +331,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
     }
 
     consoleLog(msg: string, cls: string) {
-        this.console.innerHTML += '<span class="' + cls + '">' + this.entities.encode(msg) + '</span>';
+        this.console.innerHTML += '<span class="' + cls + '">' + this.ansiConvert.toHtml(this.entities.encode(msg)) + '</span>';
         this.console.scrollTop = this.console.scrollHeight;
     }
 

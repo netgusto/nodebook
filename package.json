@@ -18,6 +18,7 @@
     "body-parser": "^1.18.3",
     "chokidar": "^2.0.4",
     "codemirror": "^5.40.0",
+    "compression": "^1.7.3",
     "dockerode": "^2.5.6",
     "dotenv": "^6.0.0",
     "express": "^4.16.3",
