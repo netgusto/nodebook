@@ -4,6 +4,7 @@ const recipeNodeJS = require('./nodejs');
 const recipeTypescript = require('./typescript');
 const recipeC = require('./c');
 const recipeCpp = require('./cpp');
+const recipeElixir = require('./elixir');
 const recipeGo = require('./go');
 const recipeHaskell = require('./haskell');
 const recipeJava = require('./java');
@@ -21,6 +22,7 @@ const recipes = [
     recipeTypescript,
     recipeC,
     recipeCpp,
+    recipeElixir,
     recipeGo,
     recipeHaskell,
     recipeJava,
