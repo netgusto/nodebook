@@ -45,7 +45,20 @@ async function app({ port, bindaddress, notebookspath, logger, docker }) {
     const app = express();
 
     app.use(bodyParser.json());
-    app.use(compression());
+    app.use(compression({ filter: (req, res) => {
+        if (req.headers['x-no-compression']) {
+            // do not compress responses with this request header
+            return false
+        }
+
+        if (req.route && req.route.path === '/api/notebook/:name/exec') {
+            // do not compress exec response (streamed)
+            return false;
+        }
+      
+        // fallback to standard filter function
+        return compression.filter(req, res)
+    }}));
 
     app.get('/', handleHomePage({ trunk }));
     app.get('/notebook/:name', handleNoteBook({ trunk }));

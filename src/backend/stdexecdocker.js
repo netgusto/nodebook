@@ -23,21 +23,21 @@ module.exports = function stdExecDocker(ctnrinfo, writeStdOut, writeStdErr, writ
             const { image, cmd, cwd, mounts, env } = ctnrinfo;
 
             const stdout = new stream.Writable({
-                write: (chunk, encoding, done) => {
+                write: (chunk, _, done) => {
                     writeStdOut(chunk.toString('utf-8'));
                     done();
                 }
             });
 
             const stderr = new stream.Writable({
-                write: (chunk, encoding, done) => {
+                write: (chunk, _, done) => {
                     writeStdErr(chunk.toString('utf-8'));
                     done();
                 }
             });
 
             const stdinfo = new stream.Writable({
-                write: (chunk, encoding, done) => {
+                write: (chunk, _, done) => {
                     writeInfo(chunk.toString('utf-8'));
                     done();
                 }
