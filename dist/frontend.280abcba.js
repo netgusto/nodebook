@@ -150,4 +150,4 @@ var e;!function(n){"object"==typeof exports&&"object"==typeof module?n(require("
 },{"react":"iwnN","../Home":"dzp2","../Notebook":"1P3/"}],"zo2T":[function(require,module,exports) {
 "use strict";var r=Object.assign||function(r){for(var e=1;e<arguments.length;e++){var t=arguments[e];for(var n in t)Object.prototype.hasOwnProperty.call(t,n)&&(r[n]=t[n])}return r},e=this&&this.__importStar||function(r){if(r&&r.__esModule)return r;var e={};if(null!=r)for(var t in r)Object.hasOwnProperty.call(r,t)&&(e[t]=r[t]);return e.default=r,e},t=this&&this.__importDefault||function(r){return r&&r.__esModule?r:{default:r}};exports.__esModule=!0;var n=e(require("react")),o=e(require("react-dom")),a=t(require("./Components/App"));window.main=function(e,t,i){o.render(n.createElement(a.default,r({route:t},i)),e)};
 },{"react":"iwnN","react-dom":"iwnN","./Components/App":"88O9"}]},{},["zo2T"], null)
-//# sourceMappingURL=/frontend.90daed87.map
+//# sourceMappingURL=/frontend.280abcba.map

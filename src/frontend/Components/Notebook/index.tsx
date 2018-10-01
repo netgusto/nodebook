@@ -59,7 +59,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
 
     private boundHandleKeyDown: EventListener;
     private editorvalue: string;
-    private entities: Entities;
+    private entities: any;
     private ansiConvert: Convert;
     private console: HTMLElement;
 
@@ -355,7 +355,7 @@ function persist(notebook: Notebook, value: string) {
 
 const debouncedPersist = debounce(persist, 400);
 
-function debounce(func: Function, wait: Number = 100) {
+function debounce(func: Function, wait: number = 100) {
     let timeout;
     return function (...args) {
         clearTimeout(timeout);
