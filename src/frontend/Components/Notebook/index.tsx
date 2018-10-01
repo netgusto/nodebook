@@ -20,6 +20,8 @@ import 'codemirror/mode/r/r';
 import 'codemirror/mode/ruby/ruby';
 import 'codemirror/mode/rust/rust';
 import 'codemirror/mode/swift/swift';
+import 'codemirror/mode/swift/swift';
+import 'codemirror-mode-elixir';
 
 import 'codemirror/keymap/sublime';
 
