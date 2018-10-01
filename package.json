@@ -1,6 +1,6 @@
 {
   "name": "nbk",
-  "version": "0.1.13",
+  "version": "0.1.14",
   "description": "Nodebook - Multi-Language REPL with web UI",
   "main": "src/backend/index.js",
   "scripts": {
@@ -35,6 +35,7 @@
     "chai-as-promised": "^7.1.1",
     "chai-http": "^4.2.0",
     "classnames": "^2.2.6",
+    "codemirror-mode-elixir": "^1.1.1",
     "concurrently": "^4.0.1",
     "date-fns": "^1.29.0",
     "electron": "^2.0.9",
