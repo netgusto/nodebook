@@ -23,6 +23,7 @@ A notebook is a folder containing an `{index|main}.{js,py,c,cpp,...}` file. The 
 * Java `(.java)`
 * NodeJS `(.js)`
 * Lua `(.lua)`
+* OCaml `(.ml)`
 * PHP `(.php)`
 * Python 3 `(.py)`
 * R `(.r, .R)`

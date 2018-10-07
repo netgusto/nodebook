@@ -9,6 +9,7 @@ const recipeGo = require('./go');
 const recipeHaskell = require('./haskell');
 const recipeJava = require('./java');
 const recipeLua = require('./lua');
+const recipeOCaml = require('./ocaml');
 const recipePHP = require('./php');
 const recipePython3 = require('./python3');
 const recipeR = require('./r');
@@ -27,6 +28,7 @@ const recipes = [
     recipeHaskell,
     recipeJava,
     recipeLua,
+    recipeOCaml,
     recipePHP,
     recipePython3,
     recipeR,
