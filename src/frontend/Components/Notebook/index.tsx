@@ -14,6 +14,7 @@ import 'codemirror/mode/clike/clike';
 import 'codemirror/mode/go/go';
 import 'codemirror/mode/haskell/haskell';
 import 'codemirror/mode/lua/lua';
+import 'codemirror/mode/mllike/mllike';
 import 'codemirror/mode/php/php';
 import 'codemirror/mode/python/python';
 import 'codemirror/mode/r/r';

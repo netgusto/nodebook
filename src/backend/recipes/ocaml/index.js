@@ -7,7 +7,7 @@ const recipe = ({
     name: 'OCaml',
     language: 'OCaml',
     mainfile: ['index.ml', 'main.ml'],
-    cmmode: 'ocaml',
+    cmmode: 'mllike',
     dir: __dirname,
     exec: ({ notebook, docker, writeStdOut, writeStdErr, writeInfo, env }) => {
 
