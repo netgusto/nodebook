@@ -69,6 +69,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
         this.boundHandleKeyDown = this.handleKeyDown.bind(this);
+        this.onNotebookNameKeyDown = this.onNotebookNameKeyDown.bind(this);
         this.editorvalue = props.notebook.content;
         this.entities = new Entities();
         this.ansiConvert = new Convert();
@@ -119,6 +120,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
                                 className="notebook-name"
                                 onBlur={e => this.onNotebookNameCommit()}
                                 onInput={e => this.onNotebookNameChange((e.target as HTMLElement).innerText)}
+                                onKeyDown={this.onNotebookNameKeyDown}
                             >
                                 {newname === undefined ? notebook.name : newname}
                             </span>
@@ -185,7 +187,13 @@ export default class NotebookComponent extends React.Component<Props, State> {
 
         return name;
     }
-
+    private onNotebookNameKeyDown(event) {
+        if (event.keyCode == 13) { // Enter
+            event.preventDefault();
+            this.onNotebookNameCommit();
+            return;
+        }
+    }
     private onNotebookNameChange(newname) {
         this.setState({ newname });
     }
