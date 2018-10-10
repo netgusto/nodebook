@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.18.3",
+    "chalk": "^2.4.1",
     "chokidar": "^2.0.4",
     "codemirror": "^5.40.0",
     "compression": "^1.7.3",
