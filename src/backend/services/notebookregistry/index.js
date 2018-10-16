@@ -5,12 +5,13 @@ const globby = require('globby');
 
 module.exports = class NotebookRegistry {
 
-    constructor(notebookspath, reciperegistry) {
+    constructor(notebookspath, reciperegistry, onChange = undefined) {
         this.notebookspath = notebookspath;
         this.depth = 2;
         this.watcher = undefined;
         this.ready = false;
         this.reciperegistry = reciperegistry;
+        this.onChange = onChange;
 
         this.notebookscache = [];
     }
@@ -18,7 +19,6 @@ module.exports = class NotebookRegistry {
     mount() {
         return new Promise((resolve, reject) => {
 
-            // const glob = this.reciperegistry.getAllRecipesMainFiles().map(mainfile => pathJoin(this.notebookspath, '**', mainfile));
             const glob = pathJoin(this.notebookspath, '**', '{' + this.reciperegistry.getAllRecipesMainFiles().join(',') + '}');
 
             this.watcher = chokidar
@@ -38,6 +38,10 @@ module.exports = class NotebookRegistry {
 
                     this.watcher
                         .on('add', path => this.addFile(path));
+                    
+                    if (this.onChange) {
+                        this.watcher.on('change', path => this.addFile(path));
+                    }
 
                     resolve();
                 })
@@ -156,6 +160,10 @@ module.exports = class NotebookRegistry {
         }
 
         this.notebookscache.push(notebook);
+
+        if (this.onChange) {
+            this.onChange(notebook);
+        }
 
         return notebook;
     }

@@ -1,11 +1,13 @@
 # nodebook [![Build Status](https://travis-ci.com/netgusto/nodebook.svg?branch=master)](https://travis-ci.com/netgusto/nodebook)
 
-Nodebook - Multi-Language REPL with Web UI
+Nodebook - Multi-Language REPL with Web UI + CLI code runner
 
 ## What is it?
 
 Nodebook is an in-browser REPL supporting many programming languages. Code's on the left, Console's on the right. Click "Run" or press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> or <kbd>Cmd</kbd>+<kbd>Enter</kbd> to run your code.
 Code is automatically persisted on the file system.
+
+**You can also use Nodebook directly on the command line**, running your notebooks upon change.
 
 ![nodebook](https://user-images.githubusercontent.com/4974818/45320903-2cdec280-b544-11e8-9b2e-067b646de751.png)
 
@@ -42,10 +44,15 @@ Otherwise, the development environments on your local machine will be used.
 # Install
 $ npm i -g --production nbk
 
-# Run
+# Run with Web UI
 $ nbk path/to/notebooks
 # Or
 $ nbk --notebooks path/to/notebooks
+
+# Run on CLI
+$ nbkcli path/to/notebooks
+# Or
+$ nbkcli --notebooks path/to/notebooks
 ```
 
 ## Install and run from source
@@ -74,7 +81,7 @@ $ npm run electron -- --notebooks path/to/notebooks
 
 ## Usage
 
-### Create a Notebook
+### Create a Notebook (Web UI)
 
 Click on the **+ Notebook** button on the Home page, then select the language of the notebook to be created.
 
@@ -82,7 +89,7 @@ Once on the notebook edition page, you can rename the notebook by clicking on it
 
 Notebooks are created in the directory specified by the parameter `--notebooks`.
 
-### Create a Notebook manually
+### Create a Notebook manually (WebUI, CLI)
 
 In the directory where you want your notebooks to be stored, simply create a folder containing a file named `{index|main}.{js,py,c,cpp,...}`.
 
@@ -91,9 +98,12 @@ The notebook's name will be the name of the folder. The notebook language is det
 ### Command line options
 
 * **--notebooks**: path to notebook folders; *required*
+* **--docker**: Execute code in disposable docker containers instead of local system; defaults to `false`
+
+**Web UI only**:
+
 * **--bindaddress**: IP address the http server should bind to; defaults to `127.0.0.1`
 * **--port**: Port used by the application; defaults to `8000`
-* **--docker**: Execute code in disposable docker containers instead of local system; defaults to `false`
 
 ### Notebook environment
 
@@ -109,7 +119,7 @@ More information about the expected file format here: <https://github.com/motdot
 
 ## ⚠️ A bit of warning ⚠️
 
-Do not run this on a port open to public traffic! Doing so would allow remote code execution on your machine.
+Do not run the Web UI on a port open to public traffic! Doing so would allow remote code execution on your machine.
 
 By default, the server binds to `127.0.0.1`, which allows connection from the localhost only. You can override the bind address using `--bindaddress`, but do it only if you know what you're doing.
 

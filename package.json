@@ -1,6 +1,6 @@
 {
   "name": "nbk",
-  "version": "0.1.15",
+  "version": "0.1.16",
   "description": "Nodebook - Multi-Language REPL with web UI",
   "main": "src/backend/index.js",
   "scripts": {
@@ -16,6 +16,7 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.18.3",
+    "chalk": "^2.4.1",
     "chokidar": "^2.0.4",
     "codemirror": "^5.40.0",
     "compression": "^1.7.3",
@@ -58,6 +59,7 @@
     "react-dom": "preact-compat"
   },
   "bin": {
-    "nbk": "bin/nbk"
+    "nbk": "bin/nbk",
+    "nbkcli": "bin/nbkcli"
   }
 }
