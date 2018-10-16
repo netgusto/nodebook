@@ -59,6 +59,7 @@
     "react-dom": "preact-compat"
   },
   "bin": {
-    "nbk": "bin/nbk"
+    "nbk": "bin/nbk",
+    "nbkcli": "bin/nbkcli"
   }
 }
