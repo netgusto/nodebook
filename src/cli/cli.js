@@ -1,12 +1,11 @@
 const { Trunk } = require('trunk');
-const chalk = require('chalk');
 const EventEmitter = require('events');
-const { performance } = require('perf_hooks');
 
 const NotebookRegistry = require('../backend/services/notebookregistry');
 const RecipeRegistry = require('../backend/services/reciperegistry');
 
-const { execNotebook } = require('../backend/notebook');
+const { writeInfoLn } = require('./write');
+const { onNotebookChange, withProcessQueue, withSameNotebookChangeThrottle } = require('./onchange');
 
 module.exports = async function cli({ notebookspath, logger, docker }) {
 
@@ -37,10 +36,18 @@ module.exports = async function cli({ notebookspath, logger, docker }) {
             'notebookregistry',
             ['docker', 'notebookspath', 'reciperegistry', 'eventbus'],
             async (docker, notebookspath, reciperegistry, eventbus) => {
+
+                const change = withSameNotebookChangeThrottle(
+                    withProcessQueue(
+                        (notebook) => onNotebookChange(notebook, docker, eventbus),
+                    ),
+                    200,
+                );
+
                 const notebookregistry = new NotebookRegistry(
                     notebookspath,
                     reciperegistry,
-                    (notebook) => onNotebookChange(notebookregistry, docker, notebook, eventbus)
+                    change,
                 );
                 await notebookregistry.mount();
                 return notebookregistry;
@@ -48,57 +55,13 @@ module.exports = async function cli({ notebookspath, logger, docker }) {
         );
 
     await trunk.open();
-}
 
-function write(str) {
-    const data = JSON.parse(str);
-    const msg = JSON.parse(data.data);
-    switch (data.chan) {
-        case 'stdout': {
-            process.stdout.write(msg);
-            break;
-        }
-        case 'stderr': {
-            process.stderr.write(chalk.red(msg));
-            break;
-        }
-        case 'info': {
-            process.stdout.write(chalk.cyan(msg));
-            break;
-        }
+    const registry = trunk.get('notebookregistry');
+
+    const nbnotebooks = registry.getNotebooks().length;
+    if (nbnotebooks) {
+        writeInfoLn("Nodebook started. " + nbnotebooks + " notebook" + (nbnotebooks > 1 ? 's' : '') + " watched in " + notebookspath);
+    } else {
+        writeInfoLn("Nodebook started. No notebook yet in " + notebookspath);
     }
-}
-
-async function onNotebookChange(notebookregistry, docker, notebook, eventbus) {
-
-    const starttime = performance.now();
-
-    const res = {
-        writable: true,
-        finished: false,
-        write,
-    };
-
-    const writeInfo = (msg) => write(JSON.stringify({ chan: 'info', data: JSON.stringify(msg) }));
-
-    const label = notebook.name + ' (' + notebook.recipe.name + ')';
-
-    writeInfo('>>> Executing: ' + label + '\n');
-
-    const { start, stop } = await execNotebook(notebook, docker, res);
-    let interrupted = false;
-    const sigIntHandler = (preventDefault) => {
-        preventDefault();
-        writeInfo('>>> Stopping: ' + label + '\n');
-        stop();
-        writeInfo('>>> Stopped: ' + label + '\n');
-        interrupted = true;
-    };
-
-    eventbus.on('SIGINT', sigIntHandler);
-    await start();
-    eventbus.removeListener('SIGINT', sigIntHandler);
-    if (!interrupted) {
-        writeInfo('>>> Done: ' + label + '; took ' + (performance.now() - starttime).toFixed(1) + 'ms\n');
-    }  
 }
