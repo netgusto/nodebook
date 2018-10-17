@@ -3,10 +3,10 @@ const chaiAsPromised = require("chai-as-promised");
 const { dirname, resolve } = require('path');
 const { Trunk } = require('trunk');
 
-const { listNotebooks, getFileContent } = require('../../src/backend/notebook');
+const { listNotebooks, getFileContent } = require('../../dist/nodejs/backend/notebook');
 
-const NotebookRegistry = require('../../src/backend/services/notebookregistry');
-const RecipeRegistry = require('../../src/backend/services/reciperegistry');
+const { default: NotebookRegistry } = require('../../dist/nodejs/backend/services/notebookregistry');
+const { default: RecipeRegistry } = require('../../dist/nodejs/backend/services/reciperegistry');
 
 const { expect } = chai;
 chai.use(chaiAsPromised);
