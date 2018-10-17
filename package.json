@@ -2,14 +2,15 @@
   "name": "nbk",
   "version": "0.1.17",
   "description": "Nodebook - Multi-Language REPL with web UI",
-  "main": "src/backend/index.js",
+  "main": "dist/nodejs/backend/index.js",
   "scripts": {
     "test": "mocha test/backend",
     "dev": "concurrently --kill-others \"npm run dev-frontend\" \"npm run dev-backend -- $PARAMS\"",
     "dev-frontend": "parcel watch src/frontend/*.html",
-    "dev-backend": "tsc --watch",
+    "compile-backend": "tsc && node dist/nodejs/backend",
+    "dev-backend": "nodemon -e ts --exec \"npm run compile-backend\"",
     "prebuild": "rm -Rf dist",
-    "build": "npm run prebuild && npm run build-backend && npm run build-frontend",
+    "build": "npm run prebuild && npm run build-backend && npm run build-frontend && npm run test",
     "build-backend": "tsc && cpx \"./src/backend/recipes/**/defaultcontent/**\" ./dist/nodejs/backend/recipes",
     "build-frontend": "parcel build src/frontend/*.html --out-dir dist/frontend",
     "electron": "electron ./src/backend/electron.js"

@@ -3,8 +3,8 @@ const chaiHttp = require('chai-http');
 const portfinder = require('portfinder');
 const { dirname, resolve } = require('path');
 
-const { app } = require('../../src/backend/app');
-const { buildUrl } = require('../../src/backend/buildurl');
+const { app } = require('../../dist/nodejs/backend/app');
+const { buildUrl } = require('../../dist/nodejs/backend/buildurl');
 
 chai.use(chaiHttp);
 
