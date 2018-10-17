@@ -11,7 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const stream = require("stream");
 const Docker = require("dockerode");
 const docker = new Docker();
-const envToDockerEnv = env => {
+const envToDockerEnv = (env) => {
     const dockerenv = [];
     if (!env)
         return dockerenv;
@@ -63,20 +63,25 @@ function stdExecDocker(ctnrinfo, writeStdOut, writeStdErr, writeInfo) {
                 try {
                     yield new Promise(resolve => docker.pull(image, function (err, stream) {
                         docker.modem.followProgress(stream, onFinished, onProgress);
-                        function onFinished(err, output) {
+                        function onFinished( /*err, output*/) {
                             resolve();
                         }
                         function onProgress(event) {
                             let percent;
+                            let percentStr;
                             if (event.progressDetail) {
                                 const { current, total } = event.progressDetail;
                                 if (total) {
-                                    percent = ((current / total) * 100).toFixed(2);
-                                    if (percent < 10)
-                                        percent = '0' + percent.toString();
+                                    percent = ((current / total) * 100);
+                                    if (percent < 10) {
+                                        percentStr = '0' + percent.toFixed(2).toString();
+                                    }
+                                    else {
+                                        percentStr = percent.toFixed(2).toString();
+                                    }
                                 }
                             }
-                            stdinfo.write(event.status + (event.id ? ' ' + event.id : '') + (percent ? ' ' + percent + '%' : '') + "\n");
+                            stdinfo.write(event.status + (event.id ? ' ' + event.id : '') + (percentStr ? ' ' + percentStr + '%' : '') + "\n");
                         }
                     }));
                     container = yield docker.createContainer(ctnroptions);

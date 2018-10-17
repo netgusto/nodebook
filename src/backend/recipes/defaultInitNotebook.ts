@@ -1,12 +1,13 @@
 import * as recursiveCopy from 'recursive-copy';
 import { join as pathJoin } from 'path';
+import { Recipe } from '../types';
 
-const defaultInitNotebook = (recipe, notebookspath, name) => copyFilesAndFolders(
+const defaultInitNotebook = (recipe: Recipe, notebookspath: string, name: string) => copyFilesAndFolders(
     pathJoin(pathJoin(recipe.dir, 'defaultcontent')),
     pathJoin(notebookspath, name)
 );
 
-async function copyFilesAndFolders(sourcedir, targetdir) {
+async function copyFilesAndFolders(sourcedir: string, targetdir: string) {
 
     try {
         await recursiveCopy(sourcedir, targetdir, {

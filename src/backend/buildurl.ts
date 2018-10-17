@@ -1,6 +1,6 @@
-export function buildUrl(name, params = {}) {
+export function buildUrl(name: string, params = {}) {
 
-    function replaceParamsInUrl(template, values) {
+    function replaceParamsInUrl(template: string, values: { [key: string]: string }) {
         return template.replace(/\:(.*?)(\/|$)/g, (_, name, delimiter) => {
             return ((name in values) ? encodeURIComponent(values[name]) : '') + delimiter;
         });

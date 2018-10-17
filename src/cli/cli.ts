@@ -1,5 +1,5 @@
 import { Trunk } from 'trunk';
-import * as EventEmitter from 'events';
+import * as Emitter from 'events';
 
 import NotebookRegistry from '../backend/services/notebookregistry';
 import RecipeRegistry from '../backend/services/reciperegistry';
@@ -7,7 +7,7 @@ import RecipeRegistry from '../backend/services/reciperegistry';
 import { writeInfoLn } from './write';
 import { onNotebookChange, withProcessQueue, withSameNotebookChangeThrottle } from './onchange';
 
-export default async function cli({ notebookspath, logger, docker }) {
+export default async function cli({ notebookspath, logger, docker }: { notebookspath: string, logger: any, docker: boolean }) {
 
     process.chdir(notebookspath);
 
@@ -18,7 +18,7 @@ export default async function cli({ notebookspath, logger, docker }) {
         .add('logger', () => logger)
         .add('reciperegistry', () => new RecipeRegistry())
         .add('eventbus', () => {
-            const emitter = new EventEmitter();
+            const emitter = new Emitter();
             const sigIntHandler = () => {
                 let cancelled = false;
                 const cancel = () => cancelled = true;
@@ -35,7 +35,7 @@ export default async function cli({ notebookspath, logger, docker }) {
         .add(
             'notebookregistry',
             ['docker', 'notebookspath', 'reciperegistry', 'eventbus'],
-            async (docker, notebookspath, reciperegistry, eventbus) => {
+            async (docker: boolean, notebookspath: string, reciperegistry: any, eventbus: Emitter.EventEmitter) => {
 
                 const change = withSameNotebookChangeThrottle(
                     withProcessQueue(

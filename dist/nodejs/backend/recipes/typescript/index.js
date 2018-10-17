@@ -67,7 +67,7 @@ const recipe = ({
     init: ({ name, notebookspath }) => __awaiter(this, void 0, void 0, function* () {
         const copied = yield defaultInitNotebook_1.defaultInitNotebook(recipe, notebookspath, name);
         if (!copied)
-            return false;
+            return Promise.resolve(false);
         const notebookabsdir = path_1.join(notebookspath, name);
         return new Promise(resolve => {
             child_process_1.exec('npm i --silent --audit false --prefer-offline --progress false', { cwd: notebookabsdir }, err => {

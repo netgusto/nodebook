@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const trunk_1 = require("trunk");
-const EventEmitter = require("events");
+const Emitter = require("events");
 const notebookregistry_1 = require("../backend/services/notebookregistry");
 const reciperegistry_1 = require("../backend/services/reciperegistry");
 const write_1 = require("./write");
@@ -24,7 +24,7 @@ function cli({ notebookspath, logger, docker }) {
             .add('logger', () => logger)
             .add('reciperegistry', () => new reciperegistry_1.default())
             .add('eventbus', () => {
-            const emitter = new EventEmitter();
+            const emitter = new Emitter();
             const sigIntHandler = () => {
                 let cancelled = false;
                 const cancel = () => cancelled = true;

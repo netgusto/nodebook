@@ -1,15 +1,16 @@
 import { defaultInitNotebook } from '../defaultInitNotebook';
 import stdExec from '../../stdexec';
 import stdExecDocker from '../../stdexecdocker';
+import { Recipe } from '../../types';
 
-const recipe = ({
+const recipe: Recipe = ({
     key: 'java',
     name: 'Java',
     language: 'Java',
     mainfile: ['index.java', 'main.java'],
     cmmode: 'clike',
     dir: __dirname,
-    exec: ({ notebook, docker, writeStdOut, writeStdErr, writeInfo, env }) => {
+    exec: async ({ notebook, docker, writeStdOut, writeStdErr, writeInfo, env }) => {
 
         if (docker) {
             return stdExecDocker({

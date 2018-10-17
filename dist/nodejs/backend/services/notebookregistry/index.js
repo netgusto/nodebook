@@ -11,7 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const chokidar = require("chokidar");
 const path_1 = require("path");
 const fs_1 = require("fs");
-const globby_1 = require("globby");
+const globby = require("globby");
 class NotebookRegistry {
     constructor(notebookspath, reciperegistry, onChange = undefined) {
         this.notebookspath = notebookspath;
@@ -39,9 +39,9 @@ class NotebookRegistry {
                 this.ready = true;
                 this.initializeRegistry(this.watcher.getWatched());
                 this.watcher
-                    .on('add', path => this.addFile(path));
+                    .on('add', (path) => this.addFile(path));
                 if (this.onChange) {
-                    this.watcher.on('change', path => this.addFile(path));
+                    this.watcher.on('change', (path) => this.addFile(path));
                 }
                 resolve();
             })
@@ -122,7 +122,7 @@ class NotebookRegistry {
         const notebookIndex = this.notebookscache.findIndex(nb => nb.name === name);
         return notebookIndex > -1 ? notebookIndex : undefined;
     }
-    register({ name, mainfile = undefined, refresh = false }) {
+    register({ name, mainfile, refresh = false }) {
         return __awaiter(this, void 0, void 0, function* () {
             const currentIdx = this.getNotebookIndexByName(name);
             if (currentIdx !== undefined && !refresh)
@@ -168,7 +168,7 @@ class NotebookRegistry {
     }
     globAllRecipesMainFiles({ notebookspath, depth }) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield globby_1.default(notebookspath, {
+            return yield globby(notebookspath, {
                 absolute: true,
                 onlyFiles: true,
                 deep: depth,

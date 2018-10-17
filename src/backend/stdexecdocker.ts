@@ -1,9 +1,12 @@
 import * as stream from 'stream';
 import * as Docker from 'dockerode';
+
+import { ContainerInfo, EnvInfo, WriterFunc } from './types';
+
 const docker = new Docker();
 
-const envToDockerEnv = env => {
-    const dockerenv = [];
+const envToDockerEnv = (env: EnvInfo) => {
+    const dockerenv: string[] = [];
     if (!env) return dockerenv;
 
     Object.keys(env).forEach(function (key) {
@@ -13,9 +16,9 @@ const envToDockerEnv = env => {
     return dockerenv;
 };
 
-export default function stdExecDocker(ctnrinfo, writeStdOut, writeStdErr, writeInfo) {
+export default function stdExecDocker(ctnrinfo: ContainerInfo, writeStdOut: WriterFunc, writeStdErr: WriterFunc, writeInfo: WriterFunc) {
 
-    let container;
+    let container: Docker.Container;
 
     return {
         start: async () => {
@@ -62,26 +65,31 @@ export default function stdExecDocker(ctnrinfo, writeStdOut, writeStdErr, writeI
 
             if (!container) {
                 try {
-                    await new Promise(resolve => docker.pull(image, function(err, stream) {
+                    await new Promise(resolve => docker.pull(image, function(err: any, stream: any) {
 
                         docker.modem.followProgress(stream, onFinished, onProgress);
 
-                        function onFinished(err, output) {
+                        function onFinished(/*err, output*/) {
                             resolve();
                         }
 
-                        function onProgress(event) {
-                            let percent;
+                        function onProgress(event: any) {
+                            let percent: number;
+                            let percentStr: string;
 
                             if (event.progressDetail) {
                                 const { current, total } = event.progressDetail;
                                 if (total) {
-                                    percent = ((current / total) * 100).toFixed(2);
-                                    if (percent < 10) percent = '0' + percent.toString();
+                                    percent = ((current / total) * 100);
+                                    if (percent < 10) {
+                                        percentStr = '0' + percent.toFixed(2).toString();
+                                    } else {
+                                        percentStr = percent.toFixed(2).toString();
+                                    }
                                 }
                             }
                             
-                            stdinfo.write(event.status + (event.id ? ' ' + event.id : '') + (percent ? ' ' + percent + '%' : '') + "\n");
+                            stdinfo.write(event.status + (event.id ? ' ' + event.id : '') + (percentStr ? ' ' + percentStr + '%' : '') + "\n");
                         }
                     }));
                     container = await docker.createContainer(ctnroptions);

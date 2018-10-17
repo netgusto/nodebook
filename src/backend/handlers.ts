@@ -15,6 +15,7 @@ import {
 } from './notebook';
 
 import { buildUrl } from './buildurl';
+import { NotebookSummaryFrontend } from './types';
 
 export {
     handleHomePage,
@@ -26,11 +27,11 @@ export {
     handleAPINoteBookRename,
 };
 
-function setNoCache(res) {
+function setNoCache(res: any) {
     res.set('Cache-Control', 'max-age=0');
 }
 
-function generatePageHtml(route, params = {}) {
+function generatePageHtml(route: string, params = {}) {
     return getFileContent(path.resolve(__dirname + '/../../frontend/index.html'))
         .then(html => {
             return html
@@ -39,15 +40,15 @@ function generatePageHtml(route, params = {}) {
         });
 }
 
-function handleHomePage({ trunk }) {
-    return async function (_, res) {
+function handleHomePage({ trunk }: { trunk: any }) {
+    return async function (_: any, res: any) {
         const reciperegistry = trunk.get('reciperegistry');
         const notebookregistry = trunk.get('notebookregistry');
 
         const notebooks = await listNotebooks({ notebookregistry });
         const recipes = reciperegistry.getRecipes();
 
-        const data = [];
+        const data: NotebookSummaryFrontend[] = [];
         notebooks.forEach((notebook) => data.push(extractFrontendNotebookSummary(notebook)));
 
         res.set('Content-Type', 'text/html');
@@ -60,8 +61,8 @@ function handleHomePage({ trunk }) {
     };
 }
 
-function handleNoteBook({ trunk }) {
-    return async function (req, res) {
+function handleNoteBook({ trunk }: { trunk: any }) {
+    return async function (req: any, res: any) {
         const notebookregistry = trunk.get('notebookregistry');
 
         const { name } = req.params;
@@ -95,8 +96,8 @@ function handleNoteBook({ trunk }) {
     };
 }
 
-function handleAPINoteBookSetContent({ trunk }) {
-    return async function (req, res) {
+function handleAPINoteBookSetContent({ trunk }: { trunk: any }) {
+    return async function (req: any, res: any) {
         const notebookregistry = trunk.get('notebookregistry');
 
         const { name } = req.params;
@@ -116,10 +117,10 @@ function handleAPINoteBookSetContent({ trunk }) {
     };
 }
 
-let running = [];
+let running: Function[] = [];
 
-function handleAPINoteBookExec({ trunk }) {
-    return async function (req, res) {
+function handleAPINoteBookExec({ trunk }: { trunk: any }) {
+    return async function (req: any, res: any) {
         const docker = trunk.get('docker');
         const notebookregistry = trunk.get('notebookregistry');
 
@@ -140,8 +141,8 @@ function handleAPINoteBookExec({ trunk }) {
     };
 }
 
-function handleAPINoteBookStop({ trunk }) {
-    return async function (req, res) {
+function handleAPINoteBookStop({ trunk }: { trunk: any }) {
+    return async function (req: any, res: any) {
         const notebookregistry = trunk.get('notebookregistry');
 
         const { name } = req.params;
@@ -158,8 +159,8 @@ function handleAPINoteBookStop({ trunk }) {
     };
 }
 
-function handleAPINoteBookNew({ trunk }) {
-    return async function (req, res) {
+function handleAPINoteBookNew({ trunk }: { trunk: any }) {
+    return async function (req: any, res: any) {
         const notebookspath = trunk.get('notebookspath');
         const notebookregistry = trunk.get('notebookregistry');
         const reciperegistry = trunk.get('reciperegistry');
@@ -202,8 +203,8 @@ function handleAPINoteBookNew({ trunk }) {
     };
 }
 
-function handleAPINoteBookRename({ trunk }) {
-    return async function (req, res) {
+function handleAPINoteBookRename({ trunk }: { trunk: any }) {
+    return async function (req: any, res: any) {
         const notebookregistry = trunk.get('notebookregistry');
 
         const { name: oldname } = req.params;

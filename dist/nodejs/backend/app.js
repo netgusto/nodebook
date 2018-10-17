@@ -16,6 +16,7 @@ const trunk_1 = require("trunk");
 const handlers_1 = require("./handlers");
 const notebookregistry_1 = require("./services/notebookregistry");
 const reciperegistry_1 = require("./services/reciperegistry");
+;
 function app({ port, bindaddress, notebookspath, logger, docker }) {
     return __awaiter(this, void 0, void 0, function* () {
         process.chdir(notebookspath);

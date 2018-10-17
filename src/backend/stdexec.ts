@@ -1,12 +1,13 @@
-import { spawn } from 'child_process';
+import { spawn, ChildProcess } from 'child_process';
 import * as kill from 'tree-kill';
+import { ProcessInfo, WriterFunc } from './types';
 
-export default function stdExec(processinfo, writeStdOut, writeStdErr, writeInfo) {
+export default function stdExec(processinfo: ProcessInfo, writeStdOut: WriterFunc, writeStdErr: WriterFunc, writeInfo: WriterFunc) {
 
-    let child;
+    let child: ChildProcess;
 
     return {
-        start: () => new Promise(resolve => {
+        start: () => new Promise<void>(resolve => {
 
             const { cmd, cwd, env } = processinfo;
 
@@ -26,11 +27,12 @@ export default function stdExec(processinfo, writeStdOut, writeStdErr, writeInfo
                     writeStdErr("Process exited with status code " + code + "\n");
                 }
 
-                resolve(() => kill(child.pid));
+                resolve();
             });
         }),
         stop: () => {
-            return Promise.resolve(child && kill(child.pid, 'SIGKILL'));
+            child && kill(child.pid, 'SIGKILL');
+            return Promise.resolve();
         },
     };
 };

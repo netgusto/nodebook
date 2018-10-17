@@ -18,7 +18,15 @@ import {
 import NotebookRegistry from './services/notebookregistry';
 import RecipeRegistry from './services/reciperegistry';
 
-export async function app({ port, bindaddress, notebookspath, logger, docker }) {
+interface AppParameters {
+    port: number,
+    bindaddress: string,
+    notebookspath: string,
+    logger: Function,
+    docker: boolean,
+};
+
+export async function app({ port, bindaddress, notebookspath, logger, docker }: AppParameters) {
 
     process.chdir(notebookspath);
 
@@ -30,7 +38,7 @@ export async function app({ port, bindaddress, notebookspath, logger, docker }) 
         .add('docker', () => docker)
         .add('logger', () => logger)
         .add('reciperegistry', () => new RecipeRegistry())
-        .add('notebookregistry', ['notebookspath', 'reciperegistry'], async (notebookspath, reciperegistry) => {
+        .add('notebookregistry', ['notebookspath', 'reciperegistry'], async (notebookspath: string, reciperegistry: RecipeRegistry) => {
             const notebookregistry = new NotebookRegistry(notebookspath, reciperegistry);
             await notebookregistry.mount();
             return notebookregistry;
@@ -41,7 +49,7 @@ export async function app({ port, bindaddress, notebookspath, logger, docker }) 
     const app = express();
 
     app.use(bodyParser.json());
-    app.use(compression({ filter: (req, res) => {
+    app.use(compression({ filter: (req: any, res: any) => {
         if (req.headers['x-no-compression']) {
             // do not compress responses with this request header
             return false

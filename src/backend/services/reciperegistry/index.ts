@@ -5,7 +5,7 @@ export default class RecipeRegistry {
         return getRecipes();
     }
 
-    getRecipeForMainFilename(filename) {
+    getRecipeForMainFilename(filename: string) {
         return getRecipeForMainFilename(filename);
     }
 
@@ -13,7 +13,7 @@ export default class RecipeRegistry {
         return this.getRecipes().reduce((carry, recipe) => carry = [...carry, ...recipe.mainfile], []);
     }
 
-    getRecipeByKey(key) {
+    getRecipeByKey(key: string) {
         return getRecipeByKey(key);
     }
 }

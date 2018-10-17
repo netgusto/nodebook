@@ -5,8 +5,9 @@ import { lstat } from 'fs';
 import { defaultInitNotebook } from '../defaultInitNotebook';
 import stdExec from '../../stdexec';
 import stdExecDocker from '../../stdexecdocker';
+import { Recipe } from '../../types';
 
-const recipe = ({
+const recipe: Recipe = ({
     key: 'typescript',
     name: 'TypeScript',
     language: 'TypeScript',
@@ -61,10 +62,10 @@ const recipe = ({
     },
     init: async ({ name, notebookspath }) => {
         const copied = await defaultInitNotebook(recipe, notebookspath, name);
-        if (!copied) return false;
+        if (!copied) return Promise.resolve(false);
 
         const notebookabsdir = pathJoin(notebookspath, name);
-        return new Promise(resolve => {
+        return new Promise<boolean>(resolve => {
             exec('npm i --silent --audit false --prefer-offline --progress false', { cwd: notebookabsdir }, err => {
                 if (err) return resolve(false);
                 resolve(true);
@@ -73,7 +74,7 @@ const recipe = ({
     },
 });
 
-function hasTsNode(absdir) {
+function hasTsNode(absdir: string) {
     return new Promise((resolve) => {
         lstat(pathJoin(absdir, 'node_modules/.bin/ts-node'), (err, stats) => {
             resolve(!err && (stats.isFile() || stats.isSymbolicLink()));

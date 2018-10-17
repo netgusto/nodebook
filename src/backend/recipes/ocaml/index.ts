@@ -1,15 +1,16 @@
 import { defaultInitNotebook } from '../defaultInitNotebook';
 import stdExec from '../../stdexec';
 import stdExecDocker from '../../stdexecdocker';
+import { Recipe } from '../../types';
 
-const recipe = ({
+const recipe: Recipe = ({
     key: 'ocaml',
     name: 'OCaml',
     language: 'OCaml',
     mainfile: ['index.ml', 'main.ml'],
     cmmode: 'mllike',
     dir: __dirname,
-    exec: ({ notebook, docker, writeStdOut, writeStdErr, writeInfo, env }) => {
+    exec: async ({ notebook, docker, writeStdOut, writeStdErr, writeInfo, env }) => {
 
         if (docker) {
             return stdExecDocker({

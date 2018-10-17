@@ -12,17 +12,18 @@ const defaultInitNotebook_1 = require("../defaultInitNotebook");
 const stdexec_1 = require("../../stdexec");
 const recipe = ({
     key: 'plaintext',
+    language: 'Plain text',
     name: 'Plain text',
     mainfile: ['index.txt', 'main.txt'],
     cmmode: 'plaintext',
     dir: __dirname,
-    exec: ({ notebook, writeStdOut, writeStdErr, writeInfo, env }) => {
+    exec: ({ notebook, writeStdOut, writeStdErr, writeInfo, env }) => __awaiter(this, void 0, void 0, function* () {
         return stdexec_1.default({
             cmd: ['cat', notebook.mainfilename],
             cwd: notebook.absdir,
             env,
         }, writeStdOut, writeStdErr, writeInfo);
-    },
+    }),
     init: ({ name, notebookspath }) => __awaiter(this, void 0, void 0, function* () { return yield defaultInitNotebook_1.defaultInitNotebook(recipe, notebookspath, name); }),
 });
 exports.default = recipe;

@@ -20,7 +20,7 @@ export default async function start() {
         bindaddress: parameters.bindaddress,
         notebookspath: parameters.notebooks,
         docker: parameters.docker,
-        logger: (msg) => console.log(msg),
+        logger: (msg: string) => console.log(msg),
     });
 
     return { service, parameters };

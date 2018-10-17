@@ -1,7 +1,9 @@
 import * as chokidar from 'chokidar';
 import { join as pathJoin, dirname, basename } from 'path';
 import { lstat, lstatSync } from 'fs';
-import globby from 'globby';
+import * as globby from 'globby';
+import RecipeRegistry from '../reciperegistry';
+import { OnNotebookChangeType } from '../../types';
 
 export default class NotebookRegistry {
 
@@ -13,7 +15,7 @@ export default class NotebookRegistry {
     private onChange: (n: any) => void;
     private notebookscache: Array<any>;
 
-    constructor(notebookspath, reciperegistry, onChange = undefined) {
+    constructor(notebookspath: string, reciperegistry: RecipeRegistry, onChange: OnNotebookChangeType = undefined) {
         this.notebookspath = notebookspath;
         this.depth = 2;
         this.watcher = undefined;
@@ -45,10 +47,10 @@ export default class NotebookRegistry {
                     this.initializeRegistry(this.watcher.getWatched());
 
                     this.watcher
-                        .on('add', path => this.addFile(path));
+                        .on('add', (path: string) => this.addFile(path));
                     
                     if (this.onChange) {
-                        this.watcher.on('change', path => this.addFile(path));
+                        this.watcher.on('change', (path: string) => this.addFile(path));
                     }
 
                     resolve();
@@ -64,7 +66,7 @@ export default class NotebookRegistry {
         });
     }
 
-    initializeRegistry(files) {
+    initializeRegistry(files: any) {
 
         const notebookscache = [];
 
@@ -84,11 +86,11 @@ export default class NotebookRegistry {
         this.notebookscache = notebookscache;
     }
 
-    determineNotebookNameByAbsDir(absdir) {
+    determineNotebookNameByAbsDir(absdir: string) {
         return absdir.substr(this.notebookspath.length + 1);
     }
 
-    buildNotebookDescriptor(notebookname, mainfilename) {
+    buildNotebookDescriptor(notebookname: string, mainfilename: string) {
 
         const recipe = this.reciperegistry.getRecipeForMainFilename(mainfilename);
         if (!recipe) return undefined;
@@ -119,7 +121,7 @@ export default class NotebookRegistry {
         this.watcher.unwatch().close();
     }
 
-    async addFile(absfile) {
+    async addFile(absfile: string) {
         const absdir = dirname(absfile);
         const mainfile = basename(absfile);
         await this.refresh({
@@ -132,19 +134,19 @@ export default class NotebookRegistry {
         return this.notebookscache;
     }
 
-    getNotebookByName(name) {
+    getNotebookByName(name: string) {
         const index = this.getNotebookIndexByName(name);
         if (index === undefined) return undefined;
 
         return this.notebookscache[index];
     }
 
-    getNotebookIndexByName(name) {
+    getNotebookIndexByName(name: string) {
         const notebookIndex = this.notebookscache.findIndex(nb => nb.name === name);
         return notebookIndex > -1 ? notebookIndex : undefined;
     }
 
-    async register({ name, mainfile = undefined, refresh = false }) {
+    async register({ name, mainfile, refresh = false }: { name: string, mainfile?: string, refresh?: boolean }) {
 
         const currentIdx = this.getNotebookIndexByName(name);
         if (currentIdx !== undefined && !refresh) return this.notebookscache[currentIdx];
@@ -176,11 +178,11 @@ export default class NotebookRegistry {
         return notebook;
     }
 
-    async refresh({ name, mainfile = undefined }) {
+    async refresh({ name, mainfile = undefined }: { name: string, mainfile?: string }) {
         return await this.register({ name, mainfile, refresh: true });
     }
 
-    async renamed(oldname, newname) {
+    async renamed(oldname: string, newname: string) {
         const nbindex = this.getNotebookIndexByName(oldname);
         if (nbindex > -1) {
             // remove old name
@@ -190,7 +192,7 @@ export default class NotebookRegistry {
         return await this.refresh({ name: newname });
     }
 
-    async globAllRecipesMainFiles({ notebookspath, depth }) {
+    async globAllRecipesMainFiles({ notebookspath, depth }: { notebookspath: string, depth: number }) {
         return await globby(
             notebookspath,
             {
@@ -204,7 +206,7 @@ export default class NotebookRegistry {
                 noext: true,
                 expandDirectories: {
                     files: this.reciperegistry.getAllRecipesMainFiles(),
-                }
+                } as any
             }
         );
     }

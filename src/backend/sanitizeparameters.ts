@@ -2,7 +2,7 @@ import * as parseArgs from 'minimist';
 import * as fs from 'fs';
 import { resolve as resolvePath } from 'path';
 
-export async function sanitizeParameters(rawargv) {
+export async function sanitizeParameters(rawargv: string[]) {
     const argv = parseArgs(rawargv, {
         boolean: 'docker',
         string: ['notebooks', 'bindaddress'],

@@ -18,7 +18,7 @@ const recipe = ({
     mainfile: ['index.r', 'main.r'],
     cmmode: 'r',
     dir: __dirname,
-    exec: ({ notebook, docker, writeStdOut, writeStdErr, writeInfo, env }) => {
+    exec: ({ notebook, docker, writeStdOut, writeStdErr, writeInfo, env }) => __awaiter(this, void 0, void 0, function* () {
         if (docker) {
             return stdexecdocker_1.default({
                 image: 'r-base:latest',
@@ -37,7 +37,7 @@ const recipe = ({
                 env,
             }, writeStdOut, writeStdErr, writeInfo);
         }
-    },
+    }),
     init: ({ name, notebookspath }) => __awaiter(this, void 0, void 0, function* () { return yield defaultInitNotebook_1.defaultInitNotebook(recipe, notebookspath, name); }),
 });
 exports.default = recipe;

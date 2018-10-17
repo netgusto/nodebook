@@ -18,11 +18,12 @@ function stdExec(processinfo, writeStdOut, writeStdErr, writeInfo) {
                 if (code !== 0) {
                     writeStdErr("Process exited with status code " + code + "\n");
                 }
-                resolve(() => kill(child.pid));
+                resolve();
             });
         }),
         stop: () => {
-            return Promise.resolve(child && kill(child.pid, 'SIGKILL'));
+            child && kill(child.pid, 'SIGKILL');
+            return Promise.resolve();
         },
     };
 }

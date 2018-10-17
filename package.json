@@ -35,6 +35,11 @@
     "trunk": "^1.1.0"
   },
   "devDependencies": {
+    "@types/chokidar": "^1.7.5",
+    "@types/dockerode": "^2.5.5",
+    "@types/dotenv": "^4.0.3",
+    "@types/globby": "^8.0.0",
+    "@types/minimist": "^1.2.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "chai-http": "^4.2.0",

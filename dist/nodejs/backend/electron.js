@@ -10,15 +10,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const electron_1 = require("electron");
 const start_1 = require("./start"); // main express app
-let win;
+let mainWindow;
 function createWindow() {
     return __awaiter(this, void 0, void 0, function* () {
         let info;
         try {
             info = yield start_1.default();
-            if (info !== undefined) {
-                const { service, parameters } = info;
-                const mainWindow = new electron_1.BrowserWindow({
+            if (info) {
+                const { parameters } = info;
+                mainWindow = new electron_1.BrowserWindow({
                     width: 1280,
                     height: 720
                 });
@@ -40,7 +40,7 @@ electron_1.app.on('window-all-closed', () => {
     electron_1.app.quit();
 });
 electron_1.app.on('activate', () => {
-    if (win === null) {
+    if (mainWindow === null) {
         createWindow();
     }
 });

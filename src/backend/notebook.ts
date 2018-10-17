@@ -3,6 +3,8 @@ import { dirname, join as pathJoin } from 'path';
 import * as dotenv from 'dotenv';
 
 import { buildUrl } from './buildurl';
+import NotebookRegistry from './services/notebookregistry';
+import { Notebook, SyntheticResponse, OutputChannel, Recipe, RecipeSummaryFrontend, NotebookSummaryFrontend } from './types';
 
 export {
     listNotebooks,
@@ -16,7 +18,7 @@ export {
     renameNotebook,
 };
 
-async function listNotebooks({ notebookregistry }) {
+async function listNotebooks({ notebookregistry }: { notebookregistry: NotebookRegistry }) {
 
     const res = new Map();
 
@@ -29,7 +31,7 @@ async function listNotebooks({ notebookregistry }) {
     return res;
 }
 
-function getFileContent(abspath): Promise<string> {
+function getFileContent(abspath: string): Promise<string> {
     return new Promise((resolve, reject) => {
         readFile(abspath, 'utf8', function (err, contents) {
             if (err) return reject(err);
@@ -38,7 +40,7 @@ function getFileContent(abspath): Promise<string> {
     });
 }
 
-function setFileContent(abspath, content) {
+function setFileContent(abspath: string, content: string) {
     return new Promise((resolve, reject) => {
         writeFile(abspath, content, 'utf8', function (err) {
             if (err) reject(err);
@@ -47,7 +49,7 @@ function setFileContent(abspath, content) {
     });
 }
 
-async function updateNotebookContent(notebook, content, notebookregistry) {
+async function updateNotebookContent(notebook: Notebook, content: string, notebookregistry: NotebookRegistry) {
     try {
         await setFileContent(notebook.abspath, content);
     } catch(e) {
@@ -58,11 +60,11 @@ async function updateNotebookContent(notebook, content, notebookregistry) {
     return await notebookregistry.refresh({ name: notebook.name, mainfile: notebook.mainfilename });
 }
 
-async function execNotebook(notebook, docker, res) {
-    const write = (data, chan) => res.writable && !res.finished && res.write(JSON.stringify({ chan, data: JSON.stringify(data) }) + '\n');
-    const writeStdOut = data => write(data, 'stdout');
-    const writeStdErr = data => write(data, 'stderr');
-    const writeInfo = data => write(data, 'info');
+async function execNotebook(notebook: Notebook, docker: boolean, res: SyntheticResponse) {
+    const write = (data: string, chan: OutputChannel) => res.writable && !res.finished && res.write(JSON.stringify({ chan, data: JSON.stringify(data) }) + '\n');
+    const writeStdOut = (data: string) => write(data, 'stdout');
+    const writeStdErr = (data: string) => write(data, 'stderr');
+    const writeInfo = (data: string) => write(data, 'info');
 
     // extracting .env from notebook if defined
     const env = await getNotebookEnv(notebook);
@@ -78,7 +80,7 @@ async function execNotebook(notebook, docker, res) {
     return { start, stop };
 }
 
-async function newNotebook(notebookspath, name, recipe, notebookregistry) {
+async function newNotebook(notebookspath: string, name: string, recipe: Recipe, notebookregistry: NotebookRegistry) {
     const success = await recipe.init({ notebookspath, name });
     if (success) {
         // update cache
@@ -91,7 +93,7 @@ async function newNotebook(notebookspath, name, recipe, notebookregistry) {
     return success;
 }
 
-async function renameNotebook(notebook, newname, notebookregistry) {
+async function renameNotebook(notebook: Notebook, newname: string, notebookregistry: NotebookRegistry) {
 
     const newabsdir = pathJoin(dirname(notebook.absdir), newname);
     const exists = await new Promise(resolve => lstat(newabsdir, err => resolve(!err)));
@@ -111,7 +113,7 @@ async function renameNotebook(notebook, newname, notebookregistry) {
     return true;
 }
 
-function sanitizeNotebookName(name) {
+function sanitizeNotebookName(name: string) {
     if (typeof name !== 'string') throw new Error('The notebook name should be a string');
     
     name = name.
@@ -127,7 +129,7 @@ function sanitizeNotebookName(name) {
     return name;
 }
 
-function extractFrontendNotebookSummary(notebook) {
+function extractFrontendNotebookSummary(notebook: Notebook): NotebookSummaryFrontend {
     return {
         name: notebook.name,
         url: buildUrl("notebook", { name: notebook.name }),
@@ -136,7 +138,7 @@ function extractFrontendNotebookSummary(notebook) {
     };
 }
 
-function extractFrontendRecipeSummary(recipe) {
+function extractFrontendRecipeSummary(recipe: Recipe): RecipeSummaryFrontend {
     return {
         key: recipe.key,
         name: recipe.name,
@@ -145,7 +147,7 @@ function extractFrontendRecipeSummary(recipe) {
     };
 }
 
-async function getNotebookEnv(notebook) {
+async function getNotebookEnv(notebook: Notebook) {
     const abspath = pathJoin(notebook.absdir, '.env');
     const exists = await new Promise(resolve => stat(abspath, function (err, stat) {
         resolve(!err && stat.isFile());

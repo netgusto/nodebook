@@ -5,8 +5,9 @@ import { homedir } from 'os';
 import { defaultInitNotebook } from '../defaultInitNotebook';
 import stdExec from '../../stdexec';
 import stdExecDocker from '../../stdexecdocker';
+import { Recipe, ContainerMount } from '../../types';
 
-const recipe = ({
+const recipe: Recipe = ({
     key: 'rust',
     name: 'Rust',
     language: 'Rust',
@@ -19,7 +20,7 @@ const recipe = ({
         const cargo = await rustHasCargo(notebook.absdir);
 
         if (docker) {
-            let mounts = [];
+            let mounts: ContainerMount[] = [];
             let cmd = [];
 
             if (cargo) {
@@ -66,7 +67,7 @@ const recipe = ({
     init: async ({ name, notebookspath }) => await defaultInitNotebook(recipe, notebookspath, name),
 });
 
-function rustHasCargo(absdir) {
+function rustHasCargo(absdir: string ) {
     return new Promise((resolve) => {
         lstat(pathJoin(absdir, 'Cargo.toml'), (err, stats) => {
             resolve(!err && stats.isFile());

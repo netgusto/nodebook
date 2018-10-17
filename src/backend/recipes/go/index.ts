@@ -1,15 +1,16 @@
 import { defaultInitNotebook } from '../defaultInitNotebook';
 import stdExec from '../../stdexec';
 import stdExecDocker from '../../stdexecdocker';
+import { Recipe } from '../../types';
 
-const recipe = ({
+const recipe: Recipe = ({
     key: 'go',
     name: 'Go',
     language: 'Go',
     mainfile: ['index.go', 'main.go'],
     cmmode: 'go',
     dir: __dirname,
-    exec: ({ notebook, docker, writeStdOut, writeStdErr, writeInfo, env }) => {
+    exec: async ({ notebook, docker, writeStdOut, writeStdErr, writeInfo, env }) => {
         if (docker) {
             return stdExecDocker({
                 image: 'golang:latest',

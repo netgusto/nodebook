@@ -49,12 +49,12 @@ export {
     getRecipeByKey,
 };
 
-function getRecipeForMainFilename(filename) {
+function getRecipeForMainFilename(filename: string) {
     const recipe = recipesByMainFile.get(filename);
     return recipe ? recipe : undefined;
 }
 
-function getRecipeByKey(key) {
+function getRecipeByKey(key: string) {
     const recipe = recipesByKey.get(key);
     return recipe ? recipe : undefined;
 }

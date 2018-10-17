@@ -59,9 +59,9 @@ exports.updateNotebookContent = updateNotebookContent;
 function execNotebook(notebook, docker, res) {
     return __awaiter(this, void 0, void 0, function* () {
         const write = (data, chan) => res.writable && !res.finished && res.write(JSON.stringify({ chan, data: JSON.stringify(data) }) + '\n');
-        const writeStdOut = data => write(data, 'stdout');
-        const writeStdErr = data => write(data, 'stderr');
-        const writeInfo = data => write(data, 'info');
+        const writeStdOut = (data) => write(data, 'stdout');
+        const writeStdErr = (data) => write(data, 'stderr');
+        const writeInfo = (data) => write(data, 'info');
         // extracting .env from notebook if defined
         const env = yield getNotebookEnv(notebook);
         const { start, stop } = yield notebook.recipe.exec({

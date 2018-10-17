@@ -1,6 +1,8 @@
 import { performance } from 'perf_hooks';
 import { execNotebook } from '../backend/notebook';
 import { writeInfo, writeInfoLn, writeStdout, writeStderr } from './write';
+import * as EventEmitter from 'events';
+import { Notebook, OnNotebookChangeType } from '../backend/types';
 
 export {
     withProcessQueue,
@@ -9,11 +11,11 @@ export {
 }; 
 
 // Ensures only one notebook is running at a time
-function withProcessQueue(f) {
+function withProcessQueue(f: OnNotebookChangeType) {
 
-    const queue = [];
+    const queue: Array<Notebook> = [];
     let running = false;
-    return async (notebook) => {
+    return async (notebook: Notebook) => {
         queue.push(notebook);
         if (!running) {
             running = true;
@@ -27,9 +29,9 @@ function withProcessQueue(f) {
 }
 
 // VSCode touches file twice when saving; https://github.com/Microsoft/vscode/issues/9419
-function withSameNotebookChangeThrottle(f, throttleMs) {
+function withSameNotebookChangeThrottle(f: OnNotebookChangeType, throttleMs: number) {
     let prevchangeByNotebook = new Map();
-    return async (notebook) => {
+    return async (notebook: Notebook) => {
         const now = performance.now();
         let prevchange = null;
         if (prevchangeByNotebook.has(notebook.name)) {
@@ -44,7 +46,7 @@ function withSameNotebookChangeThrottle(f, throttleMs) {
     };
 }
 
-const write = (str) => {
+const write = (str: string) => {
     const data = JSON.parse(str);
     const msg = JSON.parse(data.data);
     switch (data.chan) {
@@ -54,7 +56,7 @@ const write = (str) => {
     }
 };
 
-async function onNotebookChange(notebook, docker, eventbus) {
+async function onNotebookChange(notebook: Notebook, docker: boolean, eventbus: EventEmitter) {
 
     const starttime = performance.now();
 
@@ -70,7 +72,7 @@ async function onNotebookChange(notebook, docker, eventbus) {
 
     const { start, stop } = await execNotebook(notebook, docker, res);
     let interrupted = false;
-    const sigIntHandler = (preventDefault) => {
+    const sigIntHandler = (preventDefault: () => void) => {
         preventDefault();
 
         // Ctrl+c outputs ^C in some terminals

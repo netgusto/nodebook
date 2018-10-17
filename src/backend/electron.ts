@@ -2,17 +2,17 @@ import { app, BrowserWindow } from 'electron';
 
 import start from './start'; // main express app
 
-let win;
+let mainWindow: BrowserWindow|null;
 
 async function createWindow() {
     let info;
 
     try {
         info = await start();
-        if (info !== undefined) {
-            const { service, parameters } = info;
+        if (info) {
+            const { parameters } = info;
 
-            const mainWindow = new BrowserWindow({
+            mainWindow = new BrowserWindow({
                 width: 1280,
                 height: 720
             });
@@ -34,7 +34,7 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-    if (win === null) {
+    if (mainWindow === null) {
         createWindow();
     }
 });
