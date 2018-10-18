@@ -15,6 +15,7 @@ import recipeRuby from './ruby';
 import recipeRust from './rust';
 import recipeSwift from './swift';
 import recipePlaintext from './plaintext';
+import { Recipe } from '../types';
 
 const recipes = [
     recipeNodeJS,
@@ -36,8 +37,8 @@ const recipes = [
     recipePlaintext,
 ];
 
-const recipesByKey = new Map();
-const recipesByMainFile = new Map();
+const recipesByKey = new Map<string, Recipe>();
+const recipesByMainFile = new Map<string, Recipe>();
 recipes.forEach(recipe => {
     recipesByKey.set(recipe.key, recipe);
     recipe.mainfile.forEach(file => recipesByMainFile.set(file, recipe));

@@ -81,7 +81,7 @@ class NotebookRegistry {
         // TODO: improve this
         // Used right now for rust src/main.rs
         const parts = notebookname.split('/');
-        if (parts.length > 1) {
+        if (parts.length > 1 && parts[1] === 'src' && recipe.key === 'rust') {
             mainfilename = parts.slice(1).join('/') + '/' + mainfilename;
             notebookname = parts[0];
         }
@@ -92,7 +92,7 @@ class NotebookRegistry {
             mainfilename,
             absdir,
             abspath,
-            mtime: fs_1.lstatSync(abspath).mtime,
+            mtime: fs_1.lstatSync(abspath).mtime.toISOString(),
             recipe,
         };
     }

@@ -9,7 +9,7 @@ export default class RecipeRegistry {
         return getRecipeForMainFilename(filename);
     }
 
-    getAllRecipesMainFiles() {
+    getAllRecipesMainFiles(): string[] {
         return this.getRecipes().reduce((carry, recipe) => carry = [...carry, ...recipe.mainfile], []);
     }
 

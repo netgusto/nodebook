@@ -3,7 +3,7 @@ import { join as pathJoin, dirname, basename } from 'path';
 import { lstat, lstatSync } from 'fs';
 import * as globby from 'globby';
 import RecipeRegistry from '../reciperegistry';
-import { OnNotebookChangeType } from '../../types';
+import { OnNotebookChangeType, Notebook } from '../../types';
 
 export default class NotebookRegistry {
 
@@ -11,9 +11,9 @@ export default class NotebookRegistry {
     private depth: number;
     private watcher: any;
     private ready: boolean;
-    private reciperegistry: any;
-    private onChange: (n: any) => void;
-    private notebookscache: Array<any>;
+    private reciperegistry: RecipeRegistry;
+    private onChange: OnNotebookChangeType;
+    private notebookscache: Array<Notebook>;
 
     constructor(notebookspath: string, reciperegistry: RecipeRegistry, onChange: OnNotebookChangeType = undefined) {
         this.notebookspath = notebookspath;
@@ -68,7 +68,7 @@ export default class NotebookRegistry {
 
     initializeRegistry(files: any) {
 
-        const notebookscache = [];
+        const notebookscache: Array<Notebook> = [];
 
         // identify basepath
         const keys = Object.keys(files);
@@ -90,7 +90,7 @@ export default class NotebookRegistry {
         return absdir.substr(this.notebookspath.length + 1);
     }
 
-    buildNotebookDescriptor(notebookname: string, mainfilename: string) {
+    buildNotebookDescriptor(notebookname: string, mainfilename: string): (Notebook|undefined) {
 
         const recipe = this.reciperegistry.getRecipeForMainFilename(mainfilename);
         if (!recipe) return undefined;
@@ -99,7 +99,7 @@ export default class NotebookRegistry {
         // Used right now for rust src/main.rs
         const parts = notebookname.split('/');
 
-        if (parts.length > 1) {
+        if (parts.length > 1 && parts[1] === 'src' && recipe.key === 'rust') {
             mainfilename = parts.slice(1).join('/') + '/' + mainfilename;
             notebookname = parts[0];
         }
@@ -112,7 +112,7 @@ export default class NotebookRegistry {
             mainfilename,
             absdir,
             abspath,
-            mtime: lstatSync(abspath).mtime,
+            mtime: lstatSync(abspath).mtime.toISOString(),
             recipe,
         };
     }
@@ -152,7 +152,7 @@ export default class NotebookRegistry {
         if (currentIdx !== undefined && !refresh) return this.notebookscache[currentIdx];
 
         const absdir = pathJoin(this.notebookspath, name);
-        const exists = await new Promise(resolve => lstat(absdir, err => resolve(!err)));
+        const exists = await new Promise<boolean>(resolve => lstat(absdir, err => resolve(!err)));
         if (!exists) return undefined;
 
         if (mainfile === undefined) {
