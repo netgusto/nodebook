@@ -38,7 +38,7 @@ If `--docker` is set on the command line, each of these environments will run in
 
 Otherwise, the development environments on your local machine will be used.
 
-## Install and run from $PATH
+## Install and run as package (npm)
 
 ```bash
 # Install
