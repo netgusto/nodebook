@@ -66,6 +66,8 @@ export default class NotebookComponent extends React.Component<Props, State> {
     private ansiConvert: Convert;
     private console: HTMLElement;
 
+    private commWorker: Worker;
+
     constructor(props: Props) {
         super(props);
         this.boundHandleKeyDown = this.handleKeyDown.bind(this);
@@ -75,15 +77,37 @@ export default class NotebookComponent extends React.Component<Props, State> {
         this.ansiConvert = new Convert();
     }
 
+    // Pleasing TS
+    setState(s: Partial<State>) { super.setState(s); }
+
     componentWillMount() {
         document.addEventListener('keydown', this.boundHandleKeyDown);
     }
 
     componentDidMount() {
+
+        let i = 0;
+        this.commWorker = new Worker('worker.ts');
+        this.commWorker.onmessage = (e: MessageEvent) => {
+            switch(e.data.action) {
+                case 'consoleLogIfRunning': {
+                    if (this.state.running) {
+                        this.consoleLog(e.data.payload.msg, e.data.payload.chan);
+                    }
+                    break;
+                }
+                case 'execEnded': {
+                    this.setState({ running: false });
+                    break;
+                }
+            }
+        };
+
         this.consoleLog('Ready.\n', 'info');
     }
 
     componentWillUnmount() {
+        this.commWorker.terminate();
         document.removeEventListener('keydown', this.boundHandleKeyDown);
     }
 
@@ -276,74 +300,42 @@ export default class NotebookComponent extends React.Component<Props, State> {
     
         this.consoleLog('--- Running...\n', 'info');
         const { execurl } = notebook;
-    
-        return window.fetch(execurl, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-        })
-        .then(res => {
-            if (!res.body) {
-                // response not streamable; use it in one piece
-                return res.text()
-                    .then(text => text.split('\n').map(jsonline => {
-            
-                        if (jsonline.trim().length === 0) return;
-    
-                        const data = JSON.parse(jsonline);
-                        if (this.state.running) this.consoleLog(JSON.parse(data.data), data.chan);
-                    }));
-            } else {
-                return new Promise((resolve, reject) => {
-                    const reader = res.body.getReader();
-                    const decoder = new TextDecoder("utf-8");
-                    let hasLastNewLine = true;
-                    const pump = () => {
-                        reader.read().then(({ done, value }) => {
-                            if (done) {
-                                resolve({ hasLastNewLine });
-                                return;
-                            }
-                
-                            decoder.decode(value).split('\n').map(jsonline => {
-                
-                                if (jsonline.trim().length === 0) return;
-    
-                                const data = JSON.parse(jsonline);
-                                const txt = JSON.parse(data.data);
-                                const lastnl = txt.lastIndexOf('\n');
-                                hasLastNewLine = (lastnl === txt.length - 1);
-                                if (this.state.running) this.consoleLog(JSON.parse(data.data), data.chan);
-                            });
-                            
-                            // Get the data and send it to the browser via the controller
-                            pump();
-                        });
-                    }
-    
-                    pump();
-                });
-            }
-        })
-        .then(({ hasLastNewLine }) => {
-            if (!hasLastNewLine) {
-                if (this.state.running) this.consoleLog('%\n', 'forcednl');
-            }
-    
-            if (this.state.running) this.consoleLog('--- Done.\n\n', 'info');
-            this.setState({ running: false });
-        })
-        .catch(err => {
-            if (this.state.running) this.consoleLog('\n--- An error occurred during execution.\n\n', 'stderr');
-            this.setState({ running: false });
+
+        this.commWorker.postMessage({
+            action: 'exec',
+            url: execurl,
         });
     }
 
+    msgstack: any[] = []
+
     consoleLog(msg: string, cls: string) {
-        this.console.innerHTML += '<span class="' + cls + '">' + this.ansiConvert.toHtml(this.entities.encode(msg)) + '</span>';
-        this.console.scrollTop = this.console.scrollHeight;
+        this.msgstack.push({ msg, cls });
+        window.requestAnimationFrame(() => {
+            if (!this.msgstack.length) return;
+
+            const maxchilds = 300;
+
+            const allhtml = this.msgstack.map(m => {
+                return '<span class="' + m.cls + '">' + this.ansiConvert.toHtml(this.entities.encode(m.msg)) + '</span>';
+            }).join('');
+
+            this.console.innerHTML += allhtml;
+
+            const nbchilds = this.console.childElementCount;
+            if(nbchilds > maxchilds) {
+                for (let i = nbchilds - maxchilds; i >= 0; i--) {
+                    this.console.children[i].remove()
+                }
+                const truncated = document.createElement('span');
+                truncated.className = 'info';
+                truncated.innerText = 'Output truncated (too big).\n';
+                this.console.prepend(truncated);
+            }
+
+            this.console.scrollTop = this.console.scrollHeight;
+            this.msgstack = [];
+        });
     }
 
     consoleClear() {
