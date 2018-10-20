@@ -5,10 +5,10 @@
   "main": "dist/nodejs/backend/index.js",
   "scripts": {
     "test": "mocha test/backend",
-    "dev": "concurrently --kill-others \"npm run dev-frontend\" \"npm run dev-backend -- $PARAMS\"",
+    "dev": "concurrently --kill-others \"npm run dev-frontend\" \"npm run dev-backend\"",
     "dev-frontend": "parcel watch src/frontend/*.html --out-dir dist/frontend",
     "compile-backend": "tsc && node dist/nodejs/backend",
-    "dev-backend": "nodemon -e ts --exec \"npm run compile-backend\"",
+    "dev-backend": "nodemon -e ts --exec \"npm run compile-backend -- $PARAMS\"",
     "prebuild": "rm -Rf dist",
     "build": "npm run prebuild && npm run build-backend && npm run build-frontend && npm run test",
     "build-backend": "tsc && cpx \"./src/backend/recipes/**/defaultcontent/**\" ./dist/nodejs/backend/recipes",

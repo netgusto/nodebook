@@ -17,12 +17,14 @@ const ruby_1 = require("./ruby");
 const rust_1 = require("./rust");
 const swift_1 = require("./swift");
 const plaintext_1 = require("./plaintext");
+const fsharp_1 = require("./fsharp");
 const recipes = [
     nodejs_1.default,
     typescript_1.default,
     c_1.default,
     cpp_1.default,
     elixir_1.default,
+    fsharp_1.default,
     go_1.default,
     haskell_1.default,
     java_1.default,

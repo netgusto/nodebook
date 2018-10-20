@@ -15,6 +15,7 @@ import recipeRuby from './ruby';
 import recipeRust from './rust';
 import recipeSwift from './swift';
 import recipePlaintext from './plaintext';
+import recipeFSharp from './fsharp';
 import { Recipe } from '../types';
 
 const recipes = [
@@ -23,6 +24,7 @@ const recipes = [
     recipeC,
     recipeCpp,
     recipeElixir,
+    recipeFSharp,
     recipeGo,
     recipeHaskell,
     recipeJava,
