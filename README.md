@@ -20,6 +20,7 @@ A notebook is a folder containing an `{index|main}.{js,py,c,cpp,...}` file. The 
 * C11 `(.c)`
 * C++14 `(.cpp)`
 * Elixir `(.ex)`
+* Fsharp `(.fs)`
 * Go `(.go)`
 * Haskell `(.hs)`
 * Java `(.java)`
