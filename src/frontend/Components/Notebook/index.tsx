@@ -112,15 +112,23 @@ export default class NotebookComponent extends React.Component<Props, State> {
     }
 
     handleKeyDown(event) {
-        if ((event.metaKey || event.ctrlKey) && event.keyCode == 13) {          // cmd + Enter          
+        if ((event.metaKey || event.ctrlKey) && event.keyCode === 13) {          // cmd + Enter          
             event.preventDefault();
             this.execNotebook();
-        } else if ((event.metaKey || event.ctrlKey) && event.key == 's') {      // cmd + S
+        } else if ((event.metaKey || event.ctrlKey) && event.key === 's') {      // cmd + S
 
             const { notebook } = this.props;
 
             event.preventDefault();
             persist(notebook, this.editorvalue).then(() => this.execNotebook());
+        } else if (event.ctrlKey && event.key === 'c') {    // ctrl+c
+            event.preventDefault();
+            if (this.state.running) {
+                this.stopExecution();
+            }
+        } else if (event.ctrlKey && event.key === 'r') {    // ctrl+r
+            event.preventDefault();
+            this.execNotebook();
         }
     }
 
