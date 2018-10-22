@@ -16,6 +16,7 @@ import recipeRust from './rust';
 import recipeSwift from './swift';
 import recipePlaintext from './plaintext';
 import recipeFSharp from './fsharp';
+import recipeCSharp from './csharp';
 import { Recipe } from '../types';
 
 const recipes = [
@@ -23,6 +24,7 @@ const recipes = [
     recipeTypescript,
     recipeC,
     recipeCpp,
+    recipeCSharp,
     recipeElixir,
     recipeFSharp,
     recipeGo,
