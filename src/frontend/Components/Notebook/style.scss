@@ -113,7 +113,6 @@ body {
     #layout {
         display: grid;
         grid-template-rows: 50px auto;
-        grid-template-columns: auto 5px 40%;
         grid-template-areas: 'top top top'
                              'code gutter console';
     }
@@ -181,6 +180,7 @@ body {
     #gutter {
         grid-area: gutter;
         background-color: #333;
+        cursor: col-resize;
     }
 
     #right {
