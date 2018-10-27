@@ -13,7 +13,7 @@
     "build": "npm run prebuild && npm run build-backend && npm run build-frontend && npm run test",
     "build-backend": "tsc && cpx \"./src/backend/recipes/**/defaultcontent/**\" ./dist/nodejs/backend/recipes",
     "build-frontend": "parcel build src/frontend/*.html --out-dir dist/frontend",
-    "electron": "electron ./src/backend/electron.js"
+    "electron": "electron ./dist/nodejs/backend/electron.js"
   },
   "author": "@netgusto",
   "license": "ISC",
