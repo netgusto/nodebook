@@ -49,6 +49,8 @@ export interface State {
     autoclear: boolean;
     newname: string|undefined;
     running: boolean;
+    dragging: boolean;
+    codeWidth: number;
 }
 
 export default class NotebookComponent extends React.Component<Props, State> {
@@ -58,9 +60,14 @@ export default class NotebookComponent extends React.Component<Props, State> {
         autoclear: false,
         newname: undefined,
         running: false,
+        dragging: false,
+        codeWidth: 60,
     };
 
     private boundHandleKeyDown: EventListener;
+    private boundHandleMouseUp: EventListener;
+    private boundHandleMouseDown: EventListener;
+    private boundHandleMouseMove: EventListener;
     private editorvalue: string;
     private entities: any;
     private ansiConvert: Convert;
@@ -71,6 +78,9 @@ export default class NotebookComponent extends React.Component<Props, State> {
     constructor(props: Props) {
         super(props);
         this.boundHandleKeyDown = this.handleKeyDown.bind(this);
+        this.boundHandleMouseDown = this.handleMouseDown.bind(this);
+        this.boundHandleMouseUp = this.handleMouseUp.bind(this);
+        this.boundHandleMouseMove = this.handleMouseMove.bind(this);
         this.onNotebookNameKeyDown = this.onNotebookNameKeyDown.bind(this);
         this.editorvalue = props.notebook.content;
         this.entities = new Entities();
@@ -82,6 +92,8 @@ export default class NotebookComponent extends React.Component<Props, State> {
 
     componentWillMount() {
         document.addEventListener('keydown', this.boundHandleKeyDown);
+        document.addEventListener('mouseup', this.boundHandleMouseUp);
+        document.addEventListener('mousemove', this.boundHandleMouseMove);
     }
 
     componentDidMount() {
@@ -111,6 +123,21 @@ export default class NotebookComponent extends React.Component<Props, State> {
         document.removeEventListener('keydown', this.boundHandleKeyDown);
     }
 
+    handleMouseDown(event) {
+        this.setState({ dragging: true });
+    }
+
+    handleMouseUp(event) {
+        this.setState({ dragging: false });
+    }
+
+    handleMouseMove(event) {
+        if (this.state.dragging) {
+            const percent = (event.pageX / window.innerWidth) * 100;
+            this.setState({ codeWidth: percent });
+        }
+    }
+
     handleKeyDown(event) {
         if ((event.metaKey || event.ctrlKey) && event.keyCode === 13) {          // cmd + Enter          
             event.preventDefault();
@@ -134,11 +161,12 @@ export default class NotebookComponent extends React.Component<Props, State> {
 
     render() {
         const { notebook, homeurl } = this.props;
-        const { autoclear, newname, running } = this.state;
+        const { autoclear, newname, running, codeWidth } = this.state;
+        const layoutStyle = { gridTemplateColumns: `${codeWidth}% 5px ${100-codeWidth}%` };
 
         return (
             <div className="notebook-app">
-                <div id="layout">
+                <div id="layout" style={layoutStyle}>
                     <div id="top">
                         <div id="btn-run">
                             <button className={cx('bigbutton', 'run', { running })} onClick={() => running ? this.stopExecution() : this.execNotebook()}>
@@ -195,7 +223,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
                             />
                         </div>
                     </div>
-                    <div id="gutter"></div>
+                    <div id="gutter" onMouseDown={this.boundHandleMouseDown}></div>
                     <div id="right">
                         <div id="console" ref={el => this.console = el}></div>
                     </div>
