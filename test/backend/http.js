@@ -72,7 +72,7 @@ describe('http service', function () {
                 expect(err).eq(null);
                 expect(res).has.status(200);
 
-                expect(res.text).matches(/route\s?=\s?"notebook"/g);
+                expect(res.text).matches(/,e="notebook",/g);
                 expect(res.text).contains('"content":"console.log(\'Hello, World!\');"');
 
                 expect(res.text).contains(validNotebook);
