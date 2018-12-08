@@ -1,6 +1,6 @@
 {
   "name": "nbk",
-  "version": "0.1.25",
+  "version": "0.1.26",
   "description": "Nodebook - Multi-Language REPL with web UI",
   "main": "dist/nodejs/backend/index.js",
   "scripts": {
@@ -33,7 +33,8 @@
     "recursive-copy": "^2.0.9",
     "title-case": "^2.1.1",
     "tree-kill": "^1.2.0",
-    "trunk": "^1.1.0"
+    "trunk": "^1.1.0",
+    "event-stream": "3.3.4"
   },
   "devDependencies": {
     "@types/chokidar": "^1.7.5",
