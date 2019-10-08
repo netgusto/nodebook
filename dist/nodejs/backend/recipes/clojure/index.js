@@ -32,7 +32,6 @@ const recipe = ({
             }, writeStdOut, writeStdErr, writeInfo);
         }
         else {
-            console.log(notebook.mainfilename, notebook.absdir, env);
             return stdexec_1.default({
                 cmd: ['sh', '-c', 'clojure ' + notebook.mainfilename],
                 cwd: notebook.absdir,
