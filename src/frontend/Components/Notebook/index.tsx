@@ -11,6 +11,7 @@ import 'codemirror/theme/monokai.css';
 
 import 'codemirror/mode/javascript/javascript';
 import 'codemirror/mode/clike/clike';
+import 'codemirror/mode/clojure/clojure';
 import 'codemirror/mode/go/go';
 import 'codemirror/mode/haskell/haskell';
 import 'codemirror/mode/lua/lua';
