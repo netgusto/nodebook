@@ -7,18 +7,35 @@ class ApiClient implements ApiClientType {
   private csrfToken: string;
   private debounceWait = 400;
   private debounceTimeout;
+  private options = {
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
+  };
 
-  persist(notebook: NotebookType, value: string) {
-    return window.fetch(notebook.persisturl, {
-      method: 'POST',
-      headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-          content: value,
+  private getCsrfToken(): Promise<string> {
+    if (this.csrfToken) return Promise.resolve(this.csrfToken);
+    return window.fetch('/csrf')
+      .then((res) => res.json())
+      .then((json) => {
+        this.csrfToken = json.csrfToken;
+        return this.csrfToken;
       })
+  }
+
+  private post(url, body) {
+    return this.getCsrfToken().then((csrfToken) => {
+      const options = Object.assign({}, this.options, {
+        method: 'POST',
+        body: JSON.stringify(Object.assign({}, body, { csrfToken }))
+      })
+      return window.fetch(url, options);
     });
+  }
+
+  persist(notebook: NotebookType, content: string) {
+    return this.post(notebook.persisturl, { content });
   }
 
   debouncedPersist(notebook: NotebookType, value: string) {
@@ -29,39 +46,15 @@ class ApiClient implements ApiClientType {
   }
 
   stop(notebook: NotebookType) {
-    return window.fetch(notebook.stopurl, {
-      method: 'POST',
-      headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-      },
-    })
+    return this.post(notebook.stopurl, {});
   }
 
-  rename(url: string, sanitizedName: string) {
-    return window.fetch(url, {
-      method: 'POST',
-      headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-          newname: sanitizedName,
-      })
-    })
+  rename(url: string, newname: string) {
+    return this.post(url, { newname });
   }
 
   create(url, recipekey) {
-    return window.fetch(url, {
-      method: 'POST',
-      headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-          recipekey,
-      })
-    })
+    return this.post(url, { recipekey });
   }
 }
 
