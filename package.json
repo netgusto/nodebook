@@ -1,6 +1,6 @@
 {
   "name": "nbk",
-  "version": "0.1.26",
+  "version": "0.1.27",
   "description": "Nodebook - Multi-Language REPL with web UI",
   "main": "dist/nodejs/backend/index.js",
   "scripts": {
