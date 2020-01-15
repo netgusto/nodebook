@@ -207,7 +207,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
                                     styleActiveLine: true,
                                     matchBrackets: true,
                                     indentUnit: 4,
-                                    scrollPastEnd: true,
+                                    scrollPastEnd: false,
                                     keyMap: 'sublime',
 
                                     extraKeys: {
