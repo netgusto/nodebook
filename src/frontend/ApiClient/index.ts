@@ -14,16 +14,6 @@ class ApiClient implements ApiClientType {
     }
   };
 
-  private getCsrfToken(): Promise<string> {
-    if (this.csrfToken) return Promise.resolve(this.csrfToken);
-    return window.fetch('/csrf')
-      .then((res) => res.json())
-      .then((json) => {
-        this.csrfToken = json.csrfToken;
-        return this.csrfToken;
-      })
-  }
-
   private post(url, body) {
     return this.getCsrfToken().then((csrfToken) => {
       const options = Object.assign({}, this.options, {
@@ -32,6 +22,16 @@ class ApiClient implements ApiClientType {
       })
       return window.fetch(url, options);
     });
+  }
+
+  getCsrfToken(): Promise<string> {
+    if (this.csrfToken) return Promise.resolve(this.csrfToken);
+    return window.fetch('/csrf')
+      .then((res) => res.json())
+      .then((json) => {
+        this.csrfToken = json.csrfToken;
+        return this.csrfToken;
+      })
   }
 
   persist(notebook: NotebookType, content: string) {

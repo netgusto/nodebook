@@ -1,7 +1,7 @@
 import * as React from 'react';
 import cx from 'classnames';
-import subDays from 'date-fns/sub_days';
-import isBefore from 'date-fns/is_before';
+import subDays from 'date-fns/subDays';
+import isBefore from 'date-fns/isBefore';
 import Spinner from 'react-spinkit';
 
 import { NotebookHandle, Recipe, ApiClient } from "../../types";

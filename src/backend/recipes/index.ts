@@ -1,6 +1,7 @@
 import recipeNodeJS from './nodejs';
 import recipeTypescript from './typescript';
 import recipeC from './c';
+import recipeClojure from './clojure';
 import recipeCpp from './cpp';
 import recipeElixir from './elixir';
 import recipeGo from './go';
@@ -23,6 +24,7 @@ const recipes = [
     recipeNodeJS,
     recipeTypescript,
     recipeC,
+    recipeClojure,
     recipeCpp,
     recipeCSharp,
     recipeElixir,

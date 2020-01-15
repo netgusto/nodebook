@@ -13,17 +13,18 @@ const defaultInitNotebook_1 = require("../defaultInitNotebook");
 const stdexec_1 = require("../../stdexec");
 const stdexecdocker_1 = require("../../stdexecdocker");
 const recipe = ({
-    key: 'ocaml',
-    name: 'OCaml',
-    language: 'OCaml',
-    mainfile: ['index.ml', 'main.ml'],
-    cmmode: 'mllike',
+    key: 'clojure',
+    name: 'Clojure',
+    language: 'Clojure',
+    mainfile: ['index.clj', 'main.clj'],
+    cmmode: 'clojure',
     dir: __dirname,
     exec: ({ notebook, docker, writeStdOut, writeStdErr, writeInfo, env }) => __awaiter(void 0, void 0, void 0, function* () {
+        let command;
         if (docker) {
             return stdexecdocker_1.default({
-                image: 'ocaml/opam:alpine',
-                cmd: ['sh', '-c', "ocamlc -o /tmp/code.out /code/" + notebook.mainfilename + " && /tmp/code.out"],
+                image: 'clojure:tools-deps',
+                cmd: ['sh', '-c', 'clojure ' + notebook.mainfilename],
                 cwd: '/code',
                 mounts: [
                     { from: notebook.absdir, to: '/code', mode: 'rw' },
@@ -33,7 +34,7 @@ const recipe = ({
         }
         else {
             return stdexec_1.default({
-                cmd: ['sh', '-c', "ocamlc -o /tmp/code.out " + notebook.mainfilename + " && /tmp/code.out"],
+                cmd: ['sh', '-c', 'clojure ' + notebook.mainfilename],
                 cwd: notebook.absdir,
                 env,
             }, writeStdOut, writeStdErr, writeInfo);

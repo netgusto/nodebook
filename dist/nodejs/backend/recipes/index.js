@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const nodejs_1 = require("./nodejs");
 const typescript_1 = require("./typescript");
 const c_1 = require("./c");
+const clojure_1 = require("./clojure");
 const cpp_1 = require("./cpp");
 const elixir_1 = require("./elixir");
 const go_1 = require("./go");
@@ -23,6 +24,7 @@ const recipes = [
     nodejs_1.default,
     typescript_1.default,
     c_1.default,
+    clojure_1.default,
     cpp_1.default,
     csharp_1.default,
     elixir_1.default,

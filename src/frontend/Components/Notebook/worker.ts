@@ -1,7 +1,7 @@
 onmessage = function(e: MessageEvent) {
     switch(e.data.action) {
         case 'exec': {
-            execAction(e.data.url);
+            execAction(e.data.url, e.data.csrfToken);
         }
     }
 }
@@ -22,9 +22,10 @@ function notifyExecEnded() {
     });
 }
 
-function execAction(url: string) {
+function execAction(url: string, csrfToken: string) {
     return fetch(url, {
         method: 'POST',
+        body: JSON.stringify({ csrfToken }),
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json'

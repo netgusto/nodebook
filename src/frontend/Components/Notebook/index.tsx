@@ -11,6 +11,7 @@ import 'codemirror/theme/monokai.css';
 
 import 'codemirror/mode/javascript/javascript';
 import 'codemirror/mode/clike/clike';
+import 'codemirror/mode/clojure/clojure';
 import 'codemirror/mode/go/go';
 import 'codemirror/mode/haskell/haskell';
 import 'codemirror/mode/lua/lua';
@@ -163,7 +164,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
     render() {
         const { notebook, homeurl } = this.props;
         const { autoclear, newname, running, codeWidth } = this.state;
-        const layoutStyle = { gridTemplateColumns: `${codeWidth}% 5px ${100-codeWidth}%` };
+        const layoutStyle = { gridTemplateColumns: `${codeWidth}% 5px calc(${100-codeWidth}% - 5px)` };
 
         return (
             <div className="notebook-app">
@@ -208,7 +209,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
                                     styleActiveLine: true,
                                     matchBrackets: true,
                                     indentUnit: 4,
-                                    scrollPastEnd: true,
+                                    scrollPastEnd: false,
                                     keyMap: 'sublime',
 
                                     extraKeys: {
@@ -322,10 +323,14 @@ export default class NotebookComponent extends React.Component<Props, State> {
         this.consoleLog('--- Running...\n', 'info');
         const { execurl } = notebook;
 
-        this.commWorker.postMessage({
-            action: 'exec',
-            url: execurl,
-        });
+        this.props.apiClient.getCsrfToken()
+            .then((csrfToken) => {
+                this.commWorker.postMessage({
+                    action: 'exec',
+                    url: execurl,
+                    csrfToken
+                });
+            })
     }
 
     msgstack: any[] = []
