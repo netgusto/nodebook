@@ -199,11 +199,11 @@ export default class NotebookRegistry {
                 absolute: true,
                 onlyFiles: true,
                 deep: depth,
-                case: false,
+                caseSensitiveMatch: false,
                 ignore: ['**/node_modules'],    // in the case not .gitignore is set in the notebook!
                 gitignore: true,
-                nobrace: true,
-                noext: true,
+                braceExpansion: false,
+                extglob: true,
                 expandDirectories: {
                     files: this.reciperegistry.getAllRecipesMainFiles(),
                 } as any
