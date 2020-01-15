@@ -4,7 +4,7 @@ import subDays from 'date-fns/subDays';
 import isBefore from 'date-fns/isBefore';
 import Spinner from 'react-spinkit';
 
-import { NotebookHandle, Recipe } from "../../types";
+import { NotebookHandle, Recipe, ApiClient } from "../../types";
 
 interface NotebooksListProps {
      notebooks: NotebookHandle[];
@@ -27,6 +27,7 @@ function NotebooksList(props: NotebooksListProps) {
 }
 
 export interface Props {
+    apiClient: ApiClient;
     notebooks: NotebookHandle[];
     recipes: Recipe[];
     newnotebookurl: string;
@@ -100,22 +101,13 @@ export default class Home extends React.Component<Props, State> {
     }
 
     private selectRecipe(recipekey: string) {
-        const { newnotebookurl } = this.props;
+        const { newnotebookurl, apiClient } = this.props;
         const { creating } = this.state;
         if (creating) return;
 
         this.setState({ creating: true });
 
-        return window.fetch(newnotebookurl, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                recipekey,
-            })
-        })
+        apiClient.create(newnotebookurl, recipekey)
         .then(res => res.json())
         .then(({ url }) => {
             document.location.href = url;

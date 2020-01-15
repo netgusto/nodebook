@@ -37,10 +37,11 @@ import 'codemirror/addon/search/match-highlighter';
 import 'codemirror/addon/fold/indent-fold';
 import 'codemirror/addon/scroll/scrollpastend';
 
-import { Notebook } from "../../types";
+import { Notebook, ApiClient } from "../../types";
 import "./style.scss";
 
 export interface Props {
+    apiClient: ApiClient,
     notebook: Notebook;
     homeurl: string;
     renamenotebookurl: string;
@@ -145,10 +146,10 @@ export default class NotebookComponent extends React.Component<Props, State> {
             this.execNotebook();
         } else if ((event.metaKey || event.ctrlKey) && event.key === 's') {      // cmd + S
 
-            const { notebook } = this.props;
+            const { notebook, apiClient } = this.props;
 
             event.preventDefault();
-            persist(notebook, this.editorvalue).then(() => this.execNotebook());
+            apiClient.persist(notebook, this.editorvalue).then(() => this.execNotebook());
         } else if (event.ctrlKey && event.key === 'c') {    // ctrl+c
             event.preventDefault();
             if (this.state.running) {
@@ -161,7 +162,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
     }
 
     render() {
-        const { notebook, homeurl } = this.props;
+        const { notebook, homeurl, apiClient } = this.props;
         const { autoclear, newname, running, codeWidth } = this.state;
         const layoutStyle = { gridTemplateColumns: `${codeWidth}% 5px calc(${100-codeWidth}% - 5px)` };
 
@@ -219,7 +220,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
                                 }}
                                 onChange={(_, __, value) => {
                                     this.editorvalue = value;
-                                    debouncedPersist(notebook, value);
+                                    apiClient.debouncedPersist(notebook, value);
                                 }}
                             />
                         </div>
@@ -262,7 +263,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
     private onNotebookNameCommit() {
 
         const { newname } = this.state;
-        const { notebook, renamenotebookurl } = this.props;
+        const { notebook, renamenotebookurl, apiClient } = this.props;
 
         if (newname === undefined) return;
 
@@ -286,16 +287,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
 
         // Persist name change
 
-        return window.fetch(renamenotebookurl, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                newname: sanitizedName,
-            })
-        })
+        return apiClient.rename(renamenotebookurl, sanitizedName)
         .then(res => res.json())
         .then(({ url }) => document.location.href = url)
         .catch(_ => alert('Error: Notebook could not be renamed.'));
@@ -305,16 +297,9 @@ export default class NotebookComponent extends React.Component<Props, State> {
         const { running } = this.state;
         if (!running) return; 
 
-        const { notebook } = this.props;
-        const { stopurl } = notebook;
-
-        return window.fetch(stopurl, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-        })
+        const { notebook, apiClient } = this.props;
+        
+        return apiClient.stop(notebook)
         .then(() => {
             this.consoleLog('--- Execution stopped.\n\n', 'info');
             this.setState({ running: false });
@@ -378,29 +363,4 @@ export default class NotebookComponent extends React.Component<Props, State> {
     consoleClear() {
         this.console.innerHTML = '';
     }
-}
-
-function persist(notebook: Notebook, value: string) {
-    return window.fetch(notebook.persisturl, {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            content: value,
-        })
-    });
-}
-
-const debouncedPersist = debounce(persist, 400);
-
-function debounce(func: Function, wait: number = 100) {
-    let timeout;
-    return function (...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-            func.apply(this, args);
-        }, wait);
-    };
 }

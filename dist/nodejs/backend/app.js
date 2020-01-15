@@ -33,7 +33,8 @@ function app({ port, bindaddress, notebookspath, logger, docker }) {
             const notebookregistry = new notebookregistry_1.default(notebookspath, reciperegistry);
             yield notebookregistry.mount();
             return notebookregistry;
-        }));
+        }))
+            .add('validtokens', () => new Set());
         yield trunk.open();
         const app = express();
         app.use(bodyParser.json());
@@ -50,6 +51,7 @@ function app({ port, bindaddress, notebookspath, logger, docker }) {
                 return compression.filter(req, res);
             } }));
         app.get('/', handlers_1.handleHomePage({ trunk }));
+        app.get('/csrf', handlers_1.handleCsrf({ trunk }));
         app.get('/notebook/:name', handlers_1.handleNoteBook({ trunk }));
         app.post('/api/notebook/new', handlers_1.handleAPINoteBookNew({ trunk }));
         app.post('/api/notebook/:name/rename', handlers_1.handleAPINoteBookRename({ trunk }));

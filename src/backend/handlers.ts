@@ -1,3 +1,4 @@
+import * as crypto from 'crypto';
 import * as path from 'path';
 import * as generateName from 'project-name-generator';
 import { titleCase } from 'title-case';
@@ -19,6 +20,7 @@ import { NotebookSummaryFrontend } from './types';
 
 export {
     handleHomePage,
+    handleCsrf,
     handleNoteBook,
     handleAPINoteBookSetContent,
     handleAPINoteBookExec,
@@ -38,6 +40,16 @@ function generatePageHtml(route: string, params = {}) {
                 .replace(/"#route#"/g, JSON.stringify(route))
                 .replace(/"#params#"/g, JSON.stringify(params));
         });
+}
+
+function handleCsrf({ trunk }: { trunk: any }) {
+    return async function (_: any, res: any) {
+        const csrfToken = crypto.randomBytes(32).toString('hex')
+        trunk.get('validtokens').add(csrfToken)
+        res.set('Content-Type', 'application/json');
+        setNoCache(res);
+        res.send(JSON.stringify({ csrfToken }));
+    }
 }
 
 function handleHomePage({ trunk }: { trunk: any }) {
@@ -99,9 +111,12 @@ function handleNoteBook({ trunk }: { trunk: any }) {
 function handleAPINoteBookSetContent({ trunk }: { trunk: any }) {
     return async function (req: any, res: any) {
         const notebookregistry = trunk.get('notebookregistry');
+        const validtokens = trunk.get('validtokens')
 
         const { name } = req.params;
-        const { content } = req.body;
+        const { content, csrfToken } = req.body;
+
+        if (!csrfToken || !validtokens.has(csrfToken)) return res.status(401).send('Unauthorized request');
 
         if (content === undefined) return res.status(400).send('Notebook content not set on POST');
 
@@ -123,8 +138,12 @@ function handleAPINoteBookExec({ trunk }: { trunk: any }) {
     return async function (req: any, res: any) {
         const docker = trunk.get('docker');
         const notebookregistry = trunk.get('notebookregistry');
+        const validtokens = trunk.get('validtokens');
 
         const { name } = req.params;
+        const { csrfToken } = req.body;
+
+        if (!csrfToken || !validtokens.has(csrfToken)) return res.status(401).send('Unauthorized request');
 
         res.set('Content-Type', 'text/plain');
 
@@ -144,8 +163,12 @@ function handleAPINoteBookExec({ trunk }: { trunk: any }) {
 function handleAPINoteBookStop({ trunk }: { trunk: any }) {
     return async function (req: any, res: any) {
         const notebookregistry = trunk.get('notebookregistry');
+        const validtokens = trunk.get('validtokens');
 
         const { name } = req.params;
+        const { csrfToken } = req.body;
+
+        if (!csrfToken || !validtokens.has(csrfToken)) return res.status(401).send('Unauthorized request');
 
         res.set('Content-Type', 'text/plain');
 
@@ -164,8 +187,11 @@ function handleAPINoteBookNew({ trunk }: { trunk: any }) {
         const notebookspath = trunk.get('notebookspath');
         const notebookregistry = trunk.get('notebookregistry');
         const reciperegistry = trunk.get('reciperegistry');
+        const validtokens = trunk.get('validtokens');
 
-        const { recipekey } = req.body;
+        const { recipekey, csrfToken } = req.body;
+        if (!csrfToken || !validtokens.has(csrfToken)) return res.status(401).send('Unauthorized request');
+
         res.set('Content-Type', 'text/plain');
 
         // find recipe
@@ -206,9 +232,12 @@ function handleAPINoteBookNew({ trunk }: { trunk: any }) {
 function handleAPINoteBookRename({ trunk }: { trunk: any }) {
     return async function (req: any, res: any) {
         const notebookregistry = trunk.get('notebookregistry');
+        const validtokens = trunk.get('validtokens');
 
         const { name: oldname } = req.params;
-        const { newname } = req.body;
+        const { newname, csrfToken } = req.body;
+
+        if (!csrfToken || !validtokens.has(csrfToken)) return res.status(401).send('Unauthorized request');
 
         res.set('Content-Type', 'text/plain');
 
