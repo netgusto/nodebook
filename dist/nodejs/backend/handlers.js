@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const path = require("path");
 const generateName = require("project-name-generator");
-const titleCase = require('title-case');
+const title_case_1 = require("title-case");
 const notebook_1 = require("./notebook");
 const buildurl_1 = require("./buildurl");
 function setNoCache(res) {
@@ -148,7 +148,7 @@ function handleAPINoteBookNew({ trunk }) {
             // Generate name
             let name;
             do {
-                name = notebook_1.sanitizeNotebookName(titleCase(generateName().spaced));
+                name = notebook_1.sanitizeNotebookName(title_case_1.titleCase(generateName().spaced));
             } while (notebookregistry.getNotebookByName(name));
             let done;
             try {
