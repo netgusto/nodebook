@@ -1,5 +1,7 @@
 $yellowcolor: #FFC312;
 
+html, body {margin: 0; height: 100%; overflow-y: hidden}
+
 body {
     margin: 0; padding: 0;
     background: #272822;
@@ -190,13 +192,13 @@ body {
     #console {
         color: #f8f8f2;
         width: 100%;
-        height: calc(100vh - 70px); // 70: 50 + 10 (padding) * 2
+        height: calc(100vh - 50px); // 70: 50 + 10 (padding) * 2
         overflow: scroll;
         unicode-bidi: embed;
         font-family: 'Roboto Mono', Menlo, 'Ubuntu Mono', Monaco, Consolas, 'source-code-pro', monospace;
         white-space: pre;
         margin-bottom: 20px;
-        padding-left: 10px;
+        // padding-left: 10px;
     }
 
     #console .stderr { color: red; }

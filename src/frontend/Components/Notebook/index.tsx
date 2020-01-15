@@ -162,7 +162,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
     render() {
         const { notebook, homeurl } = this.props;
         const { autoclear, newname, running, codeWidth } = this.state;
-        const layoutStyle = { gridTemplateColumns: `${codeWidth}% 5px ${100-codeWidth}%` };
+        const layoutStyle = { gridTemplateColumns: `${codeWidth}% 5px calc(${100-codeWidth}% - 5px)` };
 
         return (
             <div className="notebook-app">
