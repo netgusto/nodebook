@@ -12,8 +12,7 @@
     "prebuild": "rm -Rf dist",
     "build": "npm run prebuild && npm run build-backend && npm run build-frontend && npm run test",
     "build-backend": "tsc && cpx \"./src/backend/recipes/**/defaultcontent/**\" ./dist/nodejs/backend/recipes",
-    "build-frontend": "parcel build src/frontend/*.html --out-dir dist/frontend",
-    "electron": "electron ./dist/nodejs/backend/electron.js"
+    "build-frontend": "parcel build src/frontend/*.html --out-dir dist/frontend"
   },
   "author": "@netgusto",
   "license": "ISC",
