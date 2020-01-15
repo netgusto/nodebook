@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as generateName from 'project-name-generator';
-const titleCase = require('title-case');
+import { titleCase } from 'title-case';
 
 import {
     listNotebooks,
