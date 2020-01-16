@@ -7,6 +7,7 @@ import { Trunk } from 'trunk';
 
 import {
     handleHomePage,
+    handleCsrf,
     handleNoteBook,
     handleAPINoteBookSetContent,
     handleAPINoteBookExec,
@@ -42,7 +43,8 @@ export async function app({ port, bindaddress, notebookspath, logger, docker }: 
             const notebookregistry = new NotebookRegistry(notebookspath, reciperegistry);
             await notebookregistry.mount();
             return notebookregistry;
-        });
+        })
+        .add('validtokens', () => new Set());
     
     await trunk.open();
 
@@ -65,6 +67,7 @@ export async function app({ port, bindaddress, notebookspath, logger, docker }: 
     }}));
 
     app.get('/', handleHomePage({ trunk }));
+    app.get('/csrf', handleCsrf({ trunk }));
     app.get('/notebook/:name', handleNoteBook({ trunk }));
     app.post('/api/notebook/new', handleAPINoteBookNew({ trunk }));
     app.post('/api/notebook/:name/rename', handleAPINoteBookRename({ trunk }));

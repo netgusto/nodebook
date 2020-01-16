@@ -1,12 +1,18 @@
 import * as React from 'react';
 
-import { Route as RouteType, NotebookHandle as NotebookHandleType, Notebook as NotebookType } from "../../types";
+import {
+    Route as RouteType,
+    NotebookHandle as NotebookHandleType,
+    Notebook as NotebookType,
+    ApiClient as ApiClientType
+} from "../../types";
 
 import Home, { Props as HomeProps } from "../Home";
 import Notebook, { Props as NotebookProps } from "../Notebook";
 
 
 interface Props {
+    apiClient: ApiClientType,
     route: RouteType;
     notebooks?: NotebookHandleType[];
     notebook?: NotebookType;

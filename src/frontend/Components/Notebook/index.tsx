@@ -37,10 +37,11 @@ import 'codemirror/addon/search/match-highlighter';
 import 'codemirror/addon/fold/indent-fold';
 import 'codemirror/addon/scroll/scrollpastend';
 
-import { Notebook } from "../../types";
+import { Notebook, ApiClient } from "../../types";
 import "./style.scss";
 
 export interface Props {
+    apiClient: ApiClient,
     notebook: Notebook;
     homeurl: string;
     renamenotebookurl: string;
@@ -148,7 +149,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
             const { notebook } = this.props;
 
             event.preventDefault();
-            persist(notebook, this.editorvalue).then(() => this.execNotebook());
+            this.props.apiClient.persist(notebook, this.editorvalue).then(() => this.execNotebook());
         } else if (event.ctrlKey && event.key === 'c') {    // ctrl+c
             event.preventDefault();
             if (this.state.running) {
@@ -219,7 +220,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
                                 }}
                                 onChange={(_, __, value) => {
                                     this.editorvalue = value;
-                                    debouncedPersist(notebook, value);
+                                    this.props.apiClient.debouncedPersist(notebook, value);
                                 }}
                             />
                         </div>
@@ -286,16 +287,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
 
         // Persist name change
 
-        return window.fetch(renamenotebookurl, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                newname: sanitizedName,
-            })
-        })
+        return this.props.apiClient.rename(renamenotebookurl, sanitizedName)
         .then(res => res.json())
         .then(({ url }) => document.location.href = url)
         .catch(_ => alert('Error: Notebook could not be renamed.'));
@@ -306,15 +298,8 @@ export default class NotebookComponent extends React.Component<Props, State> {
         if (!running) return; 
 
         const { notebook } = this.props;
-        const { stopurl } = notebook;
-
-        return window.fetch(stopurl, {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-        })
+        
+        return this.props.apiClient.stop(notebook)
         .then(() => {
             this.consoleLog('--- Execution stopped.\n\n', 'info');
             this.setState({ running: false });
@@ -338,10 +323,14 @@ export default class NotebookComponent extends React.Component<Props, State> {
         this.consoleLog('--- Running...\n', 'info');
         const { execurl } = notebook;
 
-        this.commWorker.postMessage({
-            action: 'exec',
-            url: execurl,
-        });
+        this.props.apiClient.getCsrfToken()
+            .then((csrfToken) => {
+                this.commWorker.postMessage({
+                    action: 'exec',
+                    url: execurl,
+                    csrfToken
+                });
+            })
     }
 
     msgstack: any[] = []
@@ -378,29 +367,4 @@ export default class NotebookComponent extends React.Component<Props, State> {
     consoleClear() {
         this.console.innerHTML = '';
     }
-}
-
-function persist(notebook: Notebook, value: string) {
-    return window.fetch(notebook.persisturl, {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            content: value,
-        })
-    });
-}
-
-const debouncedPersist = debounce(persist, 400);
-
-function debounce(func: Function, wait: number = 100) {
-    let timeout;
-    return function (...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-            func.apply(this, args);
-        }, wait);
-    };
 }

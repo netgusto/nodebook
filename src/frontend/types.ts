@@ -20,3 +20,12 @@ export interface Recipe {
     language: string;
     cmmode: string;
 }
+
+export interface ApiClient {
+    getCsrfToken: () => Promise<string>;
+    persist: (notebook: Notebook, value: string) => Promise<Response>;
+    debouncedPersist: (notebook: Notebook, value: string) => void;
+    stop: (notebook: Notebook) => Promise<Response>;
+    rename: (url: string, name: string) => Promise<Response>;
+    create: (url: string, recipekey: string) => Promise<Response>;
+}

@@ -59,6 +59,7 @@
     "react-codemirror2": "^6.0.0",
     "react-dom": "^16.12.0",
     "react-spinkit": "^3.0.0",
+    "sass": "^1.23.0",
     "typescript": "^3.7.4"
   },
   "alias": {
