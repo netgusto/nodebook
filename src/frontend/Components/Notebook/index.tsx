@@ -44,6 +44,10 @@ export interface Props {
     apiClient: ApiClient,
     notebook: Notebook;
     homeurl: string;
+    execurl: string;
+    stopurl: string;
+    persisturl: string;
+    content: string;
     renamenotebookurl: string;
 }
 
@@ -84,7 +88,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
         this.boundHandleMouseUp = this.handleMouseUp.bind(this);
         this.boundHandleMouseMove = this.handleMouseMove.bind(this);
         this.onNotebookNameKeyDown = this.onNotebookNameKeyDown.bind(this);
-        this.editorvalue = props.notebook.content;
+        this.editorvalue = props.content;
         this.entities = new Entities();
         this.ansiConvert = new Convert();
     }
@@ -146,10 +150,10 @@ export default class NotebookComponent extends React.Component<Props, State> {
             this.execNotebook();
         } else if ((event.metaKey || event.ctrlKey) && event.key === 's') {      // cmd + S
 
-            const { notebook } = this.props;
+            const { persisturl } = this.props;
 
             event.preventDefault();
-            this.props.apiClient.persist(notebook, this.editorvalue).then(() => this.execNotebook());
+            this.props.apiClient.persist(persisturl, this.editorvalue).then(() => this.execNotebook());
         } else if (event.ctrlKey && event.key === 'c') {    // ctrl+c
             event.preventDefault();
             if (this.state.running) {
@@ -162,7 +166,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
     }
 
     render() {
-        const { notebook, homeurl } = this.props;
+        const { notebook, homeurl, persisturl, content } = this.props;
         const { autoclear, newname, running, codeWidth } = this.state;
         const layoutStyle = { gridTemplateColumns: `${codeWidth}% 5px calc(${100-codeWidth}% - 5px)` };
 
@@ -200,7 +204,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
                     <div id="left">
                         <div id="code">
                             <CM
-                                value={notebook.content}
+                                value={content}
                                 options={{
                                     mode: notebook.recipe.cmmode,
                                     theme: 'monokai',
@@ -220,7 +224,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
                                 }}
                                 onChange={(_, __, value) => {
                                     this.editorvalue = value;
-                                    this.props.apiClient.debouncedPersist(notebook, value);
+                                    this.props.apiClient.debouncedPersist(persisturl, value);
                                 }}
                             />
                         </div>
@@ -297,9 +301,9 @@ export default class NotebookComponent extends React.Component<Props, State> {
         const { running } = this.state;
         if (!running) return; 
 
-        const { notebook } = this.props;
+        const { stopurl } = this.props;
         
-        return this.props.apiClient.stop(notebook)
+        return this.props.apiClient.stop(stopurl)
         .then(() => {
             this.consoleLog('--- Execution stopped.\n\n', 'info');
             this.setState({ running: false });
@@ -312,7 +316,7 @@ export default class NotebookComponent extends React.Component<Props, State> {
     private execNotebook() {
 
         const { autoclear, running } = this.state;
-        const { notebook } = this.props;
+        const { execurl } = this.props;
 
         if (running) return;
 
@@ -321,7 +325,6 @@ export default class NotebookComponent extends React.Component<Props, State> {
         if (autoclear) this.consoleClear();
     
         this.consoleLog('--- Running...\n', 'info');
-        const { execurl } = notebook;
 
         this.props.apiClient.getCsrfToken()
             .then((csrfToken) => {

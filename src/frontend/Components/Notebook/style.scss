@@ -1,6 +1,7 @@
 $yellowcolor: #FFC312;
 
-html, body {margin: 0; height: 100%; overflow-y: hidden}
+html, body {margin: 0; height: 100%}
+html.notebook, html.notebook body {overflow-y: hidden}
 
 body {
     margin: 0; padding: 0;
