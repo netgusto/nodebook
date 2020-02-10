@@ -3,4 +3,5 @@ node_modules
 /dist/*.map
 .DS_Store
 src/backend/nbk
+dist/nbk
 pkged.go

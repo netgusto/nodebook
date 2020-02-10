@@ -1,17 +1,17 @@
 package recipe
 
 import (
-	"github.com/netgusto/nodebook/src/backend/recipe/helper"
+	"github.com/netgusto/nodebook/src/shared/recipe/helper"
 	"github.com/netgusto/nodebook/src/shared/types"
 )
 
-func Fsharp() types.Recipe {
+func Csharp() types.Recipe {
 	return helper.StdRecipe(
-		"fsharp",     // key
-		"F#",         // name
-		"fsharp",     // language
-		"Program.fs", // mainfile
-		"mllike",     // cmmode
+		"csharp",     // key
+		"C#",         // name
+		"csharp",     // language
+		"Program.cs", // mainfile
+		"clike",      // cmmode
 		"docker.io/microsoft/dotnet",
 		func(notebook types.Notebook) []string {
 			return []string{"dotnet", "run"}

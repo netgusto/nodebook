@@ -4,7 +4,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/netgusto/nodebook/src/backend/recipe/helper"
+	"github.com/netgusto/nodebook/src/shared/recipe/helper"
 	"github.com/netgusto/nodebook/src/shared/types"
 	"github.com/pkg/errors"
 )

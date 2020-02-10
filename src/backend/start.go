@@ -12,7 +12,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/markbates/pkger"
 	"github.com/netgusto/nodebook/src/backend/httphandler"
-	"github.com/netgusto/nodebook/src/backend/recipe"
+	"github.com/netgusto/nodebook/src/shared/recipe"
 	"github.com/netgusto/nodebook/src/shared/service"
 	pkgErrors "github.com/pkg/errors"
 
