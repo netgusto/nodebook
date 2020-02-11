@@ -5,3 +5,5 @@ node_modules
 src/backend/nbk
 dist/nbk
 pkged.go
+dist/nbkcli
+src/cli/cli

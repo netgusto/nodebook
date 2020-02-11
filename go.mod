@@ -16,6 +16,7 @@ require (
 	github.com/markbates/pkger v0.14.0
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/pkg/errors v0.8.1
+	github.com/ttacon/chalk v0.0.0-20160626202418-22c06c80ed31
 	golang.org/x/net v0.0.0-20200114155413-6afb5195e5aa // indirect
 	golang.org/x/sys v0.0.0-20200117145432-59e60aa80a0c // indirect
 )

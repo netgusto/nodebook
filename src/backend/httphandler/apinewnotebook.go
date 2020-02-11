@@ -11,7 +11,6 @@ import (
 func ApiNewNotebookHandler(
 	notebookRegistry *service.NotebookRegistry,
 	recipeRegistry *service.RecipeRegistry,
-	notebookWatcher *service.NotebookWatcher,
 	csrfService *service.CSRFService,
 	routes *service.Routes,
 	notebookspath string) HTTPHandler {
@@ -71,14 +70,6 @@ func ApiNewNotebookHandler(
 
 		// Register notebook
 		notebookRegistry.RegisterNotebook(notebook)
-
-		// Watch notebook
-		if notebookWatcher != nil {
-			if err := notebookWatcher.AddNotebook(notebook); err != nil {
-				http.Error(res, "Could not watch notebook", http.StatusInternalServerError)
-				panic(err)
-			}
-		}
 
 		payload, err := json.Marshal(extractFrontendNotebookSummary(notebook, routes))
 		if err != nil {
