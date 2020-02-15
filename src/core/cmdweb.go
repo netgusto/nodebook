@@ -1,4 +1,4 @@
-package main
+package core
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 	"github.com/netgusto/nodebook/src/core/shared/service"
 )
 
-func webRun(notebookspath string, docker bool, bindaddress string, port int) {
+func WebRun(notebookspath string, docker bool, bindaddress string, port int) {
 	if docker && !shared.IsDockerRunning() {
 		fmt.Println("docker is not running on the host, but --docker requested.")
 		os.Exit(1)

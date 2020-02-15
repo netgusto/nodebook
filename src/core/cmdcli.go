@@ -1,4 +1,4 @@
-package main
+package core
 
 import (
 	"fmt"
@@ -15,7 +15,7 @@ import (
 	"github.com/ttacon/chalk"
 )
 
-func cliRun(notebookspath string, docker bool) {
+func CliRun(notebookspath string, docker bool) {
 	if docker && !shared.IsDockerRunning() {
 		fmt.Println("docker is not running on the host, but --docker requested.")
 		os.Exit(1)

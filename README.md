@@ -1,4 +1,4 @@
-# nodebook [![Build Status](https://travis-ci.com/netgusto/nodebook.svg?branch=master)](https://travis-ci.com/netgusto/nodebook)
+# nodebook
 
 Nodebook - Multi-Language REPL with Web UI + CLI code runner
 
@@ -41,32 +41,32 @@ If `--docker` is set on the command line, each of these environments will run in
 
 Otherwise, the local toolchains will be used.
 
-## Build from source
+## Install from source
 
 Building requires go.
 
 ```bash
 $ make deps
-$ make build
-# the built binary is dist/nbk
+$ make install
+# nodebook should be available under $GOPATH/bin/nodebook or $GOBIN/nodebook
 ```
 
 ## Run with Web UI
 
 ```
-# With docker
-$ nbk --docker path/to/notebooks
+# With dockerized toolchains
+$ nodebook --docker path/to/notebooks
 
-# Using local toolchains
-$ nbk path/to/notebooks
+# With local toolchains
+$ nodebook path/to/notebooks
 ```
 
-# Run on CLI
+# Run on CLI (watch and run mode)
 
 ```
-$ nbk --cli --docker path/to/notebooks
+$ nodebook cli --docker path/to/notebooks
 # Or
-$ nbk --cli path/to/notebooks
+$ nodebook cli path/to/notebooks
 ```
 
 ## Usage
@@ -87,7 +87,6 @@ The notebook's name will be the name of the folder. The notebook language is det
 
 ### Command line options
 
-* **--notebooks**: path to notebook folders; *required*
 * **--docker**: Execute code in disposable docker containers instead of local system; defaults to `false`
 
 **Web UI only**:
