@@ -1,9 +1,7 @@
 node_modules
 .cache
-/dist/*.map
+/dist/frontend/*.map
 .DS_Store
-src/backend/nbk
+src/core/core
 dist/nbk
 pkged.go
-dist/nbkcli
-src/cli/cli

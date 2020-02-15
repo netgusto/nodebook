@@ -39,35 +39,34 @@ A notebook is a folder containing an `{index|main}.{js,py,c,cpp,...}` file. The 
 
 If `--docker` is set on the command line, each of these environments will run inside a specific docker container.
 
-Otherwise, the development environments on your local machine will be used.
+Otherwise, the local toolchains will be used.
 
-## Install and run as package (npm)
+## Build from source
+
+Building requires go.
 
 ```bash
-# Install
-$ npm i -g --production nbk
-
-# Run with Web UI
-$ nbk path/to/notebooks
-# Or
-$ nbk --notebooks path/to/notebooks
-
-# Run on CLI
-$ nbkcli path/to/notebooks
-# Or
-$ nbkcli --notebooks path/to/notebooks
+$ make deps
+$ make build
+# the built binary is dist/nbk
 ```
 
-## Install and run from source
+## Run with Web UI
 
-```bash
-# Install
-$ git clone https://github.com/netgusto/nodebook
-$ cd nodebook
-$ npm install --production
+```
+# With docker
+$ nbk --docker path/to/notebooks
 
-# Run
-$ node . --notebooks path/to/notebooks
+# Using local toolchains
+$ nbk path/to/notebooks
+```
+
+# Run on CLI
+
+```
+$ nbk --cli --docker path/to/notebooks
+# Or
+$ nbk --cli path/to/notebooks
 ```
 
 ## Usage
@@ -114,23 +113,3 @@ Do not run the Web UI on a port open to public traffic! Doing so would allow rem
 
 By default, the server binds to `127.0.0.1`, which allows connection from the localhost only. You can override the bind address using `--bindaddress`, but do it only if you know what you're doing.
 
-## Develop
-
-To iterate on the code:
-
-```bash
-$ npm install
-$ PARAMS="--notebooks path/to/notebooks" npm run dev
-```
-
-To build:
-
-```bash
-$ npm run build
-```
-
-To test:
-
-```bash
-$ npm test
-```
