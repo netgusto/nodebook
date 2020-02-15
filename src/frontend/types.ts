@@ -8,10 +8,6 @@ export interface NotebookHandle {
 }
 
 export interface Notebook extends NotebookHandle {
-    execurl: string;
-    persisturl: string;
-    content: string;
-    stopurl: string;
 }
 
 export interface Recipe {
@@ -23,9 +19,9 @@ export interface Recipe {
 
 export interface ApiClient {
     getCsrfToken: () => Promise<string>;
-    persist: (notebook: Notebook, value: string) => Promise<Response>;
-    debouncedPersist: (notebook: Notebook, value: string) => void;
-    stop: (notebook: Notebook) => Promise<Response>;
+    persist: (url: string, value: string) => Promise<Response>;
+    debouncedPersist: (url: string, value: string) => void;
+    stop: (url: string) => Promise<Response>;
     rename: (url: string, name: string) => Promise<Response>;
     create: (url: string, recipekey: string) => Promise<Response>;
 }

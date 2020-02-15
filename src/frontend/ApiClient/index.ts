@@ -34,19 +34,19 @@ class ApiClient implements ApiClientType {
       })
   }
 
-  persist(notebook: NotebookType, content: string) {
-    return this.post(notebook.persisturl, { content });
+  persist(url: string, content: string) {
+    return this.post(url, { content });
   }
 
-  debouncedPersist(notebook: NotebookType, value: string) {
+  debouncedPersist(url: string, value: string) {
     clearTimeout(this.debounceTimeout);
     this.debounceTimeout = setTimeout(() => {
-      this.persist(notebook, value)
+      this.persist(url, value)
     }, this.debounceWait);
   }
 
-  stop(notebook: NotebookType) {
-    return this.post(notebook.stopurl, {});
+  stop(url: string) {
+    return this.post(url, {});
   }
 
   rename(url: string, newname: string) {

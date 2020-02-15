@@ -1,4 +1,4 @@
-# nodebook [![Build Status](https://travis-ci.com/netgusto/nodebook.svg?branch=master)](https://travis-ci.com/netgusto/nodebook)
+# nodebook
 
 Nodebook - Multi-Language REPL with Web UI + CLI code runner
 
@@ -39,35 +39,34 @@ A notebook is a folder containing an `{index|main}.{js,py,c,cpp,...}` file. The 
 
 If `--docker` is set on the command line, each of these environments will run inside a specific docker container.
 
-Otherwise, the development environments on your local machine will be used.
+Otherwise, the local toolchains will be used.
 
-## Install and run as package (npm)
+## Install from source
+
+Building requires go.
 
 ```bash
-# Install
-$ npm i -g --production nbk
-
-# Run with Web UI
-$ nbk path/to/notebooks
-# Or
-$ nbk --notebooks path/to/notebooks
-
-# Run on CLI
-$ nbkcli path/to/notebooks
-# Or
-$ nbkcli --notebooks path/to/notebooks
+$ make deps
+$ make install
+# nodebook should be available under $GOPATH/bin/nodebook or $GOBIN/nodebook
 ```
 
-## Install and run from source
+## Run with Web UI
 
-```bash
-# Install
-$ git clone https://github.com/netgusto/nodebook
-$ cd nodebook
-$ npm install --production
+```
+# With dockerized toolchains
+$ nodebook --docker path/to/notebooks
 
-# Run
-$ node . --notebooks path/to/notebooks
+# With local toolchains
+$ nodebook path/to/notebooks
+```
+
+# Run on CLI (watch and run mode)
+
+```
+$ nodebook cli --docker path/to/notebooks
+# Or
+$ nodebook cli path/to/notebooks
 ```
 
 ## Usage
@@ -88,7 +87,6 @@ The notebook's name will be the name of the folder. The notebook language is det
 
 ### Command line options
 
-* **--notebooks**: path to notebook folders; *required*
 * **--docker**: Execute code in disposable docker containers instead of local system; defaults to `false`
 
 **Web UI only**:
@@ -114,23 +112,3 @@ Do not run the Web UI on a port open to public traffic! Doing so would allow rem
 
 By default, the server binds to `127.0.0.1`, which allows connection from the localhost only. You can override the bind address using `--bindaddress`, but do it only if you know what you're doing.
 
-## Develop
-
-To iterate on the code:
-
-```bash
-$ npm install
-$ PARAMS="--notebooks path/to/notebooks" npm run dev
-```
-
-To build:
-
-```bash
-$ npm run build
-```
-
-To test:
-
-```bash
-$ npm test
-```

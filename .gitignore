@@ -1,4 +1,7 @@
 node_modules
 .cache
-/dist/*.map
+/dist/frontend/*.map
 .DS_Store
+src/core/core
+dist/nbk
+pkged.go

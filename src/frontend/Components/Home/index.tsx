@@ -85,7 +85,7 @@ export default class Home extends React.Component<Props, State> {
                 </div>
                 
                 <div className="tools">
-                    <button className={cx('bigbutton', 'btn-new', { creating })} onClick={() => this.setState({ menuopen: !menuopen })}>
+                    <button className={cx('bigbutton', 'btn-new', { creating })} onClick={() => (this as any).setState({ menuopen: !menuopen })}>
                         {creating ? <Spinner fadeIn="none" name="wave" color="white" /> : (
                             <span>{menuopen ? '-' : '+'} Notebook</span>
                         )}
@@ -105,7 +105,7 @@ export default class Home extends React.Component<Props, State> {
         const { creating } = this.state;
         if (creating) return;
 
-        this.setState({ creating: true });
+        (this as any).setState({ creating: true });
 
         this.props.apiClient.create(newnotebookurl, recipekey)
         .then(res => res.json())
