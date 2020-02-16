@@ -2,6 +2,8 @@
 
 Nodebook - Multi-Language REPL with Web UI + CLI code runner
 
+Useful to practice algorithms and datastructures for coding interviews.
+
 ## What is it?
 
 Nodebook is an in-browser REPL supporting many programming languages. Code's on the left, Console's on the right. Click "Run" or press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> or <kbd>Cmd</kbd>+<kbd>Enter</kbd> to run your code.
