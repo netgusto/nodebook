@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"os"
+    "path/filepath"
 
 	"github.com/netgusto/nodebook/src/core/shared/recipe"
 	"github.com/netgusto/nodebook/src/core/shared/service"
@@ -14,8 +15,14 @@ func baseServices(notebooksPath string) (*service.RecipeRegistry, *service.Noteb
 	recipeRegistry := service.NewRecipeRegistry()
 	recipe.AddRecipesToRegistry(recipeRegistry)
 
+    absBookPath, err := filepath.Abs(notebooksPath)
+    if err != nil {
+        fmt.Println("Could not get absolute path")
+        os.Exit(1)
+    }
+
 	// Notebook registry
-	nbRegistry := service.NewNotebookRegistry(notebooksPath, recipeRegistry)
+	nbRegistry := service.NewNotebookRegistry(absBookPath, recipeRegistry)
 
 	// Find notebooks
 	notebooks, err := nbRegistry.FindNotebooks(nbRegistry.GetNotebooksPath())
