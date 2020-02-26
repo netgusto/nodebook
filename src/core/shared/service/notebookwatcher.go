@@ -54,7 +54,12 @@ func (w *NotebookWatcher) Watch() error {
 
 				if event.Op&fsnotify.Write == fsnotify.Write {
 
-					notebookname := filepath.Base(filepath.Dir(event.Name))
+					absdir := filepath.Dir(event.Name)
+					notebookname, err := w.notebookregistry.DetermineNotebookNameByAbsDir(absdir)
+					if err != nil {
+						log.Printf("ERROR: COULD NOT FIND NOTEBOOK FOR DIR %s\n", absdir)
+					}
+
 					notebook, err := w.notebookregistry.GetNotebookByName(notebookname)
 					if err != nil {
 						log.Printf("ERROR: COULD NOT FIND NOTEBOOK FOR NAME %s\n", notebookname)
@@ -77,5 +82,4 @@ func (w *NotebookWatcher) Watch() error {
 	<-done
 
 	return nil
-	// watcher: https://github.com/fsnotify/fsnotify/blob/master/example_test.go
 }
