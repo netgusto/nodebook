@@ -81,7 +81,7 @@ func (r NotebookRegistry) BuildNotebookDescriptor(notebookname string, recipe ty
 	return &notebook, nil
 }
 
-func (r NotebookRegistry) determineNotebookNameByAbsDir(absdir string) (string, error) {
+func (r NotebookRegistry) DetermineNotebookNameByAbsDir(absdir string) (string, error) {
 	if len(absdir) < len(r.notebookspath)+1 {
 		return "", fmt.Errorf("Notebook \"%s\" not in base directory \"%s\"", absdir, r.notebookspath)
 	}
@@ -124,7 +124,7 @@ func (r NotebookRegistry) FindNotebooks(folderpath string) ([]types.Notebook, er
 			}
 		} else {
 			if recipe, found := searchedNames[name]; found {
-				notebookname, err := r.determineNotebookNameByAbsDir(filepath.Dir(absPath))
+				notebookname, err := r.DetermineNotebookNameByAbsDir(filepath.Dir(absPath))
 				if err != nil {
 					return nil // ignore directory
 				}

@@ -21,7 +21,7 @@ func makeAPI(
 	root := mux.NewRouter()
 	root.Path("/").HandlerFunc(httphandler.HomePageHandler(nbRegistry, recipeRegistry, routes))
 	root.Path("/csrf").HandlerFunc(httphandler.CsrfHandler(csrfService))
-	root.Path("/notebook/{name}").HandlerFunc(httphandler.NotebookHandler(nbRegistry, routes))
+	root.Path("/notebook/{name:.+}").HandlerFunc(httphandler.NotebookHandler(nbRegistry, routes))
 
 	api := root.Methods("post").PathPrefix("/api").Subrouter()
 	api.Path("/notebook/new").HandlerFunc(httphandler.ApiNewNotebookHandler(
@@ -32,10 +32,10 @@ func makeAPI(
 		nbRegistry.GetNotebooksPath(),
 	))
 
-	api.Path("/notebook/{name}/rename").HandlerFunc(httphandler.ApiNotebookRenameHandler(nbRegistry, csrfService, routes))
-	api.Path("/notebook/{name}/setcontent").HandlerFunc(httphandler.ApiNotebookSetContentHandler(nbRegistry, csrfService))
-	api.Path("/notebook/{name}/exec").HandlerFunc(httphandler.ApiNotebookExecHandler(nbRegistry, csrfService, useDocker))
-	api.Path("/notebook/{name}/stop").HandlerFunc(httphandler.ApiNotebookStopHandler(nbRegistry, csrfService))
+	api.Path("/notebook/{name:.+}/rename").HandlerFunc(httphandler.ApiNotebookRenameHandler(nbRegistry, csrfService, routes))
+	api.Path("/notebook/{name:.+}/setcontent").HandlerFunc(httphandler.ApiNotebookSetContentHandler(nbRegistry, csrfService))
+	api.Path("/notebook/{name:.+}/exec").HandlerFunc(httphandler.ApiNotebookExecHandler(nbRegistry, csrfService, useDocker))
+	api.Path("/notebook/{name:.+}/stop").HandlerFunc(httphandler.ApiNotebookStopHandler(nbRegistry, csrfService))
 
 	root.PathPrefix("/").Handler(fs)
 
