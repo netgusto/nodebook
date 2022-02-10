@@ -42,7 +42,7 @@
     "date-fns": "^2.9.0",
     "html-entities": "^1.2.1",
     "mocha": "^7.0.0",
-    "node-sass": "^4.13.0",
+    "node-sass": "^7.0.0",
     "nodemon": "^2.0.2",
     "parcel-bundler": "^1.12.4",
     "portfinder": "^1.0.25",
